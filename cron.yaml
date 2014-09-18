@@ -1,0 +1,4 @@
+cron:
+- description: scrawler
+  url: /
+  schedule: every 15 mins
