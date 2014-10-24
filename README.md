@@ -3,4 +3,4 @@ FantasyFRC
 
 Fantasy first robotics
 
-fantasy-frc.appspot.com
+www.fantasy-frc.appspot.com
