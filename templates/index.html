@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>{% autoescape true %}
+	<head>
+	</head>
+  <body>
+  	<div id="logout">
+		<div>Loggen in as {{ user }}, <a href="{{ logout_url }}">Log out</a></div>
+		<div>{% if league_name == ""%}Not a member of a league - <a href="/leagueManagement/createLeague">Click to Create one!</a>{% endif %}
+			 {% if league_name != ""%}League: {{ league_name }} - <a id="leave_league" href="/leagueManagement/leaveLeague">Click to leave</a>{% endif %}</div>
+	</div>
+	<hr>
+	<h1>Fantasy-FRC Alpha 0.0.1</h1>
+	<h1><i>Team List is from the Alamo regional in 2014</i></h1>
+	<div id="team_list">
+		<h2>Valid Team List:</h2>
+		<table>
+		{% for team_segment in team_list %}
+		<tr>
+			{% for number in team_segment %}
+				<td>{% autoescape false %}{{ number }}{% endautoescape %}</td>
+
+			{% endfor %}
+		</tr>
+		{% endfor %}
+		</table>
+	</div>
+
+	<div id="team_selector">
+		<h2>Change Prefrence:</h2>
+		<p>{{ update_text }}</p>
+		<form action="/updateuser?Choice_key={{ Choice_key }}" method="post">
+			Selected Team:
+			<input type="text" value="{{ past_choice }}" name="team">
+			<input type="submit" value="Update">
+		</form>
+	</div>
+	<div id="league_display">
+		<h2>League Choices:</h2>
+		<table>
+		{% for row in league_table %}
+		<tr>
+			<td>{{ row.player_name }}</td>
+			<td>{{ row.player_team }}</td>
+		</tr>
+		{% endfor %}
+		</table>
+	</div>
+  {% endautoescape %}</body>
+</html>

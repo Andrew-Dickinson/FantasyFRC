@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html>{% autoescape true %}
+	<head>
+		<script>
+			// set the date we're counting down to
+			var target = Number("{{ current_unix_timeout }}");
+			var fifteen_refresh = "{{ users_turn }}".toLowerCase() == 'false'
+			setInterval(function () {
+				if (fifteen_refresh) {
+					location.replace("/draft/");
+				}
+			}, 15000);
+		</script>
+		<script src="/static/timer.js"></script>
+	</head>
+  <body>
+  	<div id="logout">
+		<div>Loggen in as {{ user }}, <a href="{{ logout_url }}">Log out</a></div>
+		<div>{% if league_name == ""%}Not a member of a league - <a href="/leagueManagement/createLeague">Click to Create one!</a>{% endif %}
+			 {% if league_name != ""%}League: {{ league_name }} - <a id="leave_league" href="/leagueManagement/leaveLeague">Click to leave</a>{% endif %}</div>
+	</div>
+	<hr>
+	<div id="draft_display">
+		<h2>Draft Board:</h2>
+		<table border="1">
+		<th>
+		{% for player in player_list %}
+			<td>{{ player }}</td>
+		{% endfor %}
+		</th>
+		{% for row in draft_board %}
+		<tr>
+			<td>Round {{ loop.index }}</td>
+			{% for col in row %}
+				<td>{% autoescape false %}{{ col }}{% endautoescape %}</td>
+			{% endfor %}
+		</tr>
+		{% endfor %}
+		</table>
+	</div>
+	<div>
+		<h2>Time remaining for {% if users_turn %}you{% else %}{{ picking_user }}{% endif %}: <span id="countdown"></span></h2>
+	</div>
+	{% if users_turn %}
+	<div id="team_selector">
+		<p>It's your turn to make a selection</p>
+		<h2>Pick Team:</h2>
+		<p>{{ update_text }}</p>
+		<form action="/draft/submitPick" method="post">
+			Team Number:
+			<input type="text" value="" name="team">
+			<input type="submit" value="Submit">
+		</form>
+	</div>
+	{% endif %}
+
+  {% endautoescape %}</body>
+</html>
