@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>{% autoescape true %}
+	<head>
+	</head>
+  <body>
+  	<div id="logout">
+  		<div><a href="/">Home</a></div>
+		<div>Loggen in as {{ user }}, <a href="{{ logout_url }}">Log out</a></div>
+		<div>{% if league_name == ""%}Not a member of a league - <a href="/leagueManagement/createLeague">Click to Create one!</a>{% endif %}
+			 {% if league_name != ""%}League: {{ league_name }} - <a id="leave_league" href="/leagueManagement/leaveLeague">Click to leave</a>{% endif %}</div>
+	</div>
+	<hr>
+	<h1>Manage Team</h1>
+	<div id="team_list">
+			<h2>Alliance Lineup:</h2>
+			<table>
+			<tr><td>Team</td></tr>
+			{% for team in lineup %}
+			<tr>
+				<td>
+					<a href="teamDetail/{{team.number}}">{{ team.number }}</a>
+				</td>
+				<td>
+					<a href="/allianceManagement/updateLineup?action=bench&team_number={{ team.number }}">
+					<img src="/static/icons/arrow_refresh.png" alt="Move Down"/>Bench</a>
+				</td>
+				<td>
+					<a href="/allianceManagement/updateLineup?action=drop&team_number={{ team.number }}">
+					<img src="/static/icons/delete.png" alt="Drop Team"/>Drop</a>
+				</td>
+			</tr>
+			{% endfor %}
+			</table>
+			<h2>Bench:</h2>
+			<table>
+			<tr><td>Team</td></tr>
+			{% for team in bench %}
+			<tr>
+				<td>
+					<a href="teamDetail/{{team}}">{{ team }}</a>
+				</td>
+				<td>
+					<a href="/allianceManagement/updateLineup?action=putin&team_number={{ team }}">
+					<img src="/static/icons/arrow_refresh.png" alt="Move Up"/>Add to Lineup</a>
+				</td>
+				<td>
+					<a href="/allianceManagement/updateLineup?action=drop&team_number={{ team }}">
+					<img src="/static/icons/delete.png" alt="Drop Team"/>Drop</a>
+				</td>
+			</tr>
+			{% endfor %}
+			</table>
+			<a href="/pickUp/">Pick up free agent</a>
+	</div>
+  {% endautoescape %}</body>
+</html>

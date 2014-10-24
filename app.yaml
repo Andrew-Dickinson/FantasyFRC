@@ -1,12 +1,34 @@
-application: andrew-custom-svue
+application: fantasy-frc
 version: 1
 runtime: python27
 api_version: 1
+module: default
 threadsafe: false
 
 handlers:
+- url: /static
+  static_dir: static
+- url: /updateTeams/.*
+  script: UpdateDB.application
+  login: admin
+- url: /leagueManagement/.*
+  script: league_management.application
+  login: required
+- url: /allianceManagement/.*
+  script: alliance_management.application
+  login: required
+- url: /draft/.*
+  script: drafting.application
+  login: required
+- url: /pickUp/.*
+  script: picking_up.application
+  login: required
+
+
 - url: /.*
   script: MainPage.application
+#Index manages it's own login requirements
+
 
 libraries:
 - name: webapp2

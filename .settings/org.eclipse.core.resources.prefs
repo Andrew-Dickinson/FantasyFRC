@@ -1,2 +1,9 @@
 eclipse.preferences.version=1
 encoding/MainPage.py=utf-8
+encoding/UpdateDB.py=utf-8
+encoding/alliance_management.py=utf-8
+encoding/drafting.py=utf-8
+encoding/globals.py=utf-8
+encoding/league_management.py=utf-8
+encoding/picking_up.py=utf-8
+encoding/progress_through_elimination_classification.py=utf-8
