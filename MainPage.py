@@ -83,66 +83,12 @@ class MainPage(webapp2.RequestHandler):
                 account.put()
             league_id = account.league
 
-            #TODO Replace with choice of event
-            event_id = '2014txsa'
-
-            #Get user's choices for the current league
-            find_Choice_key = Choice_key(account_key(user_id), str(league_id))
-            found_Choice = find_Choice_key.get()
-
-            #Display update text for the status of the last choice update
-            update_text = self.request.get('updated')
-            if self.request.get('updated') == "Good":
-                update_text = "Update successful!"
-
-            past_choice = ""
-            if found_Choice:
-                past_choice = found_Choice.drafted_team
-
-            #Get list of teams at event
-            team_numbers = get_team_list(event_id)
-
-            #Get a list of those that are unavailable
-            taken_teams = get_taken_teams(league_id)
-
-            #Cross out those that are taken
-            for i, number in enumerate(team_numbers):
-                if (number in taken_teams):
-                    team_numbers[i] = "<i><strike>" + number + "</strike></i>"
-
-            #Separates teams into groups of five for easier listing
-            team_list = group_list_in_n_size(team_numbers, 10)
-
-
-            #Get list of players in the league and their choices
-            league_table = [{'player_team': 'Drafted Team', 'player_name': 'Player'}]
-            league_player_query = Account.query(Account.league == league_id)
-            league_players = league_player_query.fetch() #league_player_query.order(Account.nickname).fetch()
-            for player in league_players:
-                choice = Choice_key(account_key(player.key.id()), league_id).get()
-                if choice:
-                    league_table.append({'player_team': str(choice.drafted_team), 'player_name': player.nickname})
-                else:
-                    league_table.append({'player_team': 'None', 'player_name': player.nickname})
-
-            if league_id != '0':
-                league_name = league_key(league_id).get().name
-            else:
-                league_name = ""
-
             #Send html data to browser
             template_values = {
                         'user': user.nickname(),
-                        'logout_url': logout_url,
-                        'team_list': team_list,
-                        'Choice_key': find_Choice_key.urlsafe(), #TODO Encrypt
-                        'past_choice': past_choice,
-                        'event_id': event_id,
-                        'update_text': update_text,
-                        'league_table': league_table,
-                        'league_name': league_name
+                        'logout_url': logout_url
                         }
-            template = JINJA_ENVIRONMENT.get_template('index.html')
+            template = JINJA_ENVIRONMENT.get_template('templates/index.html')
             self.response.write(template.render(template_values))
 
 class UpdateInfo(webapp2.RequestHandler):
