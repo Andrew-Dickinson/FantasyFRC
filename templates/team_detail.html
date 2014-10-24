@@ -4,6 +4,7 @@
 	</head>
   <body>
   	<div id="logout">
+  		<div><a href="/">Home</a></div>
 		<div>Loggen in as {{ user }}, <a href="{{ logout_url }}">Log out</a></div>
 		<div>{% if league_name == ""%}Not a member of a league - <a href="/leagueManagement/createLeague">Click to Create one!</a>{% endif %}
 			 {% if league_name != ""%}League: {{ league_name }} - <a id="leave_league" href="/leagueManagement/leaveLeague">Click to leave</a>{% endif %}</div>
@@ -13,7 +14,7 @@
 	<a href="{{ tba_team_url }}" target="_blank"><h2>{{ team_name }}</h2></a>
 	<div id="team_data">
 			<h2>Team Schedule:</h2>
-			<form id="active_selection" action="/allianceManagement/updateAlliance?Choice_key={{ Choice_Key }}" method="post">
+			<!-- <form id="active_selection" action="/allianceManagement/updateAlliance?Choice_key={{ Choice_Key }}" method="post"> -->
 			<table>
 			<tr><td></td><td>Week1</td><td>Week2</td><td>Week3</td><td>Week4</td><td>Week5</td><td>Week6</td></tr>
 			<tr>
@@ -39,9 +40,9 @@
 				{% endfor %}
 			</tr>
 			</table>
-			<input type="hidden" name="Requestor" value="{{ team_data.number }}">
+			<!-- <input type="hidden" name="Requestor" value="{{ team_data.number }}">
 			<input type="submit" value="Save">
-			</form>
+			</form> -->
 	</div>
   {% endautoescape %}</body>
 </html>

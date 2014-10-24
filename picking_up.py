@@ -43,20 +43,6 @@ def setup_lineup(id, choice):
         lineup.active_teams = []
     lineup.put()
 
-# def close_draft(league_id):
-#     league = league_key(league_id).get()
-#     league.draft_open = False
-#     league.put()
-#
-#     league_player_query = Account.query(Account.league == league_id)
-#     league_players = league_player_query.fetch()
-#     logging.info(str(league_players))
-#     for player in league_players:
-#         choice = Choice_key(account_key(player.key.id()), league_id).get()
-#         for i in range(1, globals.number_of_offical_weeks + 1):
-#             setup_lineup(i, choice) #Initialize weekly lineups
-#         setup_lineup(globals.current_lineup_identifier, choice) #Initialize current lineup
-
 class Pick_up_Page(webapp2.RequestHandler):
 
     def get(self):
@@ -71,11 +57,7 @@ class Pick_up_Page(webapp2.RequestHandler):
             user_id = user.user_id()
             logout_url = users.create_logout_url('/')
 
-            account = Account.get_or_insert(user_id)
-            if account.nickname == None:
-                account.nickname =  user.nickname()
-                account.league = '0'
-                account.put()
+            account = globals.get_or_create_account(user)
             league_id = account.league
 
             #TODO Replace with choice of event

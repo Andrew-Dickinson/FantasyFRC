@@ -48,42 +48,46 @@ class edit_alliance(webapp2.RequestHandler):
         user_id = user.user_id()
         logout_url = users.create_logout_url('/')
 
-        account = Account.get_or_insert(user_id)
-        if account.nickname == None:
-            account.nickname =  user.nickname()
-            account.put()
+        account = globals.get_or_create_account(user)
         league_id = account.league
+        draft_over = league_key(league_id).get().draft_current_position == -1
 
-        active_lineup = lineup_key(Choice_key(account.key, league_id), globals.current_lineup_identifier).get().active_teams
-        roster = Choice_key(account.key, league_id).get().current_team_roster
-        logging.info(roster)
-        logging.info(active_lineup)
+        if league_id != '0':
+            league_name = league_key(league_id).get().name
+        else:
+            league_name = ""
 
-        current_lineup = []
-        for number in active_lineup:
-            team = {}
-            team['number'] = number
-            team['detail_url'] = '/allianceManagement/teamDetail/%s' % number
-            team['schedule'] = get_team_schedule(user_id, number)
-            current_lineup.append(team)
+        if draft_over:
+            active_lineup = lineup_key(Choice_key(account.key, league_id), globals.current_lineup_identifier).get().active_teams
+            roster = Choice_key(account.key, league_id).get().current_team_roster
 
-        current_bench = roster
-        for number in active_lineup:
-            current_bench.remove(number)
+            current_lineup = []
+            for number in active_lineup:
+                team = {}
+                team['number'] = number
+                team['detail_url'] = '/allianceManagement/teamDetail/%s' % number
+                team['schedule'] = get_team_schedule(user_id, number)
+                current_lineup.append(team)
 
-        logging.info(current_bench)
-        #Send html data to browser
-        template_values = {
-                        'user': user.nickname(),
-                        'logout_url': logout_url,
-                        'league_name': league_key(league_id).get().name,
-                        'Choice_Key': Choice_key(account.key, league_id).urlsafe(), #TODO Encrypt
-                        'lineup': current_lineup,
-                        'bench': current_bench
-                        }
+            current_bench = roster
+            for number in active_lineup:
+                current_bench.remove(number)
 
-        template = JINJA_ENVIRONMENT.get_template('templates/alliance_management.html')
-        self.response.write(template.render(template_values))
+            logging.info(current_bench)
+            #Send html data to browser
+            template_values = {
+                            'user': user.nickname(),
+                            'logout_url': logout_url,
+                            'league_name': league_name,
+                            'Choice_Key': Choice_key(account.key, league_id).urlsafe(), #TODO Encrypt
+                            'lineup': current_lineup,
+                            'bench': current_bench
+                            }
+
+            template = JINJA_ENVIRONMENT.get_template('templates/alliance_management.html')
+            self.response.write(template.render(template_values))
+        else:
+            self.response.write("This page requires that the draft be completed before accessing it")
 
 class update_alliance(webapp2.RequestHandler):
     def post(self):
@@ -105,11 +109,10 @@ class update_lineup(webapp2.RequestHandler):
         #Current user's id, used to identify their data
         user_id = user.user_id()
 
-        account = Account.get_or_insert(user_id)
-        if account.nickname == None:
-            account.nickname =  user.nickname()
-            account.put()
+        account = globals.get_or_create_account(user)
         league_id = account.league
+
+
 
         active_lineup = lineup_key(Choice_key(account.key, league_id), globals.current_lineup_identifier).get()
 
@@ -138,11 +141,13 @@ class team_detail_page(webapp2.RequestHandler):
         user_id = user.user_id()
         logout_url = users.create_logout_url('/')
 
-        account = Account.get_or_insert(user_id)
-        if account.nickname == None:
-            account.nickname =  user.nickname()
-            account.put()
+        account = globals.get_or_create_account(user)
         league_id = account.league
+
+        if league_id != '0':
+            league_name = league_key(league_id).get().name
+        else:
+            league_name = ""
 
         team_data = {}
         team_data['number'] = team_number
@@ -155,7 +160,7 @@ class team_detail_page(webapp2.RequestHandler):
         template_values = {
                         'user': user.nickname(),
                         'logout_url': logout_url,
-                        'league_name': league_key(league_id).get().name,
+                        'league_name': league_name,
                         'Choice_Key': Choice_key(account.key, account.league).urlsafe(), #TODO Encrypt
                         'team_data': team_data,
                         'team_name': team_name,

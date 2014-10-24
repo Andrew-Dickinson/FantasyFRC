@@ -4,6 +4,7 @@
 	</head>
   <body>
   	<div id="logout">
+  		<div><a href="/">Home</a></div>
 		<div>Loggen in as {{ user }}, <a href="{{ logout_url }}">Log out</a></div>
 		<div>{% if league_name == ""%}Not a member of a league - <a href="/leagueManagement/createLeague">Click to Create one!</a>{% endif %}
 			 {% if league_name != ""%}League: {{ league_name }} - <a id="leave_league" href="/leagueManagement/leaveLeague">Click to leave</a>{% endif %}</div>

@@ -3,13 +3,14 @@
 <html>
   <body>
   	<div id="logout">
+  		<div><a href="/">Home</a></div>
 		<div>Loggen in as {{ user }}, <a href="{{ logout_url }}">Log out</a></div>
 	</div>
 	<hr>
 	<h1>Create a league</h1>
 	<div id="team_selector">
 		<p>{{ update_text }}</p>
-		<form action="/leagueManagement/updateLeague?account_key={{ account_key }}" method="post">
+		<form action="/leagueManagement/updateLeague" method="post">
 			League Name:
 			<input type="text" value="{{ user }}'s League" name="name" size="40">
 			<input type="submit" value="Create">

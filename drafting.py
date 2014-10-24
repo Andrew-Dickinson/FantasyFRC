@@ -49,7 +49,7 @@ def get_taken_teams(league_id):
     league_players = league_player_query.fetch()
 
     for player in league_players:
-        choice = Choice.get_or_insert(Choice_key(player.key, str(league_id)).id(), parent=Choice_key(player.key, str(league_id)))
+        choice = choice = Choice.get_or_insert(league_id, parent=player.key)
         logging.info(choice)
         if choice:
             for team in choice.current_team_roster:
@@ -92,13 +92,14 @@ def setup_for_next_pick(league_id):
 def close_draft(league_id):
     league = league_key(league_id).get()
     league.draft_current_position = -1 #Indicate the draft is over
+    league.draft_current_timeout = None
     league.put()
 
     #Initialize requirements for bench/active system
     league_player_query = Account.query(Account.league == league_id)
     league_players = league_player_query.fetch()
     for player in league_players:
-        choice = Choice.get_or_insert(Choice_key(player.key, str(league_id)).id(), parent=Choice_key(player.key, str(league_id)))
+        choice = Choice.get_or_insert(league_id, parent=player.key)
         for i in range(1, globals.number_of_offical_weeks + 1):
             setup_lineup(i, choice) #Initialize weekly lineups
         setup_lineup(globals.current_lineup_identifier, choice) #Initialize current lineup
@@ -113,82 +114,97 @@ class Draft_Page(webapp2.RequestHandler):
         user_id = user.user_id()
         logout_url = users.create_logout_url('/')
 
-        account = Account.get_or_insert(user_id)
-        if account.nickname == None:
-            account.nickname =  user.nickname()
-            account.league = '0'
-            account.put()
+        account = globals.get_or_create_account(user)
         league_id = account.league
 
-        #Make check to see if the time for the current pick has expired
-        current_time = datetime.datetime.utcnow()
-        current_timeout = league_key(league_id).get().draft_current_timeout
-        draft_pick = draft_pick_key(league_key(league_id), league_key(league_id).get().draft_current_position).get()
-        if current_time > current_timeout: #The time has expired
-            setup_for_next_pick(league_id) #Move the pick along to the next person
-            draft_pick.team = 0
-
-        #Display update text for the status of the last choice update
-        update_text = self.request.get('updated')
-        if self.request.get('updated') == "Good":
-            update_text = "Team added successfully"
-
-
-
-        league_player_query = Account.query(Account.league == league_id)
-        league_players = league_player_query.fetch()
-
-        draft_board = []
-        player_list = []
-        for player in league_players:
-            player_list.append(player.nickname)
-
-        number_of_picks = len(league_players) * globals.alliance_size
-        for position in range(1, number_of_picks + 1):
-            pick = draft_pick_key(league_key(league_id), position).get()
-            team = pick.team
-            username = (((position % len(league_players)) - 1) % len(league_players))
-            round = int((position-1)/len(league_players))
-            if username == 0:
-                draft_board.append([])
-#                 draft_board.append([ndb.Key(urlsafe=draft_pick_key(league_key(league_id), row).get().player).get().nickname])
-                for i in range(0, len(league_players)):
-                    draft_board[round].append('-')
-            if team:
-                draft_board[round][username] = str(team)
-                if team == 0:
-                    draft_board[round][username] = "<i>Forfeited</i>"
-            else:
-                draft_board[round][username] = "<i>TBD</i>"
-
-
         if league_id != '0':
-            league_name = league_key(league_id).get().name
+            #Make check to see if the time for the current pick has expired
+            current_time = datetime.datetime.utcnow()
+            current_timeout = league_key(league_id).get().draft_current_timeout
+            draft_pick = draft_pick_key(league_key(league_id), league_key(league_id).get().draft_current_position).get()
+            if current_timeout:
+                if current_time > current_timeout: #The time has expired
+                    logging.info("Forefit")
+                    draft_pick.team = 0 #Set the pick to indicate it was forefited
+                    draft_pick.put()
+                    setup_for_next_pick(league_id) #Move the pick along to the next person
+
+
+            #Display update text for the status of the last choice update
+            update_text = self.request.get('updated')
+            if self.request.get('updated') == "Good":
+                update_text = "Team added successfully"
+
+
+
+            league_player_query = Account.query(Account.league == league_id)
+            league_players = league_player_query.fetch()
+
+            draft_board = []
+            player_list = []
+            for player in league_players:
+                player_list.append(player.nickname)
+
+            number_of_picks = len(league_players) * globals.alliance_size
+            for position in range(1, number_of_picks + 1):
+                pick = draft_pick_key(league_key(league_id), position).get()
+
+                username = (((position % len(league_players)) - 1) % len(league_players))
+                draft_round = int((position-1)/len(league_players))
+                if username == 0:
+                    draft_board.append([])
+                    for i in range(0, len(league_players)):
+                        draft_board[draft_round].append('-')
+                if pick and pick.team != None:
+                    draft_board[draft_round][username] = str(pick.team)
+                    if pick.team == 0:
+                        draft_board[draft_round][username] = "<i>Forfeited</i>"
+                else:
+                    draft_board[draft_round][username] = "<i>TBD</i>"
+
+
+            if league_id != '0':
+                league_name = league_key(league_id).get().name
+            else:
+                league_name = ""
+
+            users_turn = False
+            picking_user = ""
+            draft_pick = draft_pick_key(league_key(league_id), league_key(league_id).get().draft_current_position).get()
+            if draft_pick:
+                users_turn = (draft_pick.player == account.key.urlsafe())
+                picking_user = ndb.Key(urlsafe=draft_pick.player).get().nickname
+
+            current_unix_timeout = None
+            if current_timeout:
+                current_unix_timeout = calendar.timegm(current_timeout.timetuple())
+
+            current_position = league_key(league_id).get().draft_current_position
+            draft_status = "Mid"
+            if current_position == 0:
+                draft_status = "Pre"
+            elif current_position == -1:
+                draft_status = "Post"
+            else:
+                draft_status = "Mid"
+            #Send html data to browser
+            template_values = {
+                        'user': user.nickname(),
+                        'logout_url': logout_url,
+    #                     'Choice_key': find_Choice_key.urlsafe(), #TODO Encrypt
+                        'draft_board': draft_board,
+                        'player_list': player_list,
+                        'update_text': update_text,
+                        'league_name': league_name,
+                        'users_turn': users_turn,
+                        'picking_user': picking_user,
+                        'current_unix_timeout': current_unix_timeout,
+                        'draft_status': draft_status,
+                        }
+            template = JINJA_ENVIRONMENT.get_template('templates/draft_main.html')
+            self.response.write(template.render(template_values))
         else:
-            league_name = ""
-
-        users_turn = False
-        picking_user = ""
-        draft_pick = draft_pick_key(league_key(league_id), league_key(league_id).get().draft_current_position).get()
-        if draft_pick:
-            users_turn = (draft_pick.player == account.key.urlsafe())
-            picking_user = ndb.Key(urlsafe=draft_pick.player).get().nickname
-
-        #Send html data to browser
-        template_values = {
-                    'user': user.nickname(),
-                    'logout_url': logout_url,
-#                     'Choice_key': find_Choice_key.urlsafe(), #TODO Encrypt
-                    'draft_board': draft_board,
-                    'player_list': player_list,
-                    'update_text': update_text,
-                    'league_name': league_name,
-                    'users_turn': users_turn,
-                    'picking_user': picking_user,
-                    'current_unix_timeout': calendar.timegm(current_timeout.timetuple())
-                    }
-        template = JINJA_ENVIRONMENT.get_template('templates/draft_main.html')
-        self.response.write(template.render(template_values))
+            self.response.write('Must be a member of a league to perform this action')
 
 class Start_Draft(webapp2.RequestHandler):
     def get(self):
@@ -199,11 +215,7 @@ class Start_Draft(webapp2.RequestHandler):
         user_id = user.user_id()
         logout_url = users.create_logout_url('/')
 
-        account = Account.get_or_insert(user_id)
-        if account.nickname == None:
-            account.nickname =  user.nickname()
-            account.league = '0'
-            account.put()
+        account = globals.get_or_create_account(user)
         league_id = account.league
         league = league_key(league_id).get()
 
@@ -228,11 +240,7 @@ class Submit_Pick(webapp2.RequestHandler):
         user_id = user.user_id()
         logout_url = users.create_logout_url('/')
 
-        account = Account.get_or_insert(user_id)
-        if account.nickname == None:
-            account.nickname =  user.nickname()
-            account.league = '0'
-            account.put()
+        account = globals.get_or_create_account(user)
         league_id = account.league
 
         selection_error = ""
@@ -255,7 +263,7 @@ class Submit_Pick(webapp2.RequestHandler):
                         current_pick.team = int(new_team)
                         current_pick.put()
                         #Add the team to the user's roster
-                        user_choice = Choice.get_or_insert(Choice_key(account.key, str(league_id)).id(), parent=Choice_key(account.key, str(league_id)))
+                        user_choice = Choice.get_or_insert(league_id, parent=account.key)
                         if user_choice.current_team_roster == None:
                             user_choice.current_team_roster = []
                         user_choice.current_team_roster.append(int(new_team))

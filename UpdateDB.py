@@ -13,7 +13,7 @@ from award_classification import AwardType
 
 from google.appengine.ext.webapp.util import run_wsgi_app
 from progress_through_elimination_classification import convert_TBA_level_to_progress, FINALIST, WINNER
-from datastore_classes import Root_Event, root_event_key, Team_Event, team_event_key, team_key, root_team_key, Root_Team
+from datastore_classes import Root_Event, root_event_key, Team_Event, team_event_key, team_key, root_team_key, Root_Team, League
 
 import jinja2
 import webapp2
@@ -40,7 +40,7 @@ def get_data_from_web(url, selector, second_selector=None):
 def proccess_elimination_progress(raw_data):
     if len(raw_data) != 0:
         event_id = raw_data[0]['event_key'] #0 is arbitrary, all elements should be the same
-        team_list = globals.get_team_list(event_id)
+        team_list = globals.get_team_list_per_event(event_id)
         for team in team_list:
             team_progress_level = 0
             for match in raw_data:
@@ -123,8 +123,15 @@ def classifyin_weeks_and_takin_names():
         root_event.name = event['short_name']
         root_event.put()
 
+def setup_default_league():
+    league = League.get_or_insert('0')
+    league.draft_current_position = 0
+    league.name = "Not in a league"
+    league.put()
+
 class UpdateDB(webapp2.RequestHandler):
     def get(self):
+        setup_default_league()
         raw_data = get_data_from_web(globals.rankings_url, '2014txsa')
         logging.info(raw_data)
         proccess_event_data(raw_data, '2014txsa')

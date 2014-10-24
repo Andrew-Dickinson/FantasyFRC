@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import os
 import logging
 
+import globals
 from globals import get_team_list
 
 from google.appengine.ext.webapp.util import run_wsgi_app
@@ -76,17 +77,20 @@ class MainPage(webapp2.RequestHandler):
             user_id = user.user_id()
             logout_url = users.create_logout_url('/')
 
-            account = Account.get_or_insert(user_id)
-            if account.nickname == None:
-                account.nickname =  user.nickname()
-                account.league = 0
-                account.put()
+            account = globals.get_or_create_account(user)
             league_id = account.league
+
+            logging.info(account)
+            if league_id != '0':
+                league_name = league_key(league_id).get().name
+            else:
+                league_name = ""
 
             #Send html data to browser
             template_values = {
                         'user': user.nickname(),
-                        'logout_url': logout_url
+                        'logout_url': logout_url,
+                        'league_name': league_name
                         }
             template = JINJA_ENVIRONMENT.get_template('templates/index.html')
             self.response.write(template.render(template_values))

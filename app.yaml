@@ -10,7 +10,7 @@ handlers:
   static_dir: static
 - url: /updateTeams/.*
   script: UpdateDB.application
-#   login: admin
+  login: admin
 - url: /leagueManagement/.*
   script: league_management.application
   login: required
@@ -27,6 +27,7 @@ handlers:
 
 - url: /.*
   script: MainPage.application
+#Index manages it's own login requirements
 
 
 libraries:

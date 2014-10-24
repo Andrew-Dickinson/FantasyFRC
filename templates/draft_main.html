@@ -5,8 +5,9 @@
 			// set the date we're counting down to
 			var target = Number("{{ current_unix_timeout }}");
 			var fifteen_refresh = "{{ users_turn }}".toLowerCase() == 'false'
+			var draft_active = ("{{ picking_user }}" != "")
 			setInterval(function () {
-				if (fifteen_refresh) {
+				if (fifteen_refresh && draft_active) {
 					location.replace("/draft/");
 				}
 			}, 15000);
@@ -15,6 +16,7 @@
 	</head>
   <body>
   	<div id="logout">
+  		<div><a href="/">Home</a></div>
 		<div>Loggen in as {{ user }}, <a href="{{ logout_url }}">Log out</a></div>
 		<div>{% if league_name == ""%}Not a member of a league - <a href="/leagueManagement/createLeague">Click to Create one!</a>{% endif %}
 			 {% if league_name != ""%}League: {{ league_name }} - <a id="leave_league" href="/leagueManagement/leaveLeague">Click to leave</a>{% endif %}</div>
@@ -22,24 +24,38 @@
 	<hr>
 	<div id="draft_display">
 		<h2>Draft Board:</h2>
+		<h2>
+			{% if draft_status == "Mid" %}
+				Time remaining for {% if users_turn %}you{% else %}{{ picking_user }}{% endif %}: <span id="countdown"></span>
+			{% elif draft_status == "Post"  %}
+				<i>Final Results - <a href="/allianceManagement/editAlliance">Manage Alliance</a></i>
+			{% elif draft_status == "Pre" %}
+				<i>Draft has not yet begun - Tell your commissioner to <a href="/draft/startDraft">start the draft</a></i>
+			{% endif %}
+		</h2>
 		<table border="1">
 		<th>
 		{% for player in player_list %}
 			<td>{{ player }}</td>
 		{% endfor %}
 		</th>
-		{% for row in draft_board %}
+		{% for round in draft_board %}
 		<tr>
 			<td>Round {{ loop.index }}</td>
-			{% for col in row %}
-				<td>{% autoescape false %}{{ col }}{% endautoescape %}</td>
+			{% for pick in round %}
+				<td>{% autoescape false %}
+					{% if pick != "<i>TBD</i>" and pick != "<i>Forfeited</i>" %}
+						<a href="/allianceManagement/teamDetail/{{ pick }}">
+							{{ pick }}
+						</a>
+					{% else %}
+						{{ pick }}
+					{% endif %}
+				{% endautoescape %}</td>
 			{% endfor %}
 		</tr>
 		{% endfor %}
 		</table>
-	</div>
-	<div>
-		<h2>Time remaining for {% if users_turn %}you{% else %}{{ picking_user }}{% endif %}: <span id="countdown"></span></h2>
 	</div>
 	{% if users_turn %}
 	<div id="team_selector">
