@@ -8,8 +8,8 @@ year = "2014"
 first_event_wednesday = date(2014, 2, 26)
 mechanize_timeout = 30.0 #Seconds
 
-alliance_size = 2
-draft_time_minutes = 0.5
+alliance_size = 5
+draft_time_minutes = 2
 
 number_of_offical_weeks = 7
 
