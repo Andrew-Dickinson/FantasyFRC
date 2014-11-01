@@ -42,7 +42,7 @@ point_breakdown_display_style = [
     "%s losses * " + str(points_per_qual_loss) + " per = %s pts.",
     "%s: %s pts.",
     "Rank %s: %s pts.",
-    "%s" #Awards are treated special becauase they're given a hyperlink
+    "%s   " #Awards are treated special becauase they're given a hyperlink
 ]
 
 explanation_of_point_categories = [
