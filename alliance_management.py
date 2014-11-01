@@ -161,6 +161,31 @@ class team_detail_page(webapp2.RequestHandler):
         team_name = "Team " + str(team_number) + " - " + root_team_key(str(team_number)).get().name
         tba_team_url = globals.public_team_url % team_number
 
+        event_breakdowns = []
+        point_breakdown = []
+        for event in get_team_schedule(int(team_number)):
+            if event['competition_name'] != '' and event['competition_name']:
+                event_breakdowns.append(get_point_breakdown_for_event(int(team_number), event['event_key']))
+        
+        for i, name in enumerate(humman_readable_point_categories):
+            point_breakdown.append([]) #Create the new row
+            point_breakdown[i].append(name) #Add the tile for the first column
+            category_total = 0
+            for event in event_breakdowns:
+                category_total += event[i]
+                point_breakdown[i].append(event[i]) #For each event, add the point value
+            point_breakdown[i].append(category_total) #Finally, add the total
+
+        point_breakdown.append([]) #For totals 
+        index_of_totals_row = len(humman_readable_point_categories)
+        overall_total = 0
+        point_breakdown[index_of_totals_row].append('Total') #Left column row title
+        for event in get_team_schedule(int(team_number)):
+            if event['competition_name'] != '' and event['competition_name']:
+                overall_total += event['points']
+                point_breakdown[index_of_totals_row].append(event['points']) #For each event, add the total value
+        point_breakdown[index_of_totals_row].append(overall_total) #Finally, add the total
+
         #Send html data to browser
         template_values = {
                         'user': user.nickname(),
@@ -169,7 +194,8 @@ class team_detail_page(webapp2.RequestHandler):
                         'Choice_Key': Choice_key(account.key, account.league).urlsafe(), #TODO Encrypt
                         'team_data': team_data,
                         'team_name': team_name,
-                        'tba_team_url': tba_team_url
+                        'tba_team_url': tba_team_url,
+                        'pointbreakdown': point_breakdown,
                         }
         template = JINJA_ENVIRONMENT.get_template('templates/team_detail.html')
         self.response.write(template.render(template_values))
@@ -192,4 +218,4 @@ if __name__ == "__main__":
     main()
 
 # Down here to resolve import issues
-from points import get_team_points_at_event, get_points_to_date
+from points import get_team_points_at_event, get_points_to_date, get_point_breakdown_for_event, humman_readable_point_categories

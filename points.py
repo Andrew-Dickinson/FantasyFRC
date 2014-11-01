@@ -13,9 +13,18 @@ elemination_progress_points = {
     DIDNTQUALIFY: 0,
     QUARTERFINALIST: 4,
     SEMIFINALIST: 10,
-    FINALIST: 0, #Assesed through awards
-    WINNER: 0  #Assesed through awards
+    FINALIST: 20,
+    WINNER: 30
 }
+
+humman_readable_point_categories = [
+    "Matches won in qualification", 
+    "Matches tied in qualification", 
+    "Matches lost in qualification", 
+    "Progress in elemination", 
+    "Seed",  
+    "Awards"
+]
 
 points_for_seed_1 = 20
 points_for_seed_2to3 = 12
@@ -37,8 +46,20 @@ def get_seed_points(seed):
     else:
         return 0
 
-def get_team_points_at_event(team_number, event_id):
+'''
+Returns a list of point values that are orderered as described by the humman_readable_point_categories variable
+'''
+def get_point_breakdown_for_event(team_number, event_id):
     team_event = Team_Event.get_or_insert(team_event_key(team_key(str(team_number)), event_id).id(), parent=team_key(str(team_number)))
+    
+    # Defualt values if event doesn't exist
+    qual_win_points = 0
+    qual_tie_points = 0
+    qual_loss_points = 0
+    elimination_points = 0
+    seed_points = 0
+    award_points = 0
+
     if team_event.win: #For debug purposes, so unloaded events don't raise exceptions
         qual_win_points = team_event.win * points_per_qual_win
         qual_tie_points = team_event.tie * points_per_qual_tie
@@ -47,16 +68,22 @@ def get_team_points_at_event(team_number, event_id):
         seed_points = get_seed_points(team_event.rank)
         award_points = 0
         for award in team_event.awards:
-            award_points += award_points_by_TBA_id[award]
-        total_points = ( qual_win_points +
-                         qual_tie_points +
-                         qual_loss_points +
-                        elimination_points +
-                         seed_points +
-                         award_points)
-    else:
-        total_points = 0
-    return total_points
+            if award != 1 and award != 2: #Don't give double points for winners/finalists
+                award_points += award_points_by_TBA_id[award]
+
+    breakdown = [
+        qual_win_points, 
+        qual_tie_points, 
+        qual_loss_points, 
+        elimination_points, 
+        seed_points, 
+        award_points
+        ]
+    return breakdown
+
+def get_team_points_at_event(team_number, event_id):
+    breakdown = get_point_breakdown_for_event(team_number, event_id)
+    return sum(breakdown)
 
 def get_points_to_date(team_number):
     schedule = get_team_schedule(team_number)
