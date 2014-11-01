@@ -169,10 +169,12 @@ class team_detail_page(webapp2.RequestHandler):
         
         for i, name in enumerate(humman_readable_point_categories):
             point_breakdown.append([]) #Create the new row
-            point_breakdown[i].append(name) #Add the tile for the first column
+            title = {'title':name, 'explanation': explanation_of_point_categories[i]} #Build the data neccessary for the title/tooltip
+            point_breakdown[i].append(title) #Add the tile for the first column
             category_total = 0
             for event in event_breakdowns:
-                category_total += event[i]
+                #Event is a value in the form [cat1,cat2...] 
+                category_total += event[i] #Build the total for the end of the row
                 point_breakdown[i].append(event[i]) #For each event, add the point value
             point_breakdown[i].append(category_total) #Finally, add the total
 
@@ -218,4 +220,4 @@ if __name__ == "__main__":
     main()
 
 # Down here to resolve import issues
-from points import get_team_points_at_event, get_points_to_date, get_point_breakdown_for_event, humman_readable_point_categories
+from points import get_team_points_at_event, get_points_to_date, get_point_breakdown_for_event, humman_readable_point_categories, explanation_of_point_categories

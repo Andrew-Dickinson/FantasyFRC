@@ -44,11 +44,31 @@
 			<td>Total</td></th>
 		{% for category in pointbreakdown %}
 			<tr>  
+				{% set categoryloop = loop %}
 				{% for item in category %}
-					<td>{{ item }}</td>
+					{% if loop.first and not categoryloop.last %}
+						<td>{{ item.title }} 
+							<a class="category-tooltip" href="#" data-toggle="tooltip" 
+							data-original-title="{{ item.explanation }}">
+								?
+							</a>
+						</td>
+					{% else %}
+						<td>{{ item }}</td>
+					{% endif %}
 				{% endfor %}
 			</tr>
 		{% endfor %}
 	</table>
 </div>
+{% endblock %}
+
+{% block inline_javascript %}
+<script type="text/javascript">
+$(document).ready(function(){
+    $(".category-tooltip").tooltip({
+        placement : 'right'
+    });
+});
+</script>
 {% endblock %}
