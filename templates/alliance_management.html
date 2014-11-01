@@ -4,46 +4,44 @@
 
 {% block content %}
 <div class="container">
-	<h1>Manage Team</h1>
+	<h1>Manage Alliance</h1>
 	<div id="team_list">
-			<h2>Alliance Lineup:</h2>
+			{% for list in team_lists %}
+			{% set listloop = loop %}
+			<h2>{% if listloop.first %}
+				Alliance Lineup:
+				{% else %}
+				Bench:
+				{% endif %}
+			</h2>
 			<table class="table">
-			<tr><td>Team</td></tr>
-			{% for team in lineup %}
+			<tr><td>Team</td><td>Swap Action</td><td>Drop</td><td>Cumulative Points</td></tr>
+			{% for team in list %}
 			<tr>
 				<td>
 					<a href="teamDetail/{{team.number}}">{{ team.number }}</a>
 				</td>
 				<td>
+					{% if listloop.first %}
 					<a href="/allianceManagement/updateLineup?action=bench&team_number={{ team.number }}">
-					<img src="/static/icons/arrow_refresh.png" alt="Move Down"/> Bench</a>
+					<img src="/static/icons/arrow_refresh.png" alt="Bench Team"/> Bench</a>
+					{% else %}
+					<a href="/allianceManagement/updateLineup?action=putin&team_number={{ team.number }}">
+					<img src="/static/icons/arrow_refresh.png" alt="Put Team In"/> Add to Lineup</a>
+					{% endif %}
 				</td>
 				<td>
 					<a href="/allianceManagement/updateLineup?action=drop&team_number={{ team.number }}">
 					<img src="/static/icons/delete.png" alt="Drop Team"/> Drop</a>
 				</td>
-			</tr>
-			{% endfor %}
-			</table>
-			<h2>Bench:</h2>
-			<table class="table">
-			<tr><td>Team</td></tr>
-			{% for team in bench %}
-			<tr>
 				<td>
-					<a href="teamDetail/{{team}}">{{ team }}</a>
-				</td>
-				<td>
-					<a href="/allianceManagement/updateLineup?action=putin&team_number={{ team }}">
-					<img src="/static/icons/arrow_refresh.png" alt="Move Up"/> Add to Lineup</a>
-				</td>
-				<td>
-					<a href="/allianceManagement/updateLineup?action=drop&team_number={{ team }}">
-					<img src="/static/icons/delete.png" alt="Drop Team"/> Drop</a>
+					<a href="teamDetail/{{ team.number }}#pointbreakdown">{{ team.total_points }}</a>
 				</td>
 			</tr>
 			{% endfor %}
 			</table>
+			{% endfor %}
+			<h2>Other options:</h2>
 			<a href="/pickUp/">Pick up free agent</a>
 	</div>
 </div>
