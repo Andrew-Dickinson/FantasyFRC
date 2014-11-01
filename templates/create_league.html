@@ -1,12 +1,6 @@
-<!DOCTYPE html>
-{% autoescape true %}
-<html>
-  <body>
-  	<div id="logout">
-  		<div><a href="/">Home</a></div>
-		<div>Loggen in as {{ user }}, <a href="{{ logout_url }}">Log out</a></div>
-	</div>
-	<hr>
+{% extends "/templates/base.html" %}
+{% block content %}
+<div class="container">
 	<h1>Create a league</h1>
 	<div id="team_selector">
 		<p>{{ update_text }}</p>
@@ -16,6 +10,5 @@
 			<input type="submit" value="Create">
 		</form>
 	</div>
-  </body>
-</html>
-{% endautoescape %}
+</div>
+{% endblock %}

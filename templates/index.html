@@ -1,20 +1,15 @@
-<!DOCTYPE html>
-<html>{% autoescape true %}
-	<head>
-	</head>
-  <body>
-  	<div id="logout">
-		<div>Loggen in as {{ user }}, <a href="{{ logout_url }}">Log out</a></div>
-		<div>{% if league_name == ""%}Not a member of a league - <a href="/leagueManagement/createLeague">Click to Create one!</a>{% endif %}
-			 {% if league_name != ""%}League: {{ league_name }} - <a id="leave_league" href="/leagueManagement/leaveLeague">Click to leave</a>{% endif %}</div>
-	</div>
-	<hr>
-	<h1>Fantasy-FRC Alpha 0.1.1</h1>
+{% extends "/templates/base.html" %}
+
+{% block title %}Fantasy FRC - Main{% endblock %}
+
+{% block content %}
+<div class="container">
+	<h1>Fantasy-FRC Alpha 0.2.1</h1>
 	<p>
 		<a href="/leagueManagement/createLeague">Create a League</a></br>
 		<a href="/leagueManagement/showLeagues">Join a League</a></br>
 		<a href="/allianceManagement/editAlliance">Edit your lineup</a></br>
 		<a href="/draft/">Go to the draft screen</a></br>
 	</p>
-  {% endautoescape %}</body>
-</html>
+</div>
+{% endblock %}

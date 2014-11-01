@@ -87,7 +87,8 @@ class edit_alliance(webapp2.RequestHandler):
             template = JINJA_ENVIRONMENT.get_template('templates/alliance_management.html')
             self.response.write(template.render(template_values))
         else:
-            self.response.write("This page requires that the draft be completed before accessing it")
+            template = JINJA_ENVIRONMENT.get_template('templates/error_page.html')
+            self.response.write(template.render({'Message':"This page requires that the draft be completed before accessing it"}))
 
 class update_alliance(webapp2.RequestHandler):
     def post(self):

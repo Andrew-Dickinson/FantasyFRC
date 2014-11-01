@@ -204,7 +204,8 @@ class Draft_Page(webapp2.RequestHandler):
             template = JINJA_ENVIRONMENT.get_template('templates/draft_main.html')
             self.response.write(template.render(template_values))
         else:
-            self.response.write('Must be a member of a league to perform this action')
+            template = JINJA_ENVIRONMENT.get_template('templates/error_page.html')
+            self.response.write(template.render({'Message':'Must be a member of a league to perform this action'}))
 
 class Start_Draft(webapp2.RequestHandler):
     def get(self):
@@ -226,9 +227,11 @@ class Start_Draft(webapp2.RequestHandler):
                 setup_for_next_pick(league_id)
                 self.redirect('/draft/')
             else:
-                self.response.write("Draft is already completed or is in progress")
+                template = JINJA_ENVIRONMENT.get_template('templates/error_page.html')
+                self.response.write(template.render({'Message':"Draft is already completed or is in progress"}))
         else:
-            self.response.write("Only the league commissioner may perform this action")
+            template = JINJA_ENVIRONMENT.get_template('templates/error_page.html')
+            self.response.write(template.render({'Message':"Only the league commissioner may perform this action"}))
 
 class Submit_Pick(webapp2.RequestHandler):
 

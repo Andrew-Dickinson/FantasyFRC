@@ -1,0 +1,20 @@
+body {
+  padding-top: 50px;
+}
+.main-content {
+  padding: 40px 15px;
+  text-align: center;
+}
+
+#footer {
+  text-align: center;
+  margin-bottom: 25px;
+}
+
+div.team_list td {
+	padding: 5px;
+}
+
+td {
+	margin: 3px;
+}

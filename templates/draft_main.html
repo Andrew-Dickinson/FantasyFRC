@@ -1,27 +1,9 @@
-<!DOCTYPE html>
-<html>{% autoescape true %}
-	<head>
-		<script>
-			// set the date we're counting down to
-			var target = Number("{{ current_unix_timeout }}");
-			var fifteen_refresh = "{{ users_turn }}".toLowerCase() == 'false'
-			var draft_active = ("{{ picking_user }}" != "")
-			setInterval(function () {
-				if (fifteen_refresh && draft_active) {
-					location.replace("/draft/");
-				}
-			}, 15000);
-		</script>
-		<script src="/static/js/timer.js"></script>
-	</head>
-  <body>
-  	<div id="logout">
-  		<div><a href="/">Home</a></div>
-		<div>Loggen in as {{ user }}, <a href="{{ logout_url }}">Log out</a></div>
-		<div>{% if league_name == ""%}Not a member of a league - <a href="/leagueManagement/createLeague">Click to Create one!</a>{% endif %}
-			 {% if league_name != ""%}League: {{ league_name }} - <a id="leave_league" href="/leagueManagement/leaveLeague">Click to leave</a>{% endif %}</div>
-	</div>
-	<hr>
+{% extends "/templates/base.html" %}
+
+{% block title %}Fantasy FRC - Draft{% endblock %}
+
+{% block content %}
+<div class="container">
 	<div id="draft_display">
 		<h2>Draft Board:</h2>
 		<h2>
@@ -33,7 +15,7 @@
 				<i>Draft has not yet begun - Tell your commissioner to <a href="/draft/startDraft">start the draft</a></i>
 			{% endif %}
 		</h2>
-		<table border="1">
+		<table class="table">
 		<th>
 		{% for player in player_list %}
 			<td>{{ player }}</td>
@@ -69,6 +51,20 @@
 		</form>
 	</div>
 	{% endif %}
+</div>
+{% endblock %}
 
-  {% endautoescape %}</body>
-</html>
+{% block inline_javascript %}
+	<script>
+		// set the date we're counting down to
+		var target = Number("{{ current_unix_timeout }}");
+		var fifteen_refresh = "{{ users_turn }}".toLowerCase() == 'false'
+		var draft_active = ("{{ picking_user }}" != "")
+		setInterval(function () {
+			if (fifteen_refresh && draft_active) {
+				location.replace("/draft/");
+			}
+		}, 15000);
+	</script>
+	<script src="/static/js/timer.js"></script>
+{% endblock %}
