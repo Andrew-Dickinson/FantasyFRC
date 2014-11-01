@@ -165,7 +165,7 @@ class team_detail_page(webapp2.RequestHandler):
         point_breakdown = []
         for event in get_team_schedule(int(team_number)):
             if event['competition_name'] != '' and event['competition_name']:
-                event_breakdowns.append(get_point_breakdown_for_event(int(team_number), event['event_key']))
+                event_breakdowns.append(get_point_breakdown_display(int(team_number), event['event_key']))
         
         for i, name in enumerate(humman_readable_point_categories):
             point_breakdown.append([]) #Create the new row
@@ -174,8 +174,12 @@ class team_detail_page(webapp2.RequestHandler):
             category_total = 0
             for event in event_breakdowns:
                 #Event is a value in the form [cat1,cat2...] 
-                category_total += event[i] #Build the total for the end of the row
-                point_breakdown[i].append(event[i]) #For each event, add the point value
+                category_total += event[i]['points'] #Build the total for the end of the row
+                event_text = ""
+                if 'tooltip' in event[i]: #If there's a tooltip, pass it on to the page
+                    point_breakdown[i].append({'points': event[i]['display'], 'tooltip': event[i]['tooltip']})
+                else:
+                    point_breakdown[i].append(event[i]['display']) #For each event, add the point display
             point_breakdown[i].append(category_total) #Finally, add the total
 
         point_breakdown.append([]) #For totals 
@@ -220,4 +224,4 @@ if __name__ == "__main__":
     main()
 
 # Down here to resolve import issues
-from points import get_team_points_at_event, get_points_to_date, get_point_breakdown_for_event, humman_readable_point_categories, explanation_of_point_categories
+from points import get_team_points_at_event, get_points_to_date, get_point_breakdown_display, humman_readable_point_categories, explanation_of_point_categories

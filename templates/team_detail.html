@@ -54,7 +54,16 @@
 							</a>
 						</td>
 					{% else %}
-						<td>{{ item }}</td>
+						{% if item.tooltip %}
+							<td>
+								<a class="category-tooltip" href="#" data-toggle="tooltip" 
+								data-original-title="{{ item.tooltip }}">
+									{{ item.points }} 
+								</a>
+							</td>
+						{% else %}
+							<td>{{ item }}</td>
+						{% endif %}
 					{% endif %}
 				{% endfor %}
 			</tr>
