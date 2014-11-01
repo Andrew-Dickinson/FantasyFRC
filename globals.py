@@ -20,6 +20,7 @@ public_team_url = "http://www.thebluealliance.com/team/%s/" + year
 
 team_url = "http://www.thebluealliance.com/api/v2/team/frc%s"
 teams_url = "http://www.thebluealliance.com/api/v2/event/%s/teams"
+event_url = "http://www.thebluealliance.com/api/v2/event/%s"
 events_url = "http://www.thebluealliance.com/api/v2/events/%s"
 rankings_url = "http://www.thebluealliance.com/api/v2/event/%s/rankings"
 team_events_url = "http://www.thebluealliance.com/api/v2/team/frc%s/" + year + "/events"

@@ -85,7 +85,7 @@ def proccess_event_data(raw_data, event_id):
     #Store the root event team list data
     root_event.teams = team_list
     logging.info(get_data_from_web(globals.team_url, data[1])['nickname'])
-    root_event.name = get_data_from_web(globals.team_url, data[1])['nickname']
+    root_event.name = get_data_from_web(globals.event_url, event_id)['name']
     root_event.put()
 
 def proccess_event_awards(raw_data, team_number, event_id):

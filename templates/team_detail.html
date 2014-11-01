@@ -8,9 +8,9 @@
 			<h2>Team Schedule:</h2>
 			<!-- <form id="active_selection" action="/allianceManagement/updateAlliance?Choice_key={{ Choice_Key }}" method="post"> -->
 			<table class="table">
-			<tr><td></td><td>Week1</td><td>Week2</td><td>Week3</td><td>Week4</td><td>Week5</td><td>Week6</td></tr>
+			<th><td>Week 1</td><td>Week 2</td><td>Week 3</td><td>Week 4</td><td>Week 5</td><td>Week 6</td><td>Week 7</td></th>
 			<tr>
-				<td>Schedule:</td>
+				<td>Event</td>
 				{% for week in team_data.schedule %}
 					{% if week.competition_name %}
 						<td class="competition-week-table-cell">
@@ -24,7 +24,7 @@
 				{% endfor %}
 			</tr>
 			<tr>
-				<td>Points:</td>
+				<td>Points</td>
 				{% for week in team_data.schedule %}
 					<td>
 						{{ week.points }}
@@ -33,5 +33,42 @@
 			</tr>
 			</table>
 	</div>
+	<a name="pointbreakdown"></a>
+	<h2>Point Breakdown</h2>
+	<table class="table"> 
+		<th>{% for week in team_data.schedule %}
+				{% if week.competition_name %}
+					<td>{{ week.competition_name }}</td>
+				{% endif %}
+			{% endfor %}
+			<td>Total</td></th>
+		{% for category in pointbreakdown %}
+			<tr>  
+				{% set categoryloop = loop %}
+				{% for item in category %}
+					{% if loop.first and not categoryloop.last %}
+						<td>{{ item.title }} 
+							<a class="category-tooltip" href="#" data-toggle="tooltip" 
+							data-original-title="{{ item.explanation }}">
+								?
+							</a>
+						</td>
+					{% else %}
+						<td>{{ item }}</td>
+					{% endif %}
+				{% endfor %}
+			</tr>
+		{% endfor %}
+	</table>
 </div>
+{% endblock %}
+
+{% block inline_javascript %}
+<script type="text/javascript">
+$(document).ready(function(){
+    $(".category-tooltip").tooltip({
+        placement : 'right'
+    });
+});
+</script>
 {% endblock %}

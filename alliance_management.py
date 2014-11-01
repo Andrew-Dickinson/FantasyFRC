@@ -12,7 +12,6 @@ from google.appengine.api import users
 from google.appengine.ext import ndb
 
 from datastore_classes import account_key, Account, root_event_key, root_team_key, lineup_key, Lineup, Choice_key, league_key
-from points import get_team_points_at_event
 
 import jinja2
 import webapp2
@@ -22,19 +21,20 @@ JINJA_ENVIRONMENT = jinja2.Environment(
     extensions=['jinja2.ext.autoescape'],
     autoescape=True)
 
-def get_team_schedule(user_id, team_number):
+def get_team_schedule(team_number):
     schedule = []
     for i in range(1, globals.number_of_offical_weeks + 1):
-        schedule.append({'competition_name': "", 'tba_url': "", 'points': 0})
+        schedule.append({'competition_name': "", 'tba_url': "", 'points': 0, 'event_key':''})
 
     event_list = root_team_key(str(team_number)).get().events
     for event_id in event_list:
         root_event = root_event_key(event_id).get()
         event_week = root_event.week
         points = 0
-        if event_id == '2014txsa':
-            points = get_team_points_at_event(team_number, event_id)
+        points = get_team_points_at_event(team_number, event_id)
         schedule[event_week - 1]['competition_name'] = root_event.name
+        # logging.info(root_event.key.id())
+        schedule[event_week - 1]['event_key'] = root_event.key.id()
         schedule[event_week - 1]['tba_url'] = globals.public_event_url % root_event.key.id()
         schedule[event_week - 1]['points'] = points
     return schedule
@@ -66,12 +66,17 @@ class edit_alliance(webapp2.RequestHandler):
                 team = {}
                 team['number'] = number
                 team['detail_url'] = '/allianceManagement/teamDetail/%s' % number
-                team['schedule'] = get_team_schedule(user_id, number)
+                team['schedule'] = get_team_schedule(number)
+                team['total_points'] = get_points_to_date(int(number))
                 current_lineup.append(team)
 
-            current_bench = roster
+            bench_numbers = roster
             for number in active_lineup:
-                current_bench.remove(number)
+                bench_numbers.remove(number)
+
+            current_bench = []
+            for number in bench_numbers:
+                current_bench.append({'number':number, 'total_points': get_points_to_date(int(number))})
 
             logging.info(current_bench)
             #Send html data to browser
@@ -80,8 +85,7 @@ class edit_alliance(webapp2.RequestHandler):
                             'logout_url': logout_url,
                             'league_name': league_name,
                             'Choice_Key': Choice_key(account.key, league_id).urlsafe(), #TODO Encrypt
-                            'lineup': current_lineup,
-                            'bench': current_bench
+                            'team_lists': [current_lineup, current_bench]
                             }
 
             template = JINJA_ENVIRONMENT.get_template('templates/alliance_management.html')
@@ -152,10 +156,37 @@ class team_detail_page(webapp2.RequestHandler):
 
         team_data = {}
         team_data['number'] = team_number
-        team_data['schedule'] = get_team_schedule(user_id, int(team_number))
+        team_data['schedule'] = get_team_schedule(int(team_number))
 
         team_name = "Team " + str(team_number) + " - " + root_team_key(str(team_number)).get().name
         tba_team_url = globals.public_team_url % team_number
+
+        event_breakdowns = []
+        point_breakdown = []
+        for event in get_team_schedule(int(team_number)):
+            if event['competition_name'] != '' and event['competition_name']:
+                event_breakdowns.append(get_point_breakdown_for_event(int(team_number), event['event_key']))
+        
+        for i, name in enumerate(humman_readable_point_categories):
+            point_breakdown.append([]) #Create the new row
+            title = {'title':name, 'explanation': explanation_of_point_categories[i]} #Build the data neccessary for the title/tooltip
+            point_breakdown[i].append(title) #Add the tile for the first column
+            category_total = 0
+            for event in event_breakdowns:
+                #Event is a value in the form [cat1,cat2...] 
+                category_total += event[i] #Build the total for the end of the row
+                point_breakdown[i].append(event[i]) #For each event, add the point value
+            point_breakdown[i].append(category_total) #Finally, add the total
+
+        point_breakdown.append([]) #For totals 
+        index_of_totals_row = len(humman_readable_point_categories)
+        overall_total = 0
+        point_breakdown[index_of_totals_row].append('Total') #Left column row title
+        for event in get_team_schedule(int(team_number)):
+            if event['competition_name'] != '' and event['competition_name']:
+                overall_total += event['points']
+                point_breakdown[index_of_totals_row].append(event['points']) #For each event, add the total value
+        point_breakdown[index_of_totals_row].append(overall_total) #Finally, add the total
 
         #Send html data to browser
         template_values = {
@@ -165,7 +196,8 @@ class team_detail_page(webapp2.RequestHandler):
                         'Choice_Key': Choice_key(account.key, account.league).urlsafe(), #TODO Encrypt
                         'team_data': team_data,
                         'team_name': team_name,
-                        'tba_team_url': tba_team_url
+                        'tba_team_url': tba_team_url,
+                        'pointbreakdown': point_breakdown,
                         }
         template = JINJA_ENVIRONMENT.get_template('templates/team_detail.html')
         self.response.write(template.render(template_values))
@@ -186,3 +218,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+# Down here to resolve import issues
+from points import get_team_points_at_event, get_points_to_date, get_point_breakdown_for_event, humman_readable_point_categories, explanation_of_point_categories
