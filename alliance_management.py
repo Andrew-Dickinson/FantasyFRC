@@ -185,11 +185,11 @@ class team_detail_page(webapp2.RequestHandler):
         point_breakdown.append([]) #For totals 
         index_of_totals_row = len(humman_readable_point_categories)
         overall_total = 0
-        point_breakdown[index_of_totals_row].append('Total') #Left column row title
+        point_breakdown[index_of_totals_row].append('Overall Total:') #Left column row title
         for event in get_team_schedule(int(team_number)):
             if event['competition_name'] != '' and event['competition_name']:
                 overall_total += event['points']
-                point_breakdown[index_of_totals_row].append(event['points']) #For each event, add the total value
+                point_breakdown[index_of_totals_row].append("") #For each event, add the total value
         point_breakdown[index_of_totals_row].append(overall_total) #Finally, add the total
 
         #Send html data to browser

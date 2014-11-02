@@ -1,4 +1,6 @@
 import logging
+
+from globals import no_data_display
 from award_classification import AwardType
 from alliance_management import get_team_schedule
 from datastore_classes import Team_Event, team_event_key, team_key
@@ -37,11 +39,11 @@ humman_readable_point_categories = [
 ]
 
 point_breakdown_display_style = [
-    "%s wins * " + str(points_per_qual_win) + " per = %s pts.",
-    "%s ties * " + str(points_per_qual_tie) + " per = %s pts.",
-    "%s losses * " + str(points_per_qual_loss) + " per = %s pts.",
-    "%s: %s pts.",
-    "Rank %s: %s pts.",
+    "%s wins",
+    "%s ties",
+    "%s losses",
+    "%s",
+    "Rank %s",
     "%s   " #Awards are treated special becauase they're given a hyperlink
 ]
 
@@ -95,6 +97,9 @@ def get_category_and_value_breakdown(team_number, event_id):
     event_rank = 0
     event_award_names_colon_points = []
 
+    #If there is no data for this event, represent it by Sending a blank breakdown
+    breakdown = []
+
     if team_event.win: #For debug purposes, so unloaded events don't raise exceptions
         qual_win_points = team_event.win * points_per_qual_win
         event_wins = team_event.win
@@ -111,8 +116,7 @@ def get_category_and_value_breakdown(team_number, event_id):
             if award != AwardType.WINNER and award != AwardType.FINALIST: #Don't give double points for winners/finalists
                 award_points += award_points_by_TBA_id[award]
                 event_award_names_colon_points.append(team_event.award_names[i] + ": " + str(award_points))
-
-    breakdown = [
+        breakdown = [
         {'points':qual_win_points, 'raw_value': event_wins},
         {'points':qual_tie_points, 'raw_value': event_ties},
         {'points':qual_loss_points, 'raw_value': event_losses},
@@ -120,6 +124,7 @@ def get_category_and_value_breakdown(team_number, event_id):
         {'points':seed_points, 'raw_value': event_rank},
         {'points':award_points, 'raw_value': event_award_names_colon_points},
         ]
+
     return breakdown
 
 '''
@@ -143,7 +148,6 @@ def get_points_to_date(team_number):
     points = 0
     for week, event in enumerate(schedule):
         if schedule[week]['competition_name'] != "":
-
             event_key = schedule[week]['event_key']
             points = points + get_team_points_at_event(team_number, event_key)
     return points
@@ -151,24 +155,31 @@ def get_points_to_date(team_number):
 def get_point_breakdown_display(team_number, event_id):
     detailed_breakdown = get_category_and_value_breakdown(team_number, event_id)
     display_output = []
-    for i, category in enumerate(detailed_breakdown):
-        if (i < len(detailed_breakdown) - 1): #Don't use this style for awards
-            format = point_breakdown_display_style[i] #Get the template from above
+    if len(detailed_breakdown) != 0: #There is data for this event
+        for i, category in enumerate(detailed_breakdown):
+            if (i < len(detailed_breakdown) - 1): #Don't use this style for awards
+                format = point_breakdown_display_style[i] #Get the template from above
+                display_output.append({
+                                    'display':format % (category['raw_value']), #Use template to create description
+                                    'points': category['points'] #Include raw points for the sake of totals
+                                    })
+            else: #This is the awards category
+                award_display = ""
+                format = point_breakdown_display_style[i]
+                for award in category['raw_value']:
+                    award_display = award_display + (format % award)
+                if award_display == "":
+                    award_display = "No Awards won at this event"
+                display_output.append({
+                                    'display': category['points'],
+                                    'tooltip': award_display,
+                                    'points': category['points']})
+    else: #There is no data
+        for i in humman_readable_point_categories:
             display_output.append({
-                                'display':format % (category['raw_value'], category['points']), #Use template to create description
-                                'points': category['points'] #Include raw points for the sake of totals
+                                'display': no_data_display,
+                                'points': 0
                                 })
-        else: #This is the awards category
-            award_display = ""
-            format = point_breakdown_display_style[i]
-            for award in category['raw_value']:
-                award_display = award_display + (format % award)
-            if award_display == "":
-                award_display = "No Awards won at this event"
-            display_output.append({
-                                'display': category['points'],
-                                'tooltip': award_display,
-                                'points': category['points']})
     return display_output
 
 

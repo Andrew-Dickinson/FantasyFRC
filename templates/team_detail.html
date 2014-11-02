@@ -23,7 +23,7 @@
 						</td>
 					{% else %}
 						<td class="by-week-table-cell">
-							Not Competing
+							<i>Not Competing</i>
 						</td>
 					{% endif %}
 				{% endfor %}
@@ -43,7 +43,7 @@
 	<table class="table"> 
 		<th>{% for week in team_data.schedule %}
 				{% if week.competition_name %}
-					<td>{{ week.competition_name }}</td>
+					<td><a href="{{ week.tba_url }}" target="_blank">{{ week.competition_name }}</a></td>
 				{% endif %}
 			{% endfor %}
 			<td>Total</td></th>
@@ -52,7 +52,7 @@
 				{% set categoryloop = loop %}
 				{% for item in category %}
 					{% if loop.first and not categoryloop.last %}
-						<td>{{ item.title }} 
+						<td width="300px">{{ item.title }} 
 							<a class="category-tooltip" href="" data-toggle="tooltip" 
 							data-original-title="{{ item.explanation }}">
 								?
@@ -67,7 +67,9 @@
 								</a>
 							</td>
 						{% else %}
-							<td>{{ item }}</td>
+							<td>{% autoescape false %}
+								{{ item }}
+							</td>{% endautoescape %}
 						{% endif %}
 					{% endif %}
 				{% endfor %}
