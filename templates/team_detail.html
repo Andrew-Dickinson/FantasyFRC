@@ -2,7 +2,12 @@
 
 {% block content %}
 <div class="container">
-	<h1><a href="/allianceManagement/editAlliance">Edit Alliance</a>/Manage Team</h1>
+	<ol class="breadcrumb">
+		<li><a href="/">Home</a></li>
+		<li><a href="/allianceManagement/editAlliance">Manage Alliance</a></li>
+		<li class="active">Team Detail</li>
+	</ol>
+
 	<a href="{{ tba_team_url }}" target="_blank"><h2>{{ team_name }}</h2></a>
 	<div id="team_data">
 			<h2>Team Schedule:</h2>
@@ -18,7 +23,7 @@
 						</td>
 					{% else %}
 						<td class="by-week-table-cell">
-							Not Competing
+							<i>Not Competing</i>
 						</td>
 					{% endif %}
 				{% endfor %}
@@ -38,7 +43,7 @@
 	<table class="table"> 
 		<th>{% for week in team_data.schedule %}
 				{% if week.competition_name %}
-					<td>{{ week.competition_name }}</td>
+					<td><a href="{{ week.tba_url }}" target="_blank">{{ week.competition_name }}</a></td>
 				{% endif %}
 			{% endfor %}
 			<td>Total</td></th>
@@ -47,14 +52,25 @@
 				{% set categoryloop = loop %}
 				{% for item in category %}
 					{% if loop.first and not categoryloop.last %}
-						<td>{{ item.title }} 
-							<a class="category-tooltip" href="#" data-toggle="tooltip" 
+						<td width="300px">{{ item.title }} 
+							<a class="category-tooltip" href="" data-toggle="tooltip" 
 							data-original-title="{{ item.explanation }}">
 								?
 							</a>
 						</td>
 					{% else %}
-						<td>{{ item }}</td>
+						{% if item.tooltip %}
+							<td>
+								<a class="category-tooltip" href="" data-toggle="tooltip" 
+								data-original-title="{{ item.tooltip }}">
+									{{ item.points }} 
+								</a>
+							</td>
+						{% else %}
+							<td>{% autoescape false %}
+								{{ item }}
+							</td>{% endautoescape %}
+						{% endif %}
 					{% endif %}
 				{% endfor %}
 			</tr>

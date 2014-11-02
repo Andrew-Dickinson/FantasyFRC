@@ -4,6 +4,11 @@
 
 {% block content %}
 <div class="container">
+	<ol class="breadcrumb">
+		<li><a href="/">Home</a></li>
+		<li class="active">Manage Alliance</li>
+	</ol>
+
 	<h1>Manage Alliance</h1>
 	<div id="team_list">
 			{% for list in team_lists %}
@@ -15,7 +20,7 @@
 				{% endif %}
 			</h2>
 			<table class="table">
-			<tr><td>Team</td><td>Swap Action</td><td>Drop</td><td>Cumulative Points</td></tr>
+			<tr><td>Team</td><td>Swap Action</td><td>Drop</td><td>Points to Date</td></tr>
 			{% for team in list %}
 			<tr>
 				<td>

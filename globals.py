@@ -15,6 +15,8 @@ number_of_offical_weeks = 7
 
 app_id = "frc3546:FantasyFRC:v0.1"
 
+no_data_display = "<i>No Data</i>"
+
 public_event_url = "http://www.thebluealliance.com/event/%s"
 public_team_url = "http://www.thebluealliance.com/team/%s/" + year
 
