@@ -7,6 +7,7 @@ from datetime import date
 year = "2014"
 first_event_wednesday = date(2014, 2, 26)
 mechanize_timeout = 30.0 #Seconds
+debug_current_editable_week = 3
 
 alliance_size = 5
 draft_time_minutes = 2
@@ -28,8 +29,6 @@ rankings_url = "http://www.thebluealliance.com/api/v2/event/%s/rankings"
 team_events_url = "http://www.thebluealliance.com/api/v2/team/frc%s/" + year + "/events"
 team_event_awards_url = "http://www.thebluealliance.com/api/v2/team/frc%s/event/%s/awards"
 event_matches_url = "http://www.thebluealliance.com/api/v2/event/%s/matches"
-
-current_lineup_identifier = 'c'
 
 
 

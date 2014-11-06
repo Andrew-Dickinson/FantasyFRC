@@ -115,7 +115,7 @@ def get_category_and_value_breakdown(team_number, event_id):
         for i, award in enumerate(team_event.awards):
             if award != AwardType.WINNER and award != AwardType.FINALIST: #Don't give double points for winners/finalists
                 award_points += award_points_by_TBA_id[award]
-                event_award_names_colon_points.append(team_event.award_names[i] + ": " + str(award_points))
+                event_award_names_colon_points.append(team_event.award_names[i] + ": " + str(award_points_by_TBA_id[award]))
         breakdown = [
         {'points':qual_win_points, 'raw_value': event_wins},
         {'points':qual_tie_points, 'raw_value': event_ties},

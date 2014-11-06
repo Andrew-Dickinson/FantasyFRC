@@ -102,7 +102,6 @@ def close_draft(league_id):
         choice = Choice.get_or_insert(league_id, parent=player.key)
         for i in range(1, globals.number_of_offical_weeks + 1):
             setup_lineup(i, choice) #Initialize weekly lineups
-        setup_lineup(globals.current_lineup_identifier, choice) #Initialize current lineup
 
 class Draft_Page(webapp2.RequestHandler):
 
