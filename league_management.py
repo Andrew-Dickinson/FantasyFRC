@@ -170,7 +170,8 @@ class Join_League(webapp2.RequestHandler):
             add_to_league(user_id, league_id) #Add to new one
             self.redirect('/')
         else:
-            self.response.write('This league has already begun, or has finished its draft')
+            template = JINJA_ENVIRONMENT.get_template('templates/error_page.html')
+            self.response.write(template.render({'Message':'This league has already begun, or has finished its draft'}))
 
 application = webapp2.WSGIApplication([
                                        ('/leagueManagement/updateLeague', update_League),
