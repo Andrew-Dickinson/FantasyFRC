@@ -190,7 +190,6 @@ class Draft_Page(webapp2.RequestHandler):
             template_values = {
                         'user': user.nickname(),
                         'logout_url': logout_url,
-    #                     'Choice_key': find_Choice_key.urlsafe(), #TODO Encrypt
                         'draft_board': draft_board,
                         'player_list': player_list,
                         'update_text': update_text,
