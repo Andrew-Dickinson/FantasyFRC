@@ -15,7 +15,7 @@ from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.ext import ndb
 from google.appengine.api import users
 
-from datastore_classes import league_key, Choice, Lineup, Choice_key, account_key, Account, lineup_key, Draft_Pick, draft_pick_key
+from datastore_classes import league_key, Choice, Lineup, Choice_key, account_key, Account, lineup_key, DraftPick, draft_pick_key
 
 import jinja2
 import webapp2
@@ -35,7 +35,7 @@ def start_draft(league_id):
     for draft_round in range(0, globals.alliance_size):
         for i, player in enumerate(league_players):
             pick_key = draft_pick_key(league_key(league_id), str(number_of_players * draft_round + i + 1))
-            pick = Draft_Pick.get_or_insert(pick_key.id(), parent=pick_key.parent())
+            pick = DraftPick.get_or_insert(pick_key.id(), parent=pick_key.parent())
             pick.player = player.key.urlsafe()
             pick.put()
         league = league_key(league_id).get()

@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-from datastore_classes import Root_Team, Account
+from datastore_classes import RootTeam, Account
 from datetime import date
 
 year = "2014"
@@ -34,7 +34,7 @@ event_matches_url = "http://www.thebluealliance.com/api/v2/event/%s/matches"
 
 def get_team_list():
     """Accesses the datastore to return a team list for an event"""
-    team_list = Root_Team.query().fetch()
+    team_list = RootTeam.query().fetch()
     team_numbers = []
     for team in team_list:
         team_numbers.append(team.key.id())
@@ -42,7 +42,7 @@ def get_team_list():
 
 def get_team_list_per_event(event_id):
     """Accesses the datastore to return a team list for an event"""
-    team_list = Root_Team.query().filter(Root_Team.events == event_id).fetch()
+    team_list = RootTeam.query().filter(RootTeam.events == event_id).fetch()
     team_numbers = []
     for team in team_list:
         team_numbers.append(team.key.id())

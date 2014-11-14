@@ -19,18 +19,18 @@ def team_key(team_number):
 
 def root_event_key(event_id):
     """Constructs the Datastore key for an event given its event_id"""
-    return ndb.Key(Root_Event, event_id)
+    return ndb.Key(RootEvent, event_id)
 
 
 def root_team_key(team_number):
     """Constructs the Datastore key for a root team given its number"""
-    return ndb.Key(Root_Team, team_number)
+    return ndb.Key(RootTeam, team_number)
 
 
 #Every other key is based off of the root keys
 def team_event_key(team_key, event_id):
     """Constructs a Datastore key for a team_event entity with a team_key as parent and event_id as id"""
-    return ndb.Key(Team_Event, event_id, parent=team_key)
+    return ndb.Key(TeamEvent, event_id, parent=team_key)
 
 
 def Choice_key(player_key, league_id):
@@ -45,7 +45,7 @@ def lineup_key(choice_key, week_number):
 
 def draft_pick_key(league_key, position):
     """Constructs a Datastore key for a draft pick entity with a league_key as parent and a position as id"""
-    return ndb.Key(Draft_Pick, str(position), parent=league_key)
+    return ndb.Key(DraftPick, str(position), parent=league_key)
 
 
 class League(ndb.Model):
@@ -56,14 +56,14 @@ class League(ndb.Model):
     draft_current_timeout = ndb.DateTimeProperty()
 
 
-class Root_Event(ndb.Model):
-    """Stores the data for an entire event, differs from Team_Event by having a larger scope"""
+class RootEvent(ndb.Model):
+    """Stores the data for an entire event, differs from TeamEvent by having a larger scope"""
     name = ndb.StringProperty()
     teams = ndb.IntegerProperty(repeated=True)
     week = ndb.IntegerProperty()
 
 
-class Root_Team(ndb.Model):
+class RootTeam(ndb.Model):
     """Stores information such as scheduling and team name"""
     name = ndb.StringProperty()
     events = ndb.StringProperty(repeated=True)
@@ -75,7 +75,7 @@ class Account(ndb.Model):
     league = ndb.StringProperty()
 
 
-class Team_Event(ndb.Model):
+class TeamEvent(ndb.Model):
     """Stores a team's data for a single event"""
     rank = ndb.IntegerProperty()
 #     qualification_score = ndb.IntegerProperty()
@@ -103,7 +103,7 @@ class Lineup(ndb.Model):
     active_teams = ndb.IntegerProperty(repeated=True)
 
 
-class Draft_Pick(ndb.Model):
+class DraftPick(ndb.Model):
     """Stores all of the information about one draft pick for a single league"""
     player = ndb.StringProperty()
     team = ndb.IntegerProperty()

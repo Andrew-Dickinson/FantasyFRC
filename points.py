@@ -3,7 +3,7 @@ import logging
 from globals import no_data_display
 from award_classification import AwardType
 from alliance_management import get_team_schedule
-from datastore_classes import Team_Event, team_event_key, team_key
+from datastore_classes import TeamEvent, team_event_key, team_key
 from progress_through_elimination_classification import UNDETERMINED, DIDNTQUALIFY, QUARTERFINALIST, SEMIFINALIST, FINALIST, WINNER
 """Uses point system described in http://www.chiefdelphi.com/media/papers/2574"""
 
@@ -80,7 +80,7 @@ def get_seed_points(seed):
 Returns both the raw data values(number of wins) and the points for each category
 '''
 def get_category_and_value_breakdown(team_number, event_id):
-    team_event = Team_Event.get_or_insert(team_event_key(team_key(str(team_number)), event_id).id(), parent=team_key(str(team_number)))
+    team_event = TeamEvent.get_or_insert(team_event_key(team_key(str(team_number)), event_id).id(), parent=team_key(str(team_number)))
     
     # Defualt values if event doesn't exist
     qual_win_points = 0

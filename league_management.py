@@ -10,7 +10,7 @@ from google.appengine.api import users
 from google.appengine.ext import ndb
 
 import globals
-from datastore_classes import account_key, Account, League, Choice, Choice_key, league_key, Lineup, Draft_Pick
+from datastore_classes import account_key, Account, League, Choice, Choice_key, league_key, Lineup, DraftPick
 
 import jinja2
 import webapp2
@@ -62,7 +62,7 @@ def delete_league(league_id):
     if league_id != '0': #Don't ever delete the default league
         league = league_key(league_id).get()
         players = Account.query().filter(Account.league == league_id).fetch()
-        draft_picks = Draft_Pick.query(ancestor=league.key).fetch()
+        draft_picks = DraftPick.query(ancestor=league.key).fetch()
         for player in players:
             remove_from_league(player.key.id())
         for draft_pick in draft_picks:
