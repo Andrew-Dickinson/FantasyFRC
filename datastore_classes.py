@@ -74,6 +74,9 @@ class Account(ndb.Model):
     nickname = ndb.StringProperty()
     league = ndb.StringProperty()
 
+    #In the form described in https://github.com/smarthimandrew/FantasyFRC/issues/12
+    schedule = ndb.IntegerProperty(repeated=True)
+
 
 class TeamEvent(ndb.Model):
     """Stores a team's data for a single event"""
