@@ -1,10 +1,9 @@
 {% extends "/templates/base.html" %}
 
-{% block title %}Fantasy FRC - Main{% endblock %}
+{% block title %}Fantasy FRC - Week {{ week_number }}{% endblock %}
 
 {% block content %}
 <div class="container">
-	
 	<ol class="breadcrumb">
 		<li><a href="/">Home</a></li>
 		<li><a href="/allianceManagement/viewAlliance">View Alliance</a></li>
@@ -34,46 +33,35 @@
 	<div id="team_list">
 			{% for list in team_lists %}
 			{% set listloop = loop %}
-			<h2>{% if listloop.first %}
-				Alliance Lineup:
-				{% else %}
-				Bench:
-				{% endif %}
-			</h2>
+				<h2>{% if listloop.first %}
+					Alliance Lineup:
+					{% else %}
+					Bench:
+					{% endif %}
+				</h2>
 			{% if list %}
 				<table class="table">
-				<tr><td>Team</td><td>Swap Action</td><td>Drop</td><td>Points to Date</td></tr>
+				<tr><td>Team</td><td>Points</td></tr>
 				{% for team in list %}
 				<tr>
 					<td>
 						<a href="/allianceManagement/teamDetail/{{team.number}}">{{ team.number }}</a>
 					</td>
 					<td>
-						{% if listloop.first %}
-						<a href="/allianceManagement/updateLineup/{{ week_number }}?action=bench&team_number={{ team.number }}">
-						<img src="/static/icons/arrow_refresh.png" alt="Bench Team"/> Bench</a>
-						{% else %}
-						<a href="/allianceManagement/updateLineup/{{ week_number }}?action=putin&team_number={{ team.number }}">
-						<img src="/static/icons/arrow_refresh.png" alt="Put Team In"/> Add to Lineup</a>
-						{% endif %}
-					</td>
-					<td>
-						<a href="/allianceManagement/updateLineup/{{ week_number }}?action=drop&team_number={{ team.number }}">
-						<img src="/static/icons/delete.png" alt="Drop Team"/> Drop</a>
-					</td>
-					<td>
 						<a href="/allianceManagement/teamDetail/{{ team.number }}#pointbreakdown">{{ team.total_points }}</a>
 					</td>
 				</tr>
 				{% endfor %}
+				{% if listloop.first %}
+					<tr><td></td><td>Total: {{ point_total }}</td></tr>
+				{% endif %}
 				</table>
 			{% else %}
 				<p>No teams in this list</p>
-			{% endif %}	
+			{% endif %}		
 			{% endfor %}
-			<h2>Other options:</h2>
-			<a href="/pickUp/">Pick up free agent</a>
 	</div>
+
 	<nav>
 	  <ul class="pager">
 	  	{% if week_number == 1 %}

@@ -23,7 +23,12 @@ handlers:
 - url: /pickUp/.*
   script: picking_up.application
   login: required
-
+- url: /thanks
+  script: thanksPage.application
+- url: /about
+  script: aboutPage.application
+- url: /help
+  script: helpPage.application
 
 - url: /.*
   script: MainPage.application

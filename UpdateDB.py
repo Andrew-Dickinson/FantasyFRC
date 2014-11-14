@@ -114,14 +114,19 @@ def classifyin_weeks_and_takin_names():
     raw_data = get_data_from_web(globals.events_url, globals.year)
     for event in raw_data:
         root_event = Root_Event.get_or_insert(root_event_key(event['key']).id())
-        start_date = date(int(event['start_date'].split('-')[0]),int(event['start_date'].split('-')[1]),int(event['start_date'].split('-')[2]))
-        time_delta = start_date - globals.first_event_wednesday
-        week = int(math.floor((time_delta.days / 7) + 1))
-        if week < 0 or week > 7:
-            week = 0
+        week = convert_date_time_to_week(date(int(event['start_date'].split('-')[0]),int(event['start_date'].split('-')[1]),int(event['start_date'].split('-')[2])))
         root_event.week = week
         root_event.name = event['short_name']
         root_event.put()
+
+def convert_date_time_to_week(date):
+    """Date is a timedate object"""
+    start_date = date
+    time_delta = start_date - globals.first_event_wednesday
+    week = int(math.floor((time_delta.days / 7) + 1))
+    if week < 0 or week > 7:
+        week = 0
+    return week
 
 def setup_default_league():
     league = League.get_or_insert('0')

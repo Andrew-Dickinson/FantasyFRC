@@ -16,7 +16,7 @@
 			{% if draft_status == "Mid" %}
 				Time remaining for {% if users_turn %}you{% else %}{{ picking_user }}{% endif %}: <span id="countdown"></span>
 			{% elif draft_status == "Post"  %}
-				<i>Final Results - <a href="/allianceManagement/editAlliance">Manage Alliance</a></i>
+				<i>Final Results - <a href="/allianceManagement/viewAlliance">Manage Alliance</a></i>
 			{% elif draft_status == "Pre" %}
 				<i>Draft has not yet begun - Tell your commissioner to <a href="/draft/startDraft">start the draft</a></i>
 			{% endif %}

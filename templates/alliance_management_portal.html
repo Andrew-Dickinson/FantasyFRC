@@ -1,0 +1,33 @@
+{% extends "/templates/base.html" %}
+
+{% block title %}Fantasy FRC - Main{% endblock %}
+
+{% block content %}
+<div class="container">
+	
+	<ol class="breadcrumb">
+		<li><a href="/">Home</a></li>
+		<li class="active">View Alliance</li>
+	</ol>
+	<h1>Lineup Overview</h1>
+	<table class="table">
+		<tr><td>Week</td><td>Active Teams</td><td>Points</td></tr>
+		{% for week in week_table %}
+		<tr>
+			<td><a href="/allianceManagement/viewAlliance/{{ week.week }}">{{ week.week }}</a></td>
+			<td><a href="/allianceManagement/viewAlliance/{{ week.week }}">
+				{% if week.active_lineup %}
+					{% for team in week.active_lineup %}{{ team }}{% if not loop.last %}, {% endif %}{% endfor %}
+				{% else %}
+					<i>No Teams</i>
+				{% endif %}
+			</a></td>
+			<td><a href="/allianceManagement/viewAlliance/{{ week.week }}">
+				{% autoescape false %}{{ week.points }}{% endautoescape %}
+			</a></td>
+		</tr>
+		{% endfor %}
+		<tr><td></td><td></td><td><b>Total: {{ total_points }}</b></td></tr>
+	</table>
+</div>
+{% endblock %}
