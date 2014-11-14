@@ -207,7 +207,6 @@ class view_alliance(webapp2.RequestHandler):
                             'logout_url': logout_url,
                             'league_name': league_name,
                             'week_number': int(week_number),
-                            'Choice_Key': Choice_key(account.key, league_id).urlsafe(),
                             'point_total': point_total,
                             'team_lists': team_lists
                             }
@@ -284,7 +283,6 @@ class team_detail_page(webapp2.RequestHandler):
                         'user': user.nickname(),
                         'logout_url': logout_url,
                         'league_name': league_name,
-                        'Choice_Key': Choice_key(account.key, account.league).urlsafe(), #TODO Encrypt
                         'team_data': team_data,
                         'team_name': team_name,
                         'tba_team_url': tba_team_url,

@@ -112,7 +112,6 @@ class Pick_up_Page(webapp2.RequestHandler):
             template_values = {
                         'user': user.nickname(),
                         'logout_url': logout_url,
-                        'Choice_key': find_Choice_key.urlsafe(), #TODO Encrypt
                         'event_id': event_id,
                         'update_text': update_text,
                         'league_table': league_table,
@@ -126,8 +125,18 @@ class Submit_Pick(webapp2.RequestHandler):
 
 
     def post(self):
-        #The event_key plus the new team from the post header
-        post_Choice_key = ndb.Key(urlsafe=self.request.get('Choice_key'))
+
+        #Current user's id, used to identify their data
+        user_id = user.user_id()
+        logout_url = users.create_logout_url('/')
+
+        account = globals.get_or_create_account(user)
+        league_id = account.league
+
+        find_Choice_key = Choice_key(account_key(user_id), str(league_id))
+        found_Choice = find_Choice_key.get()
+
+        post_Choice_key = found_Choice
         new_team = self.request.get('team')
 
         selection_error = isValidTeam(new_team, post_Choice_key.parent().get().league)
