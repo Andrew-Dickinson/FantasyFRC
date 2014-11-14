@@ -95,27 +95,7 @@ class MainPage(webapp2.RequestHandler):
             template = JINJA_ENVIRONMENT.get_template('templates/index.html')
             self.response.write(template.render(template_values))
 
-class UpdateInfo(webapp2.RequestHandler):
-
-
-    def post(self):
-        #The event_key plus the new team from the post header
-        post_Choice_key = ndb.Key(urlsafe=self.request.get('Choice_key'))
-        new_team = self.request.get('team')
-
-        selection_error = isValidTeam(new_team, post_Choice_key.parent().get().league)
-
-        #Form data into entity and submit
-        post_Choice = Choice.get_or_insert(post_Choice_key.id(), parent=post_Choice_key.parent())
-        if selection_error == "Good":
-            post_Choice.drafted_team = int(new_team)
-            str(post_Choice.put())
-
-        #Display the homepage
-        self.redirect('/?updated=' + selection_error)
-
 application = webapp2.WSGIApplication([
-                                       ('/updateuser', UpdateInfo),
                                        ('/', MainPage)
                                        ], debug=True)
 
