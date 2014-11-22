@@ -24,7 +24,7 @@ JINJA_ENVIRONMENT = jinja2.Environment(
 
 def get_team_schedule(team_number):
     schedule = []
-    for i in range(1, globals.number_of_offical_weeks + 1):
+    for i in range(1, globals.number_of_official_weeks + 1):
         schedule.append({'competition_name': "", 'tba_url': "", 'points': 0, 'event_key':''})
 
     event_list = root_team_key(str(team_number)).get().events
@@ -109,7 +109,7 @@ class alliance_portal(webapp2.RequestHandler):
 
         total_points = 0
         week_table = []
-        for weeknum in range(1, globals.number_of_offical_weeks):
+        for weeknum in range(1, globals.number_of_official_weeks):
             teams = get_team_lists(user, weeknum)[0]
             points = 0
             lineup = []

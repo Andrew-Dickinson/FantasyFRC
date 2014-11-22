@@ -50,7 +50,7 @@ def draft_pick_key(league_key, position):
 
 class League(ndb.Model):
     """Stores players in the league and the league specific settings"""
-    players = ndb.IntegerProperty(repeated=True)
+    players = ndb.IntegerProperty(repeated=True)  # Deprecated?
     name = ndb.StringProperty()
     draft_current_position = ndb.IntegerProperty()
     draft_current_timeout = ndb.DateTimeProperty()
@@ -75,7 +75,7 @@ class Account(ndb.Model):
     league = ndb.StringProperty()
 
     #In the form described in https://github.com/smarthimandrew/FantasyFRC/issues/12
-    schedule = ndb.IntegerProperty(repeated=True)
+    schedule = ndb.StringProperty(repeated=True)
 
 
 class TeamEvent(ndb.Model):

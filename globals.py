@@ -12,7 +12,8 @@ debug_current_editable_week = 3
 alliance_size = 5
 draft_time_minutes = 2
 
-number_of_offical_weeks = 7
+number_of_official_weeks = 7
+number_of_round_robin_weeks = 7
 
 app_id = "frc3546:FantasyFRC:v0.1"
 
