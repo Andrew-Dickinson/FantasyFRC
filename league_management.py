@@ -20,6 +20,28 @@ JINJA_ENVIRONMENT = jinja2.Environment(
     extensions=['jinja2.ext.autoescape'],
     autoescape=True)
 
+
+def finish_week(league_id, past_week_num):
+    league_player_query = Account.query(Account.league == league_id)
+    league_players = league_player_query.fetch()
+    for player in league_players:
+        opponent = player.schedule[past_week_num - 1]  # -1 for conversion to 0 based index
+        if opponent != globals.schedule_bye_week:
+            opponent_points = get_total_week_points(opponent, past_week_num)
+            player_points = get_total_week_points(player.key.id(), past_week_num)
+            logging.info(player_points)
+            logging.info(opponent_points)
+            if opponent_points < player_points:
+                player.record[past_week_num - 1] = globals.record_win  # -1 for conversion to 0 based index
+            elif opponent_points == player_points:
+                player.record[past_week_num - 1] = globals.record_tie # -1 for conversion to 0 based index
+            elif opponent_points > player_points:
+                player.record[past_week_num - 1] = globals.record_loss # -1 for conversion to 0 based index
+        else:  # Bye week
+            player.record[past_week_num - 1] = globals.record_bye  # -1 for conversion to 0 based index
+        player.put()
+
+
 def remove_from_league(user_id):
     #Current user's id, used to identify their data
     account = Account.get_or_insert(user_id)
@@ -44,7 +66,6 @@ def remove_from_league(user_id):
     #Remove User's association with league
     account.league = '0'
     account.put()
-
 
 
 def add_to_league(user_id, league_id):
@@ -187,3 +208,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+#Down here to fix import bug
+from points import get_total_week_points

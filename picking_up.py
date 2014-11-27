@@ -125,6 +125,7 @@ class Submit_Pick(webapp2.RequestHandler):
 
 
     def post(self):
+        user = users.get_current_user()
 
         #Current user's id, used to identify their data
         user_id = user.user_id()
@@ -134,9 +135,8 @@ class Submit_Pick(webapp2.RequestHandler):
         league_id = account.league
 
         find_Choice_key = Choice_key(account_key(user_id), str(league_id))
-        found_Choice = find_Choice_key.get()
+        post_Choice_key = find_Choice_key
 
-        post_Choice_key = found_Choice
         new_team = self.request.get('team')
 
         selection_error = isValidTeam(new_team, post_Choice_key.parent().get().league)

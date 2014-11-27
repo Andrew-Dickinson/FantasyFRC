@@ -9,7 +9,7 @@ def league_key(commissioner_id):
 
 def account_key(account_id):
     """Constructs a Datastore key for a account entity with a user id."""
-    return ndb.Key(Account, account_id)
+    return ndb.Key(Account, str(account_id))
 
 
 def team_key(team_number):
@@ -76,7 +76,7 @@ class Account(ndb.Model):
 
     #In the form described in https://github.com/smarthimandrew/FantasyFRC/issues/12
     schedule = ndb.StringProperty(repeated=True)
-
+    record = ndb.StringProperty(repeated=True)  # Uses the record variables in globals
 
 class TeamEvent(ndb.Model):
     """Stores a team's data for a single event"""

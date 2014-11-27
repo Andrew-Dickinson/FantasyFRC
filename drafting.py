@@ -68,7 +68,7 @@ def generate_schedule(league_id):
     logging.info(player_ids_list)
     shuffle(player_ids_list)
     if len(player_ids_list) % 2 == 1:  # Check if the number of players is odd
-        player_ids_list.insert(0, '0')  # Add 0 to represent bye week, added to beginning to solve last player issue
+        player_ids_list.insert(0, globals.schedule_bye_week)  # Add 0 to represent bye week, added to beginning to solve last player issue
     number_of_players = len(player_ids_list)
 
     if number_of_players > 2:
@@ -181,6 +181,8 @@ def close_draft(league_id):
         choice = Choice.get_or_insert(league_id, parent=player.key)
         for i in range(1, globals.number_of_official_weeks + 1):
             setup_lineup(i, choice)  # Initialize weekly lineups
+            player.record.append('')
+        player.put()
 
 class Draft_Page(webapp2.RequestHandler):
 

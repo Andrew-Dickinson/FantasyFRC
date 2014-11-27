@@ -12,6 +12,7 @@ from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.ext import ndb
 from google.appengine.api import users
 
+from league_management import  finish_week
 from datastore_classes import league_key, Choice, root_event_key, Choice_key, account_key, Account
 
 import jinja2
@@ -80,7 +81,6 @@ class MainPage(webapp2.RequestHandler):
             account = globals.get_or_create_account(user)
             league_id = account.league
 
-            logging.info(account)
             if league_id != '0':
                 league_name = league_key(league_id).get().name
             else:
