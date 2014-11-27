@@ -67,7 +67,8 @@ def get_team_lists(user, week_number):
     for team in roster: #Just trust me on this one, don't mess with this
         bench_numbers.append(team)
     for number in active_lineup:
-        bench_numbers.remove(number)
+        if number in bench_numbers:
+            bench_numbers.remove(number)
 
     current_bench = []
     for number in bench_numbers:
