@@ -13,7 +13,7 @@ from award_classification import AwardType
 
 from google.appengine.ext.webapp.util import run_wsgi_app
 from progress_through_elimination_classification import convert_TBA_level_to_progress, FINALIST, WINNER
-from datastore_classes import Root_Event, root_event_key, Team_Event, team_event_key, team_key, root_team_key, Root_Team, League
+from datastore_classes import RootEvent, root_event_key, TeamEvent, team_event_key, team_key, root_team_key, RootTeam, League
 
 import jinja2
 import webapp2
@@ -52,7 +52,7 @@ def proccess_elimination_progress(raw_data):
                     new_progress_level = convert_TBA_level_to_progress[level]
                     if new_progress_level > team_progress_level:
                         team_progress_level = new_progress_level
-            team_event = Team_Event.get_or_insert(team_event_key(team_key(team), event_id).id(), parent=team_key(team))
+            team_event = TeamEvent.get_or_insert(team_event_key(team_key(team), event_id).id(), parent=team_key(team))
             if team_progress_level == FINALIST:
                 if AwardType.WINNER in team_event.awards:
                     team_progress_level = WINNER
@@ -61,12 +61,12 @@ def proccess_elimination_progress(raw_data):
 
 
 def proccess_event_data(raw_data, event_id):
-    root_event = Root_Event.get_or_insert(root_event_key(event_id).id())
+    root_event = RootEvent.get_or_insert(root_event_key(event_id).id())
     team_list = []
     for i, data in enumerate(raw_data):
         if i != 0:
             #Gets or inserts based on the key of the team_event
-            team_event = Team_Event.get_or_insert(team_event_key(team_key(data[1]), event_id).id(), parent=team_key(data[1]))
+            team_event = TeamEvent.get_or_insert(team_event_key(team_key(data[1]), event_id).id(), parent=team_key(data[1]))
             #Stores all of the data for the team_event in the appropriate locations
             team_event.rank = int(Decimal(data[0]))
 #             team_event.qualification_score = int(Decimal(data[2]))
@@ -95,14 +95,14 @@ def proccess_event_awards(raw_data, team_number, event_id):
         for data in raw_data: #Iterates through this team's awards at this event
             event_award_types.append(data['award_type'])
             event_award_names.append(data['name'])
-    team_event = Team_Event.get_or_insert(team_event_key(team_key(team_number), event_id).id(), parent=team_key(team_number))
+    team_event = TeamEvent.get_or_insert(team_event_key(team_key(team_number), event_id).id(), parent=team_key(team_number))
     team_event.awards = event_award_types
     team_event.award_names = event_award_names
     team_event.put()
 
 
 def proccess_team_data(raw_data, team_number):
-    root_team = Root_Team.get_or_insert(root_team_key(team_number).id())
+    root_team = RootTeam.get_or_insert(root_team_key(team_number).id())
     event_list = []
     for data in raw_data:
         event_list.append(data['key'])
@@ -113,7 +113,7 @@ def proccess_team_data(raw_data, team_number):
 def classifyin_weeks_and_takin_names():
     raw_data = get_data_from_web(globals.events_url, globals.year)
     for event in raw_data:
-        root_event = Root_Event.get_or_insert(root_event_key(event['key']).id())
+        root_event = RootEvent.get_or_insert(root_event_key(event['key']).id())
         week = convert_date_time_to_week(date(int(event['start_date'].split('-')[0]),int(event['start_date'].split('-')[1]),int(event['start_date'].split('-')[2])))
         root_event.week = week
         root_event.name = event['short_name']

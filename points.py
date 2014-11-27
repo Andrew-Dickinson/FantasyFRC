@@ -2,8 +2,8 @@ import logging
 
 from globals import no_data_display
 from award_classification import AwardType
-from alliance_management import get_team_schedule
-from datastore_classes import Team_Event, team_event_key, team_key
+
+from datastore_classes import TeamEvent, team_event_key, team_key, lineup_key, Lineup, Choice_key, account_key
 from progress_through_elimination_classification import UNDETERMINED, DIDNTQUALIFY, QUARTERFINALIST, SEMIFINALIST, FINALIST, WINNER
 """Uses point system described in http://www.chiefdelphi.com/media/papers/2574"""
 
@@ -80,7 +80,7 @@ def get_seed_points(seed):
 Returns both the raw data values(number of wins) and the points for each category
 '''
 def get_category_and_value_breakdown(team_number, event_id):
-    team_event = Team_Event.get_or_insert(team_event_key(team_key(str(team_number)), event_id).id(), parent=team_key(str(team_number)))
+    team_event = TeamEvent.get_or_insert(team_event_key(team_key(str(team_number)), event_id).id(), parent=team_key(str(team_number)))
     
     # Defualt values if event doesn't exist
     qual_win_points = 0
@@ -183,6 +183,14 @@ def get_point_breakdown_display(team_number, event_id):
     return display_output
 
 
+def get_total_week_points(account_id, week_num):
+    league_id = account_key(account_id).get().league
+    active_teams = lineup_key(Choice_key(account_key(account_id), league_id), week_num).get().active_teams
+    total_points = 0
+    for team in active_teams:
+        total_points += get_team_schedule(team)[week_num - 1]['points']  # -1 for conversion to 0 based index
+    return total_points
+
 #Uses ids based off of https://github.com/the-blue-alliance/the-blue-alliance/blob/master/consts/award_type.py
 award_points_by_TBA_id = {
     0 : 42,
@@ -255,3 +263,6 @@ award_points_by_TBA_id = {
     65 : 2,
     66 : 42, #I consider golden corn dog to be equivalent to chairman's
 }
+
+# Down here to fix import craziness
+from alliance_management import get_team_schedule

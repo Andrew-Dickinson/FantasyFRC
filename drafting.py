@@ -15,7 +15,7 @@ from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.ext import ndb
 from google.appengine.api import users
 
-from datastore_classes import league_key, Choice, Lineup, Choice_key, account_key, Account, lineup_key, Draft_Pick, draft_pick_key
+from datastore_classes import league_key, Choice, Lineup, Choice_key, account_key, Account, lineup_key, DraftPick, draft_pick_key
 
 import jinja2
 import webapp2
@@ -29,18 +29,93 @@ def start_draft(league_id):
     """Sets up to prepare for a draft"""
     league_player_query = Account.query(Account.league == league_id)
     league_players = league_player_query.fetch()
-    shuffle(league_players) #Randomize the order of the draft
+    shuffle(league_players)  # Randomize the order of the draft
 
     number_of_players = len(league_players)
     for draft_round in range(0, globals.alliance_size):
         for i, player in enumerate(league_players):
             pick_key = draft_pick_key(league_key(league_id), str(number_of_players * draft_round + i + 1))
-            pick = Draft_Pick.get_or_insert(pick_key.id(), parent=pick_key.parent())
+            pick = DraftPick.get_or_insert(pick_key.id(), parent=pick_key.parent())
             pick.player = player.key.urlsafe()
             pick.put()
         league = league_key(league_id).get()
     league.draft_current_position = 0
     league.put()
+
+
+def make_schedule_fit(original_schedule):
+    """Takes a schedule and truncates or expands it as necessary.
+        Is only fair if the original schedule is randomly generated"""
+    desired_length = globals.number_of_round_robin_weeks
+    if len(original_schedule) < desired_length:
+        return make_schedule_fit(original_schedule + original_schedule)
+    elif len(original_schedule) > desired_length:
+        del original_schedule[desired_length:]
+        return original_schedule
+    elif len(original_schedule) == desired_length:
+        return original_schedule
+
+
+def generate_schedule(league_id):
+    """Generates and distributes a schedule based on a round robin system"""
+    player_ids_list = []
+
+    league_player_query = Account.query(Account.league == league_id)
+    league_players = league_player_query.fetch()
+    for player in league_players:
+        player_ids_list.append(player.key.id())
+
+    logging.info(player_ids_list)
+    shuffle(player_ids_list)
+    if len(player_ids_list) % 2 == 1:  # Check if the number of players is odd
+        player_ids_list.insert(0, globals.schedule_bye_week)  # Add 0 to represent bye week, added to beginning to solve last player issue
+    number_of_players = len(player_ids_list)
+
+    if number_of_players > 2:
+        #Now that there's an even number of teams, use a round robin system to assign teams to weeks
+        for player_num, player_id in enumerate(player_ids_list, start=1):
+            if player_id != '0' and player_num != number_of_players:
+                player = account_key(player_id).get()
+                schedule = []
+                for week in range(1, number_of_players):
+                    opponent = (week + (number_of_players - 1) - player_num) % (number_of_players - 1)
+                    if opponent == player_num - 1:
+                        opponent = number_of_players - 1
+
+                    schedule.append(player_ids_list[opponent])
+
+                #Confirm schedule length is appropriate
+                schedule = make_schedule_fit(schedule)
+                player.schedule = schedule
+                player.put()
+
+        #For the last player, whose schedule doesn't follow the same pattern
+        last_player = account_key(player_ids_list[number_of_players - 1]).get()
+        last_player_schedule = []
+        for week in range(1, number_of_players + 1):
+            #This equation comes from a mathematica document. Truss me about it - 2014 season
+            last_player_schedule.append(player_ids_list[int(.25*((-1)**week) *
+                                        ((number_of_players - 1) +
+                                        (number_of_players - 3)*((-1)**week) +
+                                        2*((-1)**week)*week))])
+        last_player_schedule = make_schedule_fit(last_player_schedule)
+        last_player.schedule = last_player_schedule
+        logging.info(last_player_schedule)
+        last_player.put()
+    elif number_of_players == 2:
+        #If there's only two players, they just constantly play each other
+        player1 = league_players[0]
+        schedule1 = []
+        player2 = league_players[1]
+        schedule2 = []
+        for week in range(1, globals.number_of_round_robin_weeks + 1):
+            schedule1.append(player_ids_list[1])
+            schedule2.append(player_ids_list[0])
+        player1.schedule = schedule1
+        player2.schedule = schedule2
+        player1.put()
+        player2.put()
+
 
 def get_taken_teams(league_id):
     """Returns a list of taken teams based on a league and event id"""
@@ -91,17 +166,23 @@ def setup_for_next_pick(league_id):
 
 def close_draft(league_id):
     league = league_key(league_id).get()
-    league.draft_current_position = -1 #Indicate the draft is over
+    league.draft_current_position = -1  # Indicate the draft is over
     league.draft_current_timeout = None
     league.put()
 
-    #Initialize requirements for bench/active system
+    #Build a schedule
+    generate_schedule(league_id)
+
+    #Initialize requirements for bench/active system and distribute a schedule
     league_player_query = Account.query(Account.league == league_id)
     league_players = league_player_query.fetch()
     for player in league_players:
+        #For the active system
         choice = Choice.get_or_insert(league_id, parent=player.key)
-        for i in range(1, globals.number_of_offical_weeks + 1):
-            setup_lineup(i, choice) #Initialize weekly lineups
+        for i in range(1, globals.number_of_official_weeks + 1):
+            setup_lineup(i, choice)  # Initialize weekly lineups
+            player.record.append('')
+        player.put()
 
 class Draft_Page(webapp2.RequestHandler):
 

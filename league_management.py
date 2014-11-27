@@ -10,7 +10,7 @@ from google.appengine.api import users
 from google.appengine.ext import ndb
 
 import globals
-from datastore_classes import account_key, Account, League, Choice, Choice_key, league_key, Lineup, Draft_Pick
+from datastore_classes import account_key, Account, League, Choice, Choice_key, league_key, Lineup, DraftPick
 
 import jinja2
 import webapp2
@@ -19,6 +19,28 @@ JINJA_ENVIRONMENT = jinja2.Environment(
     loader=jinja2.FileSystemLoader(os.path.dirname(__file__)),
     extensions=['jinja2.ext.autoescape'],
     autoescape=True)
+
+
+def finish_week(league_id, past_week_num):
+    league_player_query = Account.query(Account.league == league_id)
+    league_players = league_player_query.fetch()
+    for player in league_players:
+        opponent = player.schedule[past_week_num - 1]  # -1 for conversion to 0 based index
+        if opponent != globals.schedule_bye_week:
+            opponent_points = get_total_week_points(opponent, past_week_num)
+            player_points = get_total_week_points(player.key.id(), past_week_num)
+            logging.info(player_points)
+            logging.info(opponent_points)
+            if opponent_points < player_points:
+                player.record[past_week_num - 1] = globals.record_win  # -1 for conversion to 0 based index
+            elif opponent_points == player_points:
+                player.record[past_week_num - 1] = globals.record_tie # -1 for conversion to 0 based index
+            elif opponent_points > player_points:
+                player.record[past_week_num - 1] = globals.record_loss # -1 for conversion to 0 based index
+        else:  # Bye week
+            player.record[past_week_num - 1] = globals.record_bye  # -1 for conversion to 0 based index
+        player.put()
+
 
 def remove_from_league(user_id):
     #Current user's id, used to identify their data
@@ -46,7 +68,6 @@ def remove_from_league(user_id):
     account.put()
 
 
-
 def add_to_league(user_id, league_id):
     account = Account.get_or_insert(user_id)
 
@@ -62,7 +83,7 @@ def delete_league(league_id):
     if league_id != '0': #Don't ever delete the default league
         league = league_key(league_id).get()
         players = Account.query().filter(Account.league == league_id).fetch()
-        draft_picks = Draft_Pick.query(ancestor=league.key).fetch()
+        draft_picks = DraftPick.query(ancestor=league.key).fetch()
         for player in players:
             remove_from_league(player.key.id())
         for draft_pick in draft_picks:
@@ -187,3 +208,6 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+#Down here to fix import bug
+from points import get_total_week_points
