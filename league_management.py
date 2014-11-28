@@ -21,6 +21,42 @@ JINJA_ENVIRONMENT = jinja2.Environment(
     autoescape=True)
 
 
+def get_opponent_name(user_id, week_number):
+    return account_key(get_opponent(user_id, week_number)).get().nickname
+
+
+def get_opponent(user_id, week_number):
+    return account_key(user_id).get().schedule[int(week_number) - 1]  # -1 for conversion to 0 based
+
+
+def get_schedule(league_id):
+    league_player_query = Account.query(Account.league == league_id)
+    league_players = league_player_query.fetch()
+    master_schedule = []
+
+    for player in league_players:
+        master_schedule.append({'user': player.key.id(), 'schedule': player.schedule})
+
+    return master_schedule
+
+
+def get_readable_schedule(league_id):
+    league_player_query = Account.query(Account.league == league_id)
+    league_players = league_player_query.fetch()
+    master_schedule = []
+
+    for player in league_players:
+        schedule = player.schedule
+
+        #Convert to nicknames
+        for i, opponent in enumerate(schedule):
+            schedule[i] = account_key(opponent).get().nickname
+
+        master_schedule.append({'name': player.nickname, 'schedule': schedule})
+
+    return master_schedule
+
+
 def get_player_record(player_id):
     """Accesses the data store to return a player's record"""
     account = account_key(player_id).get()

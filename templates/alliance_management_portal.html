@@ -43,5 +43,22 @@
 
             {% endfor %}
     </table>
+    <h1>League Schedule</h1>
+    <table class="table">
+        <tr>
+            <td>Player</td>
+            {% for week in week_table %}
+                <td>Week {{ loop.index }}</td>
+            {% endfor %}
+        </tr>
+        {% for player in schedule %}
+            <tr>
+                <td>{{ player.name }}</td>
+                {% for opponent in player.schedule %}
+                    <td>{{ opponent }}</td>
+                {% endfor %}
+            </tr>
+        {% endfor %}
+    </table>
 </div>
 {% endblock %}
