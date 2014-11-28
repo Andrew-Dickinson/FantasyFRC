@@ -129,6 +129,7 @@ class alliance_portal(webapp2.RequestHandler):
             week_table.append(week_row)
 
         leader_board = get_leader_board(league_id)
+        league_schedule = get_readable_schedule(league_id)
 
         if draft_over:
             template_values = {
@@ -138,6 +139,7 @@ class alliance_portal(webapp2.RequestHandler):
                             'week_table': week_table,
                             'total_points': total_points,
                             'leader_board': leader_board,
+                            'schedule': league_schedule,
                             }
 
             template = JINJA_ENVIRONMENT.get_template('templates/alliance_management_portal.html')
@@ -313,5 +315,5 @@ if __name__ == "__main__":
     main()
 
 # Down here to resolve import issues
-from league_management import get_leader_board
+from league_management import get_leader_board, get_readable_schedule
 from points import get_team_points_at_event, get_points_to_date, get_point_breakdown_display, humman_readable_point_categories, explanation_of_point_categories
