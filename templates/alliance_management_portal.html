@@ -29,5 +29,19 @@
 		{% endfor %}
 		<tr><td></td><td></td><td><b>Total: {{ total_points }}</b></td></tr>
 	</table>
+    <h1>League Standings</h1>
+    <table class="table">
+        <tr><td>Rank</td><td>Name</td><td>W-L-T</td></tr>
+            {% for player in leader_board %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>{{ player.name }}</td>
+                    <td>
+                        {% for number in player.record %}{{ number }}{% if not loop.last %}-{% endif %}{% endfor %}
+                    </td>
+                </tr>
+
+            {% endfor %}
+    </table>
 </div>
 {% endblock %}

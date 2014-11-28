@@ -109,8 +109,8 @@ def generate_schedule(league_id):
         player2 = league_players[1]
         schedule2 = []
         for week in range(1, globals.number_of_round_robin_weeks + 1):
-            schedule1.append(player_ids_list[1])
-            schedule2.append(player_ids_list[0])
+            schedule1.append(player_ids_list[0])
+            schedule2.append(player_ids_list[1])
         player1.schedule = schedule1
         player2.schedule = schedule2
         player1.put()
