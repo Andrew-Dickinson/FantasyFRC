@@ -29,38 +29,48 @@
 	  </ul>
 	</nav>
 
-	<h1>View Alliance</h1>
-	<div id="team_list">
-			{% for list in team_lists %}
-			{% set listloop = loop %}
-				<h2>{% if listloop.first %}
-					Alliance Lineup:
-					{% else %}
-					Bench:
-					{% endif %}
-				</h2>
-			{% if list %}
-				<table class="table">
-				<tr><td>Team</td><td>Points</td></tr>
-				{% for team in list %}
-				<tr>
-					<td>
-						<a href="/allianceManagement/teamDetail/{{team.number}}">{{ team.number }}</a>
-					</td>
-					<td>
-						<a href="/allianceManagement/teamDetail/{{ team.number }}#pointbreakdown">{{ team.total_points }}</a>
-					</td>
-				</tr>
-				{% endfor %}
-				{% if listloop.first %}
-					<tr><td></td><td>Total: {{ point_total }}</td></tr>
-				{% endif %}
-				</table>
-			{% else %}
-				<p>No teams in this list</p>
-			{% endif %}		
-			{% endfor %}
-	</div>
+    {% for team_lists in team_listss %}
+        {% set opponent_loop = loop %}
+        {% if loop.first %}
+            <h1>Your Lineup</h1>
+        {% else %}
+            <hr/>
+            <h1>{{ opponent_name }}'s Lineup</h1>
+        {% endif %}
+        <div id="team_list">
+                {% for list in team_lists %}
+                {% set listloop = loop %}
+                    <h2>{% if listloop.first %}
+                        Active:
+                        {% else %}
+                        Bench:
+                        {% endif %}
+                    </h2>
+                {% if list %}
+                    <table class="table">
+                    <tr><td>Team</td><td>Points</td></tr>
+                    {% for team in list %}
+                    <tr>
+                        <td>
+                            <a href="/allianceManagement/teamDetail/{{team.number}}">{{ team.number }}</a>
+                        </td>
+                        <td>
+                            <a href="/allianceManagement/teamDetail/{{ team.number }}#pointbreakdown">{{ team.total_points }}</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                    {% if listloop.first %}
+                        <tr><td></td>
+                            <td>Total: {{ point_totals[opponent_loop.index0] }}
+                        </td></tr>
+                    {% endif %}
+                    </table>
+                {% else %}
+                    <p>No teams in this list</p>
+                {% endif %}
+                {% endfor %}
+        </div>
+    {% endfor %}
 
 	<nav>
 	  <ul class="pager">

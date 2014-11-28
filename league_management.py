@@ -21,6 +21,14 @@ JINJA_ENVIRONMENT = jinja2.Environment(
     autoescape=True)
 
 
+def get_opponent_name(user_id, week_number):
+    return account_key(get_opponent(user_id, week_number)).get().nickname
+
+
+def get_opponent(user_id, week_number):
+    return account_key(user_id).get().schedule[int(week_number) - 1]  # -1 for conversion to 0 based
+
+
 def get_schedule(league_id):
     league_player_query = Account.query(Account.league == league_id)
     league_players = league_player_query.fetch()
