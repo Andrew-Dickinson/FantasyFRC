@@ -110,7 +110,7 @@ class alliance_portal(webapp2.RequestHandler):
 
         total_points = 0
         week_table = []
-        for weeknum in range(1, globals.number_of_official_weeks):
+        for weeknum in range(1, globals.number_of_official_weeks + 1):
             teams = get_team_lists(user, weeknum)[0]
             points = 0
             lineup = []
