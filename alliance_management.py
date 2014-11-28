@@ -90,7 +90,7 @@ def is_week_editable(week_number):
     return globals.debug_current_editable_week <= int(week_number)
 
 class alliance_portal(webapp2.RequestHandler):
-    """docstring for alliance_portal"""
+    """The main dashboard for league info"""
     def get(self):
         # Checks for active Google account session
         user = users.get_current_user()
@@ -127,7 +127,8 @@ class alliance_portal(webapp2.RequestHandler):
 
             week_row = {'week': str(weeknum), 'active_lineup': lineup, 'points': points}
             week_table.append(week_row)
-            
+
+        leader_board = get_leader_board(league_id)
 
         if draft_over:
             template_values = {
@@ -135,7 +136,8 @@ class alliance_portal(webapp2.RequestHandler):
                             'logout_url': logout_url,
                             'league_name': league_name,
                             'week_table': week_table,
-                            'total_points': total_points
+                            'total_points': total_points,
+                            'leader_board': leader_board,
                             }
 
             template = JINJA_ENVIRONMENT.get_template('templates/alliance_management_portal.html')
@@ -311,4 +313,5 @@ if __name__ == "__main__":
     main()
 
 # Down here to resolve import issues
+from league_management import get_leader_board
 from points import get_team_points_at_event, get_points_to_date, get_point_breakdown_display, humman_readable_point_categories, explanation_of_point_categories

@@ -22,6 +22,11 @@ record_loss = 'L'
 record_tie = 'T'
 record_bye = 'B'
 
+league_points_per_win = 2
+league_points_per_tie = 1
+league_points_per_loss = 0
+league_points_per_bye = 0
+
 schedule_bye_week = '0'
 
 app_id = "frc3546:FantasyFRC:v0.1"
