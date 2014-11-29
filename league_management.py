@@ -206,6 +206,7 @@ class Show_Leagues(webapp2.RequestHandler):
             if account_key(league.key.id()).get():
                 commissioner = account_key(league.key.id()).get().nickname
             league_output.append({'name': league.name,
+                                  'id': league.key.id(),
                                   'size': number_of_players,
                                   'commissioner': commissioner,
                                   'join_url': '/leagueManagement/joinLeague/' + league.key.id()
@@ -238,10 +239,16 @@ class create_League(webapp2.RequestHandler):
         account = globals.get_or_create_account(user)
         league_id = account.league
 
+        if league_id != '0':
+            league_name = league_key(league_id).get().name
+        else:
+            league_name = ""
+
         #Send html data to browser
         template_values = {
                         'user': user.nickname(),
-                        'logout_url': logout_url
+                        'logout_url': logout_url,
+                        'league_name': league_name
                         }
         template = JINJA_ENVIRONMENT.get_template('templates/create_league.html')
         self.response.write(template.render(template_values))

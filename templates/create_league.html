@@ -12,7 +12,30 @@
 		<form action="/leagueManagement/updateLeague" method="post">
 			League Name:
 			<input type="text" value="{{ user }}'s League" name="name" size="40">
-			<input type="submit" value="Create">
+            {% if league_name != "" %}
+                <button id="create_league" type="button" class="btn btn-primary" data-toggle="modal" data-target="#create_league_modal">Create</button>
+            {% else %}
+                <button type="submit"  class="btn btn-primary">Create</button>
+            {% endif %}
+            <!-- create_league_modal -->
+            <div id="create_league_modal" class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+              <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                      <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                      <h4 class="modal-title">Woah, Careful now&hellip;</h4>
+                    </div>
+                    <div class="modal-body">
+                      <p>Leaving a league is permanent! You will <b>not</b> be able to re-join. All of your teams will be deleted and you will be ineligible to play any longer</p>
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                      <button type="submit" class="btn btn-primary btn-danger">Leave League</button>
+                  </div>
+                </div>
+              </div>
+            </div>
+
 		</form>
 	</div>
 </div>

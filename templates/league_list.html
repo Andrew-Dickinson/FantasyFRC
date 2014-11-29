@@ -17,12 +17,39 @@
 		</tr>
 		{% for league in league_list %}
 		<tr>
-			<td><a href="{{ league.join_url }}">{{ league.name }}</a></td>
+			<td>
+                {% if league_name != "" %}
+                    <a href="#"  data-toggle="modal" data-target="#join_league_modal_{{ league.id }}">{{ league.name }}</a>
+                {% else %}
+                    <a href="{{ league.join_url }}">{{ league.name }}</a>
+                {% endif %}
+            </td>
 			<td>{{ league.size }}</td>
 			<td>{{ league.commissioner }}</td>
 		</tr>
 		{% endfor %}
 		</table>
+
+        {% for league in league_list %}
+            <!-- create_league_modal -->
+            <div id="join_league_modal_{{ league.id }}" class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+              <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                      <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                      <h4 class="modal-title">Woah, Careful now&hellip;</h4>
+                    </div>
+                    <div class="modal-body">
+                      <p>Leaving a league is permanent! You will <b>not</b> be able to re-join. All of your teams will be deleted and you will be ineligible to play any longer</p>
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                      <a role="button" href="{{ league.join_url }}" class="btn btn-primary btn-danger">Leave League</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+        {% endfor %}
 	</div>
 </div>
 {% endblock %}
