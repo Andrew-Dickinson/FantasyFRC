@@ -1,0 +1,63 @@
+{% extends "/templates/base.html" %}
+
+{% block title %}Fantasy FRC - Main{% endblock %}
+
+{% block content %}
+<div class="container">
+	<h1>Point Details</h1>
+    <p>Based off of the <a href="http://www.chiefdelphi.com/media/papers/2574">CD thread's point system</a></p>
+    <h2>Qualification Matches</h2><p>
+        Win, 2 points <br/>
+        Tie, 1 point<br/>
+        Loss, 0 points<br/>
+    </p>
+    <h2>Qualification Seed</h2><p>
+        1st seed, 20 points<br/>
+        2nd-3rd seed, 12 points<br/>
+        4th-8th seed, 6 points<br/>
+        9th-12th seed, 3 points<br/>
+        13th-16th seed, 2 points<br/>
+    </p>
+    <h2>Elimination Matches</h2><p>
+        Winner, 30 points<br/>
+        Finalist, 20 points<br/>
+        Semifinalist, 10 points<br/>
+        Quarterfinalist, 4 points<br/>
+        No points are awarded for W-L-T in eliminations.<br/>
+    </p>
+    <h2>Awards</h2>
+    <h3>Regular Season</h3><p>
+        Woodie Flowers Finalist Award, 8 points<br/>
+        Regional Chairman’s Award, 42 points<br/>
+        Engineering Inspiration, 36 points<br/>
+        Rookie All-Star, 20 points<br/>
+        Rookie Inspiration, 15 points<br/>
+        <br/>
+        Highest Rookie Seed, 5 points<br/>
+        High score, 5 points<br/>
+        Judges Award, 5 points<br/>
+        Robot-based award (Delphi, Xerox, GM, Rockwell, Motorola), 15 points<br/>
+        Dean’s List, 4 points<br/>
+        Any award not previously mentioned, 2 points<br/>
+    </p>
+    <h2>Championships</h2><p>
+        Quarter finalists – Division, 5 points<br/>
+        Semifinalists – Division, 10 points<br/>
+        Finalists – Division, 15 points<br/>
+        Divisional Winners, 25 points<br/>
+        Finalists - Einstein Field, 40 points<br/>
+        Winners - Einstein Field, 50 points<br/>
+        <br/>
+        Chairman’s – Championship, 80 points<br/>
+        Engineering Inspiration Award – Championship, 45 points<br/>
+        Rookie All-Star, 25 points<br/>
+        Rookie Inspiration, 20 points<br/>
+        Woodie Flowers/Judges, 15 points<br/>
+        Dean’s List, 8 points<br/>
+        <br/>
+        Highest score / Highest Rookie Seed, 10 points<br/>
+        Robot based award, 25 points<br/>
+        Non-placement award, except previously mentioned, 10 points<br/>
+    </p>
+</div>
+{% endblock %}

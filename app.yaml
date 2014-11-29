@@ -24,7 +24,7 @@ handlers:
   script: thanksPage.application
 - url: /about
   script: aboutPage.application
-- url: /help
+- url: /help/.*
   script: helpPage.application
 - url: /.*
   script: MainPage.application
