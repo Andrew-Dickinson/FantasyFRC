@@ -7,7 +7,7 @@
 	</ol>
 
 	<div id="Current Roster">
-		<a href="/allianceManagement/editAlliance"><h2>Current Roster</h2></a>
+		<a href="/allianceManagement/viewAlliance"><h2>Current Roster</h2></a>
 		<table class="table">
 			{% for team in roster %}
 				<tr>
@@ -19,7 +19,7 @@
 	<div id="team_selector">
 		<h2>Pick Up Team:</h2>
 		<p>{{ update_text }}</p>
-		<form action="/pickUp/submitPick" method="post">
+		<form action="/draft/pickUp/submitPick" method="post">
 			Team Number:
 			<input type="text" value="" name="team">
 			<input type="submit" value="Submit">

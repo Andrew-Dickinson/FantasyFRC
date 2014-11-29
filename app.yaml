@@ -20,9 +20,6 @@ handlers:
 - url: /draft/.*
   script: drafting.application
   login: required
-- url: /pickUp/.*
-  script: picking_up.application
-  login: required
 - url: /thanks
   script: thanksPage.application
 - url: /about
