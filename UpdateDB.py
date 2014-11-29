@@ -14,6 +14,7 @@ from award_classification import AwardType
 from google.appengine.ext.webapp.util import run_wsgi_app
 from progress_through_elimination_classification import convert_TBA_level_to_progress, FINALIST, WINNER
 from datastore_classes import RootEvent, root_event_key, TeamEvent, team_event_key, team_key, root_team_key, RootTeam, League
+import time
 
 import jinja2
 import webapp2
@@ -25,6 +26,29 @@ JINJA_ENVIRONMENT = jinja2.Environment(
     autoescape=True)
 
 from customMechanize import _mechanize
+
+
+def geocode_within_limit():
+    teams = RootTeam.query().fetch()
+    num_this_second = 0
+    this_second = time.gmtime()
+
+    for team in teams:
+        if num_this_second < 5:
+            logging.info("bladslj")
+            team.latlon = geocode(team.address)
+            logging.info(team.latlon)
+            team.put()
+            num_this_second += 1
+        else:
+            logging.info("bla")
+            while this_second >= time.gmtime():
+                time.sleep(0.1)
+            num_this_second = 0
+            this_second = time.gmtime()
+            team.latlon = geocode(team.address)
+            logging.info(team.latlon)
+            team.put()
 
 
 def geocode(address):
@@ -42,7 +66,6 @@ def get_data_from_web(url, selector, second_selector=None):
     br = _mechanize.Browser()
     br.addheaders = [('X-TBA-App-Id', globals.app_id)]
     br.set_handle_robots(False)
-    logging.info(second_selector)
     final_url = url.format(selector, second_selector)
     final_url = final_url.replace(' ', "%20")
     page_data = br.open(final_url, timeout=globals.mechanize_timeout).read()
@@ -162,6 +185,7 @@ class UpdateDB(webapp2.RequestHandler):
         raw_data = get_data_from_web(globals.event_matches_url, '2014txsa')
         proccess_elimination_progress(raw_data)
         classifyin_weeks_and_takin_names()
+        geocode_within_limit()
 
 application = webapp2.WSGIApplication([
                                        ('/updateTeams/', UpdateDB)
