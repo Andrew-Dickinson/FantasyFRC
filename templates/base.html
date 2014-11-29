@@ -42,8 +42,9 @@
                     </p></li>
                     <li><p class="navbar-text">
                         {% if league_name == ""%}Not a member of a league - <a href="/leagueManagement/createLeague">Click to Create one!</a>{% endif %}
-                        {% if league_name != ""%}League: {{ league_name }} - <a id="leave_league" href="/leagueManagement/leaveLeague">Click to leave</a>{% endif %}
-                    </p></li>
+                        {% if league_name != ""%}League: {{ league_name }} - <a id="leave_league" href="#"  data-toggle="modal"
+                                                                            data-target="#leave_league_modal">Click to leave</a>{% endif %}
+						</p></li>
                   </ul>
                 </div>
             {% else %}
@@ -54,6 +55,25 @@
 		  </div>
 	</nav>
 {% endblock %}
+
+<!-- leave_league_modal -->
+<div id="leave_league_modal" class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+          <h4 class="modal-title">Woah, Careful now&hellip;</h4>
+        </div>
+        <div class="modal-body">
+          <p>Leaving a league is permanent! You will <b>not</b> be able to re-join. All of your teams will be deleted and you will be ineligible to play any longer</p>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+          <a role="button" href="/leagueManagement/leaveLeague" class="btn btn-primary btn-danger">Leave League</a>
+      </div>
+    </div>
+  </div>
+</div>
 
 {% block content %}
 {% endblock %}
@@ -76,6 +96,12 @@
 	<!-- jQuery (necessary for Bootstrap's JavaScript plugins) -->
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
     <script src="/static/js/bootstrap.min.js"></script>
+{#    <script>#}
+{#    $("#leave_league").click(function(e) {#}
+{#        e.preventDefault();#}
+{#        $(this).modal();#}
+{#    });#}
+{#</script>#}
 {% endblock %}
 
 {% block inline_javascript %}{% endblock %}

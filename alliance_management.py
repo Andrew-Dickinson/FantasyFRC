@@ -24,7 +24,7 @@ JINJA_ENVIRONMENT = jinja2.Environment(
 
 def get_team_schedule(team_number):
     schedule = []
-    for i in range(1, globals.number_of_offical_weeks + 1):
+    for i in range(1, globals.number_of_official_weeks + 1):
         schedule.append({'competition_name': "", 'tba_url': "", 'points': 0, 'event_key':''})
 
     event_list = root_team_key(str(team_number)).get().events
@@ -40,8 +40,8 @@ def get_team_schedule(team_number):
         schedule[event_week - 1]['points'] = points
     return schedule
 
-def get_team_lists(user, week_number):
-    account = globals.get_or_create_account(user)
+def get_team_lists(user_id, week_number):
+    account = account_key(user_id).get()
     choice = Choice_key(account.key, account.league).get()
     roster = choice.current_team_roster
 
@@ -67,7 +67,8 @@ def get_team_lists(user, week_number):
     for team in roster: #Just trust me on this one, don't mess with this
         bench_numbers.append(team)
     for number in active_lineup:
-        bench_numbers.remove(number)
+        if number in bench_numbers:
+            bench_numbers.remove(number)
 
     current_bench = []
     for number in bench_numbers:
@@ -89,7 +90,7 @@ def is_week_editable(week_number):
     return globals.debug_current_editable_week <= int(week_number)
 
 class alliance_portal(webapp2.RequestHandler):
-    """docstring for alliance_portal"""
+    """The main dashboard for league info"""
     def get(self):
         # Checks for active Google account session
         user = users.get_current_user()
@@ -109,8 +110,8 @@ class alliance_portal(webapp2.RequestHandler):
 
         total_points = 0
         week_table = []
-        for weeknum in range(1, globals.number_of_offical_weeks):
-            teams = get_team_lists(user, weeknum)[0]
+        for weeknum in range(1, globals.number_of_official_weeks + 1):
+            teams = get_team_lists(user_id, weeknum)[0]
             points = 0
             lineup = []
             for team in teams:
@@ -126,7 +127,9 @@ class alliance_portal(webapp2.RequestHandler):
 
             week_row = {'week': str(weeknum), 'active_lineup': lineup, 'points': points}
             week_table.append(week_row)
-            
+
+        leader_board = get_leader_board(league_id)
+        league_schedule = get_readable_schedule(league_id)
 
         if draft_over:
             template_values = {
@@ -134,7 +137,9 @@ class alliance_portal(webapp2.RequestHandler):
                             'logout_url': logout_url,
                             'league_name': league_name,
                             'week_table': week_table,
-                            'total_points': total_points
+                            'total_points': total_points,
+                            'leader_board': leader_board,
+                            'schedule': league_schedule,
                             }
 
             template = JINJA_ENVIRONMENT.get_template('templates/alliance_management_portal.html')
@@ -196,10 +201,17 @@ class view_alliance(webapp2.RequestHandler):
             league_name = ""
 
         if draft_over:
-            team_lists = get_team_lists(user, week_number)
+            team_lists = get_team_lists(user_id, week_number)
             point_total = 0
             for team in team_lists[0]:
                 point_total += team['total_points']
+
+            opponent_team_lists = get_team_lists(get_opponent(user_id, week_number), week_number)
+            opponent_point_total = 0
+            for team in opponent_team_lists[0]:
+                opponent_point_total += team['total_points']
+
+
 
             #Send html data to browser
             template_values = {
@@ -207,8 +219,9 @@ class view_alliance(webapp2.RequestHandler):
                             'logout_url': logout_url,
                             'league_name': league_name,
                             'week_number': int(week_number),
-                            'point_total': point_total,
-                            'team_lists': team_lists
+                            'point_totals': [point_total, opponent_point_total],
+                            'team_listss': [team_lists, opponent_team_lists],
+                            'opponent_name': get_opponent_name(user_id, week_number),
                             }
 
             if is_week_editable(week_number):
@@ -310,4 +323,5 @@ if __name__ == "__main__":
     main()
 
 # Down here to resolve import issues
+from league_management import get_leader_board, get_readable_schedule, get_opponent, get_opponent_name
 from points import get_team_points_at_event, get_points_to_date, get_point_breakdown_display, humman_readable_point_categories, explanation_of_point_categories
