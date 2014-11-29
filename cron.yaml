@@ -1,4 +1,4 @@
-cron:
-- description: scrawler
-  url: /
-  schedule: every 15 mins
+#cron:
+#- description: update team data
+#  url: /updateTeams/
+#  schedule: every 24 hours
