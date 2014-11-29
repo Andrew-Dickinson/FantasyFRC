@@ -29,9 +29,12 @@ class About(webapp2.RequestHandler):
         # Checks for active Google account session
         user = users.get_current_user()
 
-        #Force user login
+        #Check if user is logged in
         if user is None:
-            self.redirect(users.create_login_url(self.request.uri))
+            #Send html data to browser
+            template_values = {'logged_out': users.create_login_url('/about')}
+            template = JINJA_ENVIRONMENT.get_template('templates/about.html')
+            self.response.write(template.render(template_values))
         else:
             #Current user's id, used to identify their data
             user_id = user.user_id()
