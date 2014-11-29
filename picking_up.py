@@ -23,19 +23,6 @@ JINJA_ENVIRONMENT = jinja2.Environment(
     extensions=['jinja2.ext.autoescape'],
     autoescape=True)
 
-def get_taken_teams(league_id):
-    """Returns a list of taken teams based on a league and event id"""
-    taken_teams = []
-    league_player_query = Account.query(Account.league == league_id)
-    league_players = league_player_query.fetch()
-    for player in league_players:
-        choice = Choice_key(account_key(player.key.id()), league_id).get()
-        if choice:
-            for team in choice.current_team_roster:
-                taken_teams.append(str(team))
-    return taken_teams
-
-
 class Pick_up_Page(webapp2.RequestHandler):
 
     def get(self):
