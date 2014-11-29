@@ -31,7 +31,7 @@ class Help(webapp2.RequestHandler):
         #Check if user is logged in
         if user is None:
             #Send html data to browser
-            template_values = {'logged_out': users.create_login_url('/help')}
+            template_values = {'logged_out': users.create_login_url('/help/')}
             template = JINJA_ENVIRONMENT.get_template('templates/help.html')
             self.response.write(template.render(template_values))
         else:
