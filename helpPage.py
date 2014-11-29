@@ -57,9 +57,44 @@ class Help(webapp2.RequestHandler):
             template = JINJA_ENVIRONMENT.get_template('templates/help.html')
             self.response.write(template.render(template_values))
 
+class PointsPage(webapp2.RequestHandler):
+
+    def get(self):
+        # Checks for active Google account session
+        user = users.get_current_user()
+
+        #Check if user is logged in
+        if user is None:
+            #Send html data to browser
+            template_values = {'logged_out': users.create_login_url('/help/points')}
+            template = JINJA_ENVIRONMENT.get_template('templates/points_detail.html')
+            self.response.write(template.render(template_values))
+        else:
+            #Current user's id, used to identify their data
+            user_id = user.user_id()
+            logout_url = users.create_logout_url('/')
+
+            account = globals.get_or_create_account(user)
+            league_id = account.league
+
+            logging.info(account)
+            if league_id != '0':
+                league_name = league_key(league_id).get().name
+            else:
+                league_name = ""
+
+            #Send html data to browser
+            template_values = {
+                        'user': user.nickname(),
+                        'logout_url': logout_url,
+                        'league_name': league_name
+                        }
+            template = JINJA_ENVIRONMENT.get_template('templates/points_detail.html')
+            self.response.write(template.render(template_values))
 
 application = webapp2.WSGIApplication([
-                                       ('/help', Help),
+                                       ('/help/', Help),
+                                       ('/help/points', PointsPage),
                                        ], debug=True)
 
 def main():
