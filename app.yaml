@@ -29,10 +29,8 @@ handlers:
   script: aboutPage.application
 - url: /help
   script: helpPage.application
-
 - url: /.*
   script: MainPage.application
-#Index manages it's own login requirements
 
 
 libraries:

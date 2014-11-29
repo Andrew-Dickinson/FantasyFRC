@@ -32,20 +32,26 @@
 	          </button>
 	          <a class="navbar-brand" href="/">Fantasy FRC</a>
 	        </div>
-	        <div id="navbar" class="collapse navbar-collapse">
-	          <ul class="nav navbar-nav">
-	          	<li><a href="/allianceManagement/viewAlliance"><span class="glyphicon glyphicon-list-alt"></span> View Lineup</a></li>
-	          	<li><a href="/draft/"><span class="glyphicon glyphicon-user"></span> Draft Board</a></li>
-		  		<li><p class="navbar-text">
-					Loggen in as {{ user }} - <a href="{{ logout_url }}">Log out</a>
-				</p></li>
-				<li><p class="navbar-text">
-					{% if league_name == ""%}Not a member of a league - <a href="/leagueManagement/createLeague">Click to Create one!</a>{% endif %}
-					{% if league_name != ""%}League: {{ league_name }} - <a id="leave_league" href="#"  data-toggle="modal"
+            {% if not logged_out %}
+                <div id="navbar" class="collapse navbar-collapse">
+                  <ul class="nav navbar-nav">
+                    <li><a href="/allianceManagement/viewAlliance"><span class="glyphicon glyphicon-list-alt"></span> View Lineup</a></li>
+                    <li><a href="/draft/"><span class="glyphicon glyphicon-user"></span> Draft Board</a></li>
+                    <li><p class="navbar-text">
+                        Loggen in as {{ user }} - <a href="{{ logout_url }}">Log out</a>
+                    </p></li>
+                    <li><p class="navbar-text">
+                        {% if league_name == ""%}Not a member of a league - <a href="/leagueManagement/createLeague">Click to Create one!</a>{% endif %}
+                        {% if league_name != ""%}League: {{ league_name }} - <a id="leave_league" href="#"  data-toggle="modal"
                                                                             data-target="#leave_league_modal">Click to leave</a>{% endif %}
-				</p></li>
-			  </ul>
-			</div>
+						</p></li>
+                  </ul>
+                </div>
+            {% else %}
+                <ul class="nav navbar-nav navbar-right">
+                    <li><a href="{{ logged_out }}">Log in to Play</a></li>
+                </ul>
+            {% endif %}
 		  </div>
 	</nav>
 {% endblock %}
@@ -80,7 +86,7 @@
 	    <div class="col-sm-6 col-sm-offset-3 col-md-offset-3 col-lg-offset-3">
 	      <div>Fantasy FRC is open source. <a href="https://github.com/smarthimandrew/FantasyFRC">Contribute here!</a></div>
 	      <div>
-	        <a href="/thanks">thanks</a> - <a href="/about">about/contact</a>
+	        <a href="/thanks">thanks</a> - <a href="/about">about/contact</a> - <a href="/help">help</a>
 	      </div>
 	    </div>
 	  </div>
