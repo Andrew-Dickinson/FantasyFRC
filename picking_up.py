@@ -35,13 +35,6 @@ def get_taken_teams(league_id):
                 taken_teams.append(str(team))
     return taken_teams
 
-def setup_lineup(id, choice):
-    lineup = Lineup.get_or_insert(lineup_key(choice.key, id).id(), parent=choice.key)
-    #Only initialize if its' empty
-    logging.info(lineup.active_teams)
-    if lineup.active_teams == None:
-        lineup.active_teams = []
-    lineup.put()
 
 class Pick_up_Page(webapp2.RequestHandler):
 
@@ -60,9 +53,6 @@ class Pick_up_Page(webapp2.RequestHandler):
             account = globals.get_or_create_account(user)
             league_id = account.league
 
-            #TODO Replace with choice of event
-            event_id = '2014txsa'
-
             #Get user's choices for the current league
             find_Choice_key = Choice_key(account_key(user_id), str(league_id))
             found_Choice = find_Choice_key.get()
@@ -76,20 +66,6 @@ class Pick_up_Page(webapp2.RequestHandler):
             user_roster = []
             if found_Choice:
                 user_roster = found_Choice.current_team_roster
-
-            #Get list of teams
-            team_numbers = get_team_list()
-
-            #Get a list of those that are unavailable
-            taken_teams = get_taken_teams(league_id)
-
-            #Cross out those that are taken
-            for i, number in enumerate(team_numbers):
-                if (number in taken_teams):
-                    team_numbers[i] = "<i><strike>" + number + "</strike></i>"
-
-            #Separates teams into groups of five for easier listing
-#             team_list = group_list_in_n_size(team_numbers, 10)
 
 
             #Get list of players in the league and their choices
@@ -112,7 +88,6 @@ class Pick_up_Page(webapp2.RequestHandler):
             template_values = {
                         'user': user.nickname(),
                         'logout_url': logout_url,
-                        'event_id': event_id,
                         'update_text': update_text,
                         'league_table': league_table,
                         'league_name': league_name,
