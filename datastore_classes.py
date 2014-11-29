@@ -67,6 +67,8 @@ class RootTeam(ndb.Model):
     """Stores information such as scheduling and team name"""
     name = ndb.StringProperty()
     events = ndb.StringProperty(repeated=True)
+    address = ndb.StringProperty()
+    latlon = ndb.StringProperty()
 
 
 class Account(ndb.Model):

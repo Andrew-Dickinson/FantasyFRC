@@ -26,15 +26,26 @@ JINJA_ENVIRONMENT = jinja2.Environment(
 
 from customMechanize import _mechanize
 
+
+def geocode(address):
+    response = get_data_from_web(globals.gecode_url, address)
+    if response['status'] == "OK":
+        return (str(response['results'][0]['geometry']['location']['lat']) + " " +
+                str(response['results'][0]['geometry']['location']['lng'])
+                )
+    else:
+        return ""
+
+
 def get_data_from_web(url, selector, second_selector=None):
     """Gets data from the blue alliance about matches"""
     br = _mechanize.Browser()
     br.addheaders = [('X-TBA-App-Id', globals.app_id)]
     br.set_handle_robots(False)
-    if second_selector:
-        page_data = br.open(url % (selector, second_selector), timeout=globals.mechanize_timeout).read()
-    else:
-        page_data = br.open(url % selector, timeout=globals.mechanize_timeout).read()
+    logging.info(second_selector)
+    final_url = url.format(selector, second_selector)
+    final_url = final_url.replace(' ', "%20")
+    page_data = br.open(final_url, timeout=globals.mechanize_timeout).read()
     return json.loads(page_data)
 
 def proccess_elimination_progress(raw_data):
@@ -107,7 +118,9 @@ def proccess_team_data(raw_data, team_number):
     for data in raw_data:
         event_list.append(data['key'])
     root_team.events = event_list
-    root_team.name = get_data_from_web(globals.team_url, team_number)['nickname']
+    root_team_data = get_data_from_web(globals.team_url, team_number)
+    root_team.name = root_team_data['nickname']
+    root_team.address = root_team_data['location']
     root_team.put()
 
 def classifyin_weeks_and_takin_names():

@@ -30,20 +30,23 @@ league_points_per_bye = 0
 schedule_bye_week = '0'
 
 app_id = "frc3546:FantasyFRC:v0.1"
+google_api_key = "AIzaSyAfJd7wBMespDYqfmMivW7GtMDe1ZRkKbc"
 
 no_data_display = "<i>No Data</i>"
 
-public_event_url = "http://www.thebluealliance.com/event/%s"
-public_team_url = "http://www.thebluealliance.com/team/%s/" + year
+public_event_url = "http://www.thebluealliance.com/event/{0}"
+public_team_url = "http://www.thebluealliance.com/team/{0}/" + year
 
-team_url = "http://www.thebluealliance.com/api/v2/team/frc%s"
-teams_url = "http://www.thebluealliance.com/api/v2/event/%s/teams"
-event_url = "http://www.thebluealliance.com/api/v2/event/%s"
-events_url = "http://www.thebluealliance.com/api/v2/events/%s"
-rankings_url = "http://www.thebluealliance.com/api/v2/event/%s/rankings"
-team_events_url = "http://www.thebluealliance.com/api/v2/team/frc%s/" + year + "/events"
-team_event_awards_url = "http://www.thebluealliance.com/api/v2/team/frc%s/event/%s/awards"
-event_matches_url = "http://www.thebluealliance.com/api/v2/event/%s/matches"
+team_url = "http://www.thebluealliance.com/api/v2/team/frc{0}"
+teams_url = "http://www.thebluealliance.com/api/v2/event/{0}/teams"
+event_url = "http://www.thebluealliance.com/api/v2/event/{0}"
+events_url = "http://www.thebluealliance.com/api/v2/events/{0}"
+rankings_url = "http://www.thebluealliance.com/api/v2/event/{0}/rankings"
+team_events_url = "http://www.thebluealliance.com/api/v2/team/frc{0}/" + year + "/events"
+team_event_awards_url = "http://www.thebluealliance.com/api/v2/team/frc{0}/event/{1}/awards"
+event_matches_url = "http://www.thebluealliance.com/api/v2/event/{0}/matches"
+
+gecode_url = "https://maps.googleapis.com/maps/api/geocode/json?key=" + google_api_key + "&address={0}"
 
 
 
