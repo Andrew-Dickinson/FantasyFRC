@@ -103,35 +103,35 @@ class alliance_portal(webapp2.RequestHandler):
         league_id = account.league
         draft_over = league_key(league_id).get().draft_current_position == -1
 
-        if league_id != '0':
-            league_name = league_key(league_id).get().name
-        else:
-            league_name = ""
-
-        total_points = 0
-        week_table = []
-        for weeknum in range(1, globals.number_of_official_weeks + 1):
-            teams = get_team_lists(user_id, weeknum)[0]
-            points = 0
-            lineup = []
-            for team in teams:
-                event_key = get_team_schedule(int(team['number']))[int(weeknum) - 1]['event_key']#-1 to convert to 0-based index
-                if event_key: #Check if the team is competing that week
-                    points += get_team_points_at_event(team['number'], event_key)
-                lineup.append(team['number'])
-
-            if is_week_editable(weeknum):
-                points = "<i>No Data</i>"
-            else:
-                total_points += points
-
-            week_row = {'week': str(weeknum), 'active_lineup': lineup, 'points': points}
-            week_table.append(week_row)
-
-        leader_board = get_leader_board(league_id)
-        league_schedule = get_readable_schedule(league_id)
-
         if draft_over:
+            if league_id != '0':
+                league_name = league_key(league_id).get().name
+            else:
+                league_name = ""
+
+            total_points = 0
+            week_table = []
+            for weeknum in range(1, globals.number_of_official_weeks + 1):
+                teams = get_team_lists(user_id, weeknum)[0]
+                points = 0
+                lineup = []
+                for team in teams:
+                    event_key = get_team_schedule(int(team['number']))[int(weeknum) - 1]['event_key']#-1 to convert to 0-based index
+                    if event_key: #Check if the team is competing that week
+                        points += get_team_points_at_event(team['number'], event_key)
+                    lineup.append(team['number'])
+
+                if is_week_editable(weeknum):
+                    points = "<i>No Data</i>"
+                else:
+                    total_points += points
+
+                week_row = {'week': str(weeknum), 'active_lineup': lineup, 'points': points}
+                week_table.append(week_row)
+
+            leader_board = get_leader_board(league_id)
+            league_schedule = get_readable_schedule(league_id)
+
             template_values = {
                             'user': user.nickname(),
                             'logout_url': logout_url,
