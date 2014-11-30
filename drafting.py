@@ -49,6 +49,7 @@ def get_lat_lng_json():
     teams = RootTeam.query().fetch()
     for team in teams:
         team_data.append({"number": team.key.id(),
+                          "name": team.name,
                           "lat": float(team.latlon.split(',')[0]),
                           "lon": float(team.latlon.split(',')[1])})
     extra_stupid_layer = {'data': team_data}
