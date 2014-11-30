@@ -16,7 +16,6 @@ from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.ext import ndb
 from google.appengine.api import users
 
-from UpdateDB import geocode_within_limit
 from datastore_classes import RootTeam, league_key, Choice, Lineup, Choice_key, account_key, Account, lineup_key, DraftPick, draft_pick_key
 
 import jinja2
@@ -196,6 +195,62 @@ def close_draft(league_id):
             setup_lineup(i, choice)  # Initialize weekly lineups
             player.record.append('')
         player.put()
+
+
+def get_free_agent_list(league_id, page):
+    query = RootTeam.query().order(-RootTeam.total_points)
+    extra_teams = query.fetch(globals.free_agent_pagination * page * 4)
+
+    taken_teams = get_taken_teams(league_id)
+
+    #Get rid of the taken teams from the list
+    for team in extra_teams:
+        if team.key.id() in taken_teams:
+            extra_teams.remove(team)
+            taken_teams.remove(team.key.id())  # Not necessary, but improves efficiency
+
+    free_agent_list = []
+    for team in extra_teams[(page - 1) * globals.free_agent_pagination: page * globals.free_agent_pagination]:
+        free_agent_list.append({
+            'name': team.name,
+            'number': team.key.id(),
+            'total_points': team.total_points
+        })
+
+    return free_agent_list
+
+
+class FreeAgentListPage(webapp2.RequestHandler):
+    def get(self):
+        # Checks for active Google account session
+        user = users.get_current_user()
+
+        #Current user's id, used to identify their data
+        user_id = user.user_id()
+        logout_url = users.create_logout_url('/')
+
+        account = globals.get_or_create_account(user)
+        league_id = account.league
+
+        if league_id != '0':
+            league_name = league_key(league_id).get().name
+
+            free_agent_list = get_free_agent_list(league_id, 1)
+
+            #Send html data to browser
+            template_values = {
+                        'user': user.nickname(),
+                        'logout_url': logout_url,
+                        'league_name': league_name,
+                        'free_agent_list': free_agent_list,
+                        }
+            template = JINJA_ENVIRONMENT.get_template('templates/falist.html')
+            self.response.write(template.render(template_values))
+
+        else:
+            template = JINJA_ENVIRONMENT.get_template('templates/error_page.html')
+            self.response.write(template.render({'Message':'Must be a member of a league to perform this action'}))
+
 
 class Draft_Page(webapp2.RequestHandler):
 
@@ -436,6 +491,7 @@ class Pick_up_Page(webapp2.RequestHandler):
                         'league_table': league_table,
                         'league_name': league_name,
                         'roster': user_roster,
+                        'default_team': self.request.get('team'),
                         }
             template = JINJA_ENVIRONMENT.get_template('templates/pick_up_main.html')
             self.response.write(template.render(template_values))
@@ -471,7 +527,8 @@ class Submit_Pick(webapp2.RequestHandler):
         self.redirect('/draft/pickUp/?updated=' + selection_error)
 
 
-application = webapp2.WSGIApplication([('/draft/pickUp/submitPick', Submit_Pick),
+application = webapp2.WSGIApplication([('/draft/freeAgentList/', FreeAgentListPage),
+                                       ('/draft/pickUp/submitPick', Submit_Pick),
                                        ('/draft/pickUp/', Pick_up_Page),
                                        ('/draft/submitPick', Submit_Draft_Pick),
                                        ('/draft/startDraft', Start_Draft),

@@ -21,7 +21,7 @@
 		<p>{{ update_text }}</p>
 		<form action="/draft/pickUp/submitPick" method="post">
 			Team Number:
-			<input type="text" value="" name="team">
+			<input type="text" value="{{ default_team }}" name="team">
 			<input type="submit" value="Submit">
 		</form>
 	</div>
