@@ -3,6 +3,7 @@
 from __future__ import unicode_literals
 
 import os
+import json
 import logging
 from random import shuffle
 import datetime
@@ -15,7 +16,8 @@ from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.ext import ndb
 from google.appengine.api import users
 
-from datastore_classes import league_key, Choice, Lineup, Choice_key, account_key, Account, lineup_key, DraftPick, draft_pick_key
+from UpdateDB import geocode_within_limit
+from datastore_classes import RootTeam, league_key, Choice, Lineup, Choice_key, account_key, Account, lineup_key, DraftPick, draft_pick_key
 
 import jinja2
 import webapp2
@@ -42,6 +44,17 @@ def start_draft(league_id):
     league.draft_current_position = 0
     league.put()
 
+
+def get_lat_lng_json():
+    team_data = []
+    teams = RootTeam.query().fetch()
+    for team in teams:
+        team_data.append({"number": team.key.id(),
+                          "name": team.name,
+                          "lat": float(team.latlon.split(',')[0]),
+                          "lon": float(team.latlon.split(',')[1])})
+    extra_stupid_layer = {'data': team_data}
+    return json.dumps(extra_stupid_layer)
 
 def make_schedule_fit(original_schedule):
     """Takes a schedule and truncates or expands it as necessary.
@@ -267,6 +280,9 @@ class Draft_Page(webapp2.RequestHandler):
                 draft_status = "Post"
             else:
                 draft_status = "Mid"
+
+            team_map_data = get_lat_lng_json()
+
             #Send html data to browser
             template_values = {
                         'user': user.nickname(),
@@ -279,6 +295,7 @@ class Draft_Page(webapp2.RequestHandler):
                         'picking_user': picking_user,
                         'current_unix_timeout': current_unix_timeout,
                         'draft_status': draft_status,
+                        'team_map_data': team_map_data,
                         }
             template = JINJA_ENVIRONMENT.get_template('templates/draft_main.html')
             self.response.write(template.render(template_values))
