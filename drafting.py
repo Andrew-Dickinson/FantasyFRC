@@ -16,6 +16,7 @@ from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.ext import ndb
 from google.appengine.api import users
 
+from UpdateDB import geocode_within_limit
 from datastore_classes import RootTeam, league_key, Choice, Lineup, Choice_key, account_key, Account, lineup_key, DraftPick, draft_pick_key
 
 import jinja2

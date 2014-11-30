@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 
 import os
 import math
+import random
 from datetime import date, timedelta
 import logging
 from decimal import Decimal
@@ -27,6 +28,27 @@ JINJA_ENVIRONMENT = jinja2.Environment(
 
 from customMechanize import _mechanize
 
+
+def get_unique_location(lat, lon):
+    seperation = 0.001
+    newlat = lat
+    newlon = lon
+    datastore_lat_lon = str(lat) + "," + str(lon)
+    query = RootTeam.query().filter(RootTeam.latlon == datastore_lat_lon)
+    results = query.fetch(1)
+    if len(results) != 0:
+        dir = random.randint(0, 3)
+        if dir == 0:
+            newlat = lat - seperation
+        elif dir == 1:
+            newlat = lat + seperation
+        elif dir == 2:
+            newlon = lon - seperation
+        elif dir == 3:
+            newlon = lon + seperation
+        return get_unique_location(newlat, newlon)
+    else:
+        return str(newlat) + "," + str(newlon)
 
 def geocode_within_limit():
     teams = RootTeam.query().fetch()
@@ -54,9 +76,9 @@ def geocode_within_limit():
 def geocode(address):
     response = get_data_from_web(globals.gecode_url, address)
     if response['status'] == "OK":
-        return (str(response['results'][0]['geometry']['location']['lat']) + "," +
-                str(response['results'][0]['geometry']['location']['lng'])
-                )
+        return get_unique_location(response['results'][0]['geometry']['location']['lat'],
+                                   response['results'][0]['geometry']['location']['lng']
+                                   )
     else:
         return ""
 
