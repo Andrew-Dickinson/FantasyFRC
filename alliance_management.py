@@ -258,7 +258,7 @@ class team_detail_page(webapp2.RequestHandler):
         team_data['schedule'] = get_team_schedule(int(team_number))
 
         team_name = "Team " + str(team_number) + " - " + root_team_key(str(team_number)).get().name
-        tba_team_url = globals.public_team_url % team_number
+        tba_team_url = globals.public_team_url.format(team_number)
 
         event_breakdowns = []
         point_breakdown = []

@@ -50,7 +50,10 @@ def get_readable_schedule(league_id):
 
         #Convert to nicknames
         for i, opponent in enumerate(schedule):
-            schedule[i] = account_key(opponent).get().nickname
+            if opponent != globals.schedule_bye_week:
+                schedule[i] = account_key(opponent).get().nickname
+            else:
+                schedule[i] = "Bye"
 
         master_schedule.append({'name': player.nickname, 'schedule': schedule})
 
