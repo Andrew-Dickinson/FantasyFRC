@@ -2,6 +2,41 @@
 
 {% block title %}Fantasy FRC - Draft{% endblock %}
 
+{% block head_javascript %}
+    <style type="text/css">
+      #map-canvas { height: 500px; margin: 0; padding: 0;}
+    </style>
+    <script type="text/javascript"
+      src="https://maps.googleapis.com/maps/api/js?key=AIzaSyD1lAO7OI1bwwzvTvTQXJg5WSx2x2QQo6E">
+    </script>
+    <script type="text/javascript" src="/static/js/markerclusterer.js"></script>
+    <script type="text/javascript">var team_map_data = '{{ team_map_data|safe }}';</script>
+    <script type="text/javascript">
+      function initialize() {
+        var center = new google.maps.LatLng(32.5066815,-63.4064068)
+        var mapOptions = {
+          center: center,
+          zoom: 3,
+          mapTypeId: google.maps.MapTypeId.ROADMAP
+        };
+        var map = new google.maps.Map(document.getElementById('map-canvas'),
+            mapOptions);
+        var markers = [];
+        var obj_data = jQuery.parseJSON(team_map_data);
+        for (var i= 0; i < obj_data.data.length; i++){
+            var latLng = new google.maps.LatLng(obj_data.data[i].lat,obj_data.data[i].lon)
+            var marker = new google.maps.Marker({
+                position: latLng
+            });
+            markers.push(marker);
+        }
+        var markerClusterer = new MarkerClusterer(map, markers);
+
+      }
+      google.maps.event.addDomListener(window, 'load', initialize);
+    </script>
+{% endblock %}
+
 {% block content %}
 <div class="container">
 	<ol class="breadcrumb">
@@ -45,17 +80,19 @@
 		{% endfor %}
 		</table>
 	</div>
-	{% if users_turn %}
-	<div id="team_selector">
-		<p>It's your turn to make a selection</p>
-		<h2>Pick Team:</h2>
-		<p>{{ update_text }}</p>
-		<form action="/draft/submitPick" method="post">
-			Team Number:
-			<input type="text" value="" name="team">
-			<input type="submit" value="Submit">
-		</form>
-	</div>
+    {% if users_turn %}
+    <div id="map-canvas"></div>
+
+        <div id="team_selector">
+            <p>It's your turn to make a selection</p>
+            <h2>Pick Team:</h2>
+            <p>{{ update_text }}</p>
+            <form action="/draft/submitPick" method="post">
+                Team Number:
+                <input type="text" value="" name="team">
+                <input type="submit" value="Submit">
+            </form>
+        </div>
 	{% endif %}
 </div>
 {% endblock %}

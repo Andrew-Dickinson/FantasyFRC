@@ -54,7 +54,7 @@ def geocode_within_limit():
 def geocode(address):
     response = get_data_from_web(globals.gecode_url, address)
     if response['status'] == "OK":
-        return (str(response['results'][0]['geometry']['location']['lat']) + " " +
+        return (str(response['results'][0]['geometry']['location']['lat']) + "," +
                 str(response['results'][0]['geometry']['location']['lng'])
                 )
     else:
