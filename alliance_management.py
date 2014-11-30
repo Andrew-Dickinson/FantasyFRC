@@ -36,7 +36,7 @@ def get_team_schedule(team_number):
         schedule[event_week - 1]['competition_name'] = root_event.name
         # logging.info(root_event.key.id())
         schedule[event_week - 1]['event_key'] = root_event.key.id()
-        schedule[event_week - 1]['tba_url'] = globals.public_event_url % root_event.key.id()
+        schedule[event_week - 1]['tba_url'] = globals.public_event_url.format(root_event.key.id())
         schedule[event_week - 1]['points'] = points
     return schedule
 
