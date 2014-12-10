@@ -4,13 +4,31 @@
 
 {% block content %}
 <div class="container">
+    <nav>
+	  <ul class="pager">
+	  	{% if page == 1 %}
+	  		<li class="previous disabled"><a href="">&larr; Previous Page</a></li>
+	    {% else %}
+	    	<li class="previous">
+	    		<a href="/draft/freeAgentList/{{ page - 1 }}">&larr; Previous Page</a>
+	  		</li>
+	    {% endif %}
+	    {% if page == max_page %}
+	   		<li class="next disabled"><a href="">Next Page &rarr;</a></li>
+	    {% else %}
+	    	<li class="next">
+	    		<a href="/draft/freeAgentList/{{ page + 1 }}">Next Page &rarr;</a>
+	    	</li>
+	    {% endif %}
+	  </ul>
+	</nav>
     <h1>List of Free Agents</h1>
     <h2>Sorted by Points</h2>
     <table class="table">
         <th><td>Number</td><td>Name</td><td>Actions</td><td>Total Points</td></th>
         {% for team in free_agent_list %}
         <tr>
-            <td>{{ loop.index }}</td>
+            <td>{{ team.rank }}</td>
             <td><a href="/allianceManagement/teamDetail/{{ team.number }}">{{ team.number }}</a></td>
             <td>{{ team.name }}</td>
             <td><a href=""><img src="/static/icons/add.png"></a> <a><img src="/static/icons/flag_blue.png"></a></td>
@@ -18,5 +36,23 @@
         </tr>
         {% endfor %}
     </table>
+    <nav>
+	  <ul class="pager">
+	  	{% if page == 1 %}
+	  		<li class="previous disabled"><a href="">&larr; Previous Page</a></li>
+	    {% else %}
+	    	<li class="previous">
+	    		<a href="/draft/freeAgentList/{{ page - 1 }}">&larr; Previous Page</a>
+	  		</li>
+	    {% endif %}
+	    {% if page == max_page %}
+	   		<li class="next disabled"><a href="">Next Page &rarr;</a></li>
+	    {% else %}
+	    	<li class="next">
+	    		<a href="/draft/freeAgentList/{{ page + 1 }}">Next Page &rarr;</a>
+	    	</li>
+	    {% endif %}
+	  </ul>
+	</nav>
 </div>
 {% endblock %}

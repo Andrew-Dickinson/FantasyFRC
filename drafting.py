@@ -136,8 +136,7 @@ def get_taken_teams(league_id):
     league_players = league_player_query.fetch()
 
     for player in league_players:
-        choice = choice = Choice.get_or_insert(league_id, parent=player.key)
-        logging.info(choice)
+        choice = Choice.get_or_insert(league_id, parent=player.key)
         if choice:
             for team in choice.current_team_roster:
                 taken_teams.append(str(team))
@@ -209,9 +208,16 @@ def get_free_agent_list(league_id, page):
             extra_teams.remove(team)
             taken_teams.remove(team.key.id())  # Not necessary, but improves efficiency
 
+    #Unorthadox, yes. Necessary to fix the 118 bug. *Shudder* Don't remove!
+    for team in extra_teams:
+        if team.key.id() in taken_teams:
+            extra_teams.remove(team)
+            taken_teams.remove(team.key.id())  # Not necessary, but improves efficiency
+
     free_agent_list = []
-    for team in extra_teams[(page - 1) * globals.free_agent_pagination: page * globals.free_agent_pagination]:
+    for i, team in enumerate(extra_teams[(page - 1) * globals.free_agent_pagination : page * globals.free_agent_pagination]):
         free_agent_list.append({
+            'rank': i + ((page - 1) * globals.free_agent_pagination) + 1,
             'name': team.name,
             'number': team.key.id(),
             'total_points': team.total_points
@@ -221,7 +227,7 @@ def get_free_agent_list(league_id, page):
 
 
 class FreeAgentListPage(webapp2.RequestHandler):
-    def get(self):
+    def get(self, page):
         # Checks for active Google account session
         user = users.get_current_user()
 
@@ -233,9 +239,14 @@ class FreeAgentListPage(webapp2.RequestHandler):
         league_id = account.league
 
         if league_id != '0':
+            if not page:
+                page = 1
+            else:
+                page = int(page)
+
             league_name = league_key(league_id).get().name
 
-            free_agent_list = get_free_agent_list(league_id, 1)
+            free_agent_list = get_free_agent_list(league_id, page)
 
             #Send html data to browser
             template_values = {
@@ -243,6 +254,7 @@ class FreeAgentListPage(webapp2.RequestHandler):
                         'logout_url': logout_url,
                         'league_name': league_name,
                         'free_agent_list': free_agent_list,
+                        'page': page,
                         }
             template = JINJA_ENVIRONMENT.get_template('templates/falist.html')
             self.response.write(template.render(template_values))
@@ -527,7 +539,7 @@ class Submit_Pick(webapp2.RequestHandler):
         self.redirect('/draft/pickUp/?updated=' + selection_error)
 
 
-application = webapp2.WSGIApplication([('/draft/freeAgentList/', FreeAgentListPage),
+application = webapp2.WSGIApplication([('/draft/freeAgentList/(.*)', FreeAgentListPage),
                                        ('/draft/pickUp/submitPick', Submit_Pick),
                                        ('/draft/pickUp/', Pick_up_Page),
                                        ('/draft/submitPick', Submit_Draft_Pick),
