@@ -3,6 +3,7 @@
 from __future__ import unicode_literals
 
 import os
+import math
 import json
 import logging
 from random import shuffle
@@ -201,6 +202,25 @@ def close_draft(league_id):
         player.put()
 
 
+def get_max_free_agent_pages(league_id):
+    query = RootTeam.query().order(-RootTeam.total_points)
+    extra_teams = query.fetch()
+
+    taken_teams = get_taken_teams(league_id)
+
+    #Get rid of the taken teams from the list
+    for team in extra_teams:
+        if team.key.id() in taken_teams:
+            extra_teams.remove(team)
+            taken_teams.remove(team.key.id())  # Not necessary, but improves efficiency
+
+    number_of_teams = len(extra_teams)
+    if number_of_teams % globals.free_agent_pagination == 0:
+        return number_of_teams/globals.free_agent_pagination
+    else:
+        return math.floor(number_of_teams/globals.free_agent_pagination) + 1
+
+
 def get_free_agent_list(league_id, page):
     query = RootTeam.query().order(-RootTeam.total_points)
     extra_teams = query.fetch(globals.free_agent_pagination * page * 4)
@@ -214,6 +234,7 @@ def get_free_agent_list(league_id, page):
             taken_teams.remove(team.key.id())  # Not necessary, but improves efficiency
 
     #Unorthadox, yes. Necessary to fix the 118 bug. *Shudder* Don't remove!
+    #Actually, we don't really know what causes the 148 bug... Please fix this somebody...
     for team in extra_teams:
         if team.key.id() in taken_teams:
             extra_teams.remove(team)
@@ -260,7 +281,7 @@ class FreeAgentListPage(webapp2.RequestHandler):
                         'league_name': league_name,
                         'free_agent_list': free_agent_list,
                         'page': page,
-                        'max_page': 2,
+                        'max_page': get_max_free_agent_pages(league_id),
                         }
             template = JINJA_ENVIRONMENT.get_template('templates/falist.html')
             self.response.write(template.render(template_values))
