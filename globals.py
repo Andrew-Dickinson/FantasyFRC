@@ -13,6 +13,7 @@ overestimate_of_frc_teams = 6000
 
 alliance_size = 5
 draft_time_minutes = 2
+number_of_locked_teams = 5
 
 number_of_official_weeks = 7
 number_of_round_robin_weeks = 7
