@@ -16,6 +16,7 @@ from google.appengine.ext.webapp.util import run_wsgi_app
 from progress_through_elimination_classification import convert_TBA_level_to_progress, FINALIST, WINNER
 from datastore_classes import RootEvent, root_event_key, TeamEvent, team_event_key, team_key, root_team_key, RootTeam, League
 import time
+from points import get_points_to_date
 
 import jinja2
 import webapp2
@@ -28,6 +29,13 @@ JINJA_ENVIRONMENT = jinja2.Environment(
 
 from customMechanize import _mechanize
 
+
+def update_total_points():
+    query = RootTeam.query()
+    teams = query.fetch()
+    for team in teams:
+        team.total_points = get_points_to_date(team.key.id())
+        team.put()
 
 def get_unique_location(lat, lon):
     seperation = 0.001
@@ -208,6 +216,7 @@ class UpdateDB(webapp2.RequestHandler):
         proccess_elimination_progress(raw_data)
         classifyin_weeks_and_takin_names()
         geocode_within_limit()
+        update_total_points()
 
 application = webapp2.WSGIApplication([
                                        ('/updateTeams/', UpdateDB)

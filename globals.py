@@ -34,6 +34,8 @@ google_api_key = "AIzaSyAfJd7wBMespDYqfmMivW7GtMDe1ZRkKbc"
 
 no_data_display = "<i>No Data</i>"
 
+free_agent_pagination = 50
+
 public_event_url = "http://www.thebluealliance.com/event/{0}"
 public_team_url = "http://www.thebluealliance.com/team/{0}/" + year
 
@@ -47,7 +49,6 @@ team_event_awards_url = "http://www.thebluealliance.com/api/v2/team/frc{0}/event
 event_matches_url = "http://www.thebluealliance.com/api/v2/event/{0}/matches"
 
 gecode_url = "https://maps.googleapis.com/maps/api/geocode/json?key=" + google_api_key + "&address={0}"
-
 
 
 def get_team_list():

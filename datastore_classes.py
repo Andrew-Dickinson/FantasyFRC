@@ -69,6 +69,7 @@ class RootTeam(ndb.Model):
     events = ndb.StringProperty(repeated=True)
     address = ndb.StringProperty()
     latlon = ndb.StringProperty()
+    total_points = ndb.IntegerProperty()
 
 
 class Account(ndb.Model):

@@ -11,7 +11,6 @@ from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.api import users
 from google.appengine.ext import ndb
 
-from UpdateDB import convert_date_time_to_week
 from datastore_classes import account_key, Account, root_event_key, root_team_key, lineup_key, Lineup, Choice_key, league_key
 
 import jinja2
