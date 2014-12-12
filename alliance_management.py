@@ -11,7 +11,7 @@ from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.api import users
 from google.appengine.ext import ndb
 
-from datastore_classes import account_key, Account, root_event_key, root_team_key, lineup_key, Lineup, Choice_key, league_key
+from datastore_classes import account_key, RootTeam, Account, root_event_key, root_team_key, lineup_key, Lineup, Choice_key, league_key
 
 import jinja2
 import webapp2
@@ -60,6 +60,9 @@ def get_team_lists(user_id, week_number):
             event_key = get_team_schedule(int(number))[int(week_number) - 1]['event_key']#-1 to convert to 0-based index
             if event_key: #Check if the team is competing that week
                 team['total_points'] = get_team_points_at_event(int(number), event_key)
+
+        if str(number) in get_top_teams(globals.number_of_locked_teams):
+            team['disabled'] = 'True'
         current_lineup.append(team)
 
     bench_numbers = []
@@ -78,11 +81,24 @@ def get_team_lists(user_id, week_number):
             event_key = get_team_schedule(int(number))[int(week_number) - 1]['event_key']#-1 to convert to 0-based index
             if event_key: #Check if the team is competing that week
                 total_points = get_team_points_at_event(int(number), event_key)
-        current_bench.append({'number':number, 'total_points': total_points})
+        disabled = ''
+        if str(number) in get_top_teams(globals.number_of_locked_teams):
+            disabled = 'True'
+        current_bench.append({'number':number, 'total_points': total_points, 'disabled': disabled})
 
     logging.info(current_bench)
 
     return [current_lineup, current_bench]
+
+
+def get_top_teams(number):
+    query = RootTeam.query().order(-RootTeam.total_points)
+    teams = query.fetch(number)
+    teamlist = []
+    for team in teams:
+        teamlist.append(team.key.id())
+    return teamlist
+
 
 def is_week_editable(week_number):
     """Returns if the week is editable or not"""
@@ -171,11 +187,12 @@ class update_lineup(webapp2.RequestHandler):
             elif action == "putin":
                 active_lineup.active_teams.append(int(team_number))
             elif action == "drop":
-                choice = Choice_key(account.key, league_id).get()
-                choice.current_team_roster.remove(int(team_number))
-                if int(team_number) in active_lineup.active_teams:
-                    active_lineup.active_teams.remove(int(team_number))
-                choice.put()
+                if not str(team_number) in get_top_teams(globals.number_of_locked_teams):
+                    choice = Choice_key(account.key, league_id).get()
+                    choice.current_team_roster.remove(int(team_number))
+                    if int(team_number) in active_lineup.active_teams:
+                        active_lineup.active_teams.remove(int(team_number))
+                    choice.put()
             active_lineup.put()
 
         self.redirect('/allianceManagement/viewAlliance/' + str(week_number))

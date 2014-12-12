@@ -18,3 +18,8 @@ div.team_list td {
 td {
 	margin: 3px;
 }
+
+.text-disabled {
+    font-style: italic;
+    color: #727272;
+}
