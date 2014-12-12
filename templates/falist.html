@@ -31,7 +31,7 @@
             <td>{{ team.rank }}</td>
             <td><a href="/allianceManagement/teamDetail/{{ team.number }}">{{ team.number }}</a></td>
             <td>{{ team.name }}</td>
-            <td><a href=""><img src="/static/icons/add.png"></a> <a><img src="/static/icons/flag_blue.png"></a></td>
+            <td><a href="/draft/pickUp/submitPick?team={{ team.number }}"><img src="/static/icons/add.png"></a> <a href=""><img src="/static/icons/flag_blue.png"></a></td>
             <td>{{ team.total_points }}</td>
         </tr>
         {% endfor %}

@@ -255,6 +255,7 @@ class FreeAgentListPage(webapp2.RequestHandler):
                         'league_name': league_name,
                         'free_agent_list': free_agent_list,
                         'page': page,
+                        'max_page': 2,
                         }
             template = JINJA_ENVIRONMENT.get_template('templates/falist.html')
             self.response.write(template.render(template_values))
@@ -509,7 +510,32 @@ class Pick_up_Page(webapp2.RequestHandler):
             self.response.write(template.render(template_values))
 
 class Submit_Pick(webapp2.RequestHandler):
+    def get(self):
+        user = users.get_current_user()
 
+        #Current user's id, used to identify their data
+        user_id = user.user_id()
+        logout_url = users.create_logout_url('/')
+
+        account = globals.get_or_create_account(user)
+        league_id = account.league
+
+        find_Choice_key = Choice_key(account_key(user_id), str(league_id))
+        post_Choice_key = find_Choice_key
+
+        new_team = self.request.get('team')
+
+        selection_error = isValidTeam(new_team, post_Choice_key.parent().get().league)
+
+        #Form data into entity and submit
+        post_Choice = Choice.get_or_insert(post_Choice_key.id(), parent=post_Choice_key.parent())
+        if selection_error == "Good":
+            post_Choice.current_team_roster.append(int(new_team))
+            str(post_Choice.put())
+#             close_draft(post_Choice_key.parent().get().league)
+
+        #Display the homepage
+        self.redirect(self.request.referer)
 
     def post(self):
         user = users.get_current_user()
