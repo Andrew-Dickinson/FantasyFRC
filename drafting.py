@@ -44,9 +44,14 @@ def start_draft(league_id):
     league.put()
 
 
-def get_lat_lng_json():
+def get_lat_lng_json(league_id):
     team_data = []
     teams = RootTeam.query().fetch()
+    taken_teams = get_taken_teams(league_id)
+    for team in teams:
+        if team.key.id() in taken_teams:
+            teams.remove(team)
+
     for team in teams:
         team_data.append({"number": team.key.id(),
                           "name": team.name,
@@ -349,7 +354,7 @@ class Draft_Page(webapp2.RequestHandler):
             else:
                 draft_status = "Mid"
 
-            team_map_data = get_lat_lng_json()
+            team_map_data = get_lat_lng_json(league_id)
 
             #Send html data to browser
             template_values = {
