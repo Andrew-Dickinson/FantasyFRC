@@ -52,6 +52,7 @@ class League(ndb.Model):
     """Stores players in the league and the league specific settings"""
     players = ndb.IntegerProperty(repeated=True)  # Deprecated?
     name = ndb.StringProperty()
+    snake_draft = ndb.BooleanProperty()
     draft_current_position = ndb.IntegerProperty()
     draft_current_timeout = ndb.DateTimeProperty()
 
@@ -113,3 +114,4 @@ class DraftPick(ndb.Model):
     """Stores all of the information about one draft pick for a single league"""
     player = ndb.StringProperty()
     team = ndb.IntegerProperty()
+    display_number = ndb.IntegerProperty()
