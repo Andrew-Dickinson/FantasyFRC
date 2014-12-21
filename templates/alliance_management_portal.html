@@ -31,7 +31,7 @@
 	</table>
     <h1>League Standings</h1>
     <table class="table">
-        <tr><td>Rank</td><td>Name</td><td>W-L-T</td></tr>
+        <tr><td>Rank</td><td>Name</td><td>W-L-T</td><td>Total Points</td></tr>
             {% for player in leader_board %}
                 <tr>
                     <td>{{ loop.index }}</td>
@@ -39,6 +39,7 @@
                     <td>
                         {% for number in player.record %}{{ number }}{% if not loop.last %}-{% endif %}{% endfor %}
                     </td>
+                    <td>{{ player.points }}</td>
                 </tr>
 
             {% endfor %}
