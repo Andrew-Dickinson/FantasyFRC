@@ -60,7 +60,7 @@
                     </tr>
                     {% endfor %}
                         <tr><td></td>
-                            <td>Total: {{ point_totals[opponent_loop.index0] }}
+                            <td>Total: {{ point_totals[opponent_loop.index0][loop.index0] }}
                         </td></tr>
                     </table>
                 {% else %}

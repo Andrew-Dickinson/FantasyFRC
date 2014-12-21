@@ -218,14 +218,20 @@ class view_alliance(webapp2.RequestHandler):
 
         if draft_over:
             team_lists = get_team_lists(user_id, week_number)
-            point_total = 0
-            for team in team_lists[0]:
-                point_total += team['total_points']
+            point_totals = []
+            for team_list in team_lists:
+                point_total = 0
+                for team in team_list:
+                    point_total += team['total_points']
+                point_totals.append(point_total)
 
             opponent_team_lists = get_team_lists(get_opponent(user_id, week_number), week_number)
-            opponent_point_total = 0
-            for team in opponent_team_lists[0]:
-                opponent_point_total += team['total_points']
+            opponent_point_totals = []
+            for team_list in team_lists:
+                opponent_point_total = 0
+                for team in team_list:
+                    opponent_point_total += team['total_points']
+                opponent_point_totals.append(opponent_point_total)
 
 
 
@@ -235,7 +241,7 @@ class view_alliance(webapp2.RequestHandler):
                             'logout_url': logout_url,
                             'league_name': league_name,
                             'week_number': int(week_number),
-                            'point_totals': [point_total, opponent_point_total],
+                            'point_totals': [point_totals, opponent_point_totals],
                             'team_listss': [team_lists, opponent_team_lists],
                             'opponent_name': get_opponent_name(user_id, week_number),
                             }
