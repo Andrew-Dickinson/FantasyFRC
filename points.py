@@ -1,4 +1,5 @@
 import logging
+import globals
 
 from globals import no_data_display
 from award_classification import AwardType
@@ -189,6 +190,13 @@ def get_total_week_points(account_id, week_num):
     total_points = 0
     for team in active_teams:
         total_points += get_team_schedule(team)[week_num - 1]['points']  # -1 for conversion to 0 based index
+    return total_points
+
+
+def get_person_total_points(account_id):
+    total_points = 0
+    for week_num in range(1, globals.number_of_official_weeks + 1):
+        total_points += get_total_week_points(account_id, week_num)
     return total_points
 
 #Uses ids based off of https://github.com/the-blue-alliance/the-blue-alliance/blob/master/consts/award_type.py

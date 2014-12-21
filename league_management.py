@@ -10,6 +10,7 @@ from google.appengine.api import users
 from google.appengine.ext import ndb
 
 import globals
+from points import get_person_total_points
 from datastore_classes import account_key, Account, League, Choice, Choice_key, league_key, Lineup, DraftPick
 
 import jinja2
@@ -107,7 +108,11 @@ def get_leader_board(league_id):
 
     #Build the leader board
     for i, player in enumerate(sorted_by_points):
-        leader_board.append({'name': player['nickname'], 'rank': i + 1, 'record': get_player_record(player['id'])})
+        leader_board.append({'name': player['nickname'],
+                             'rank': i + 1,
+                             'record': get_player_record(player['id']),
+                             'points': get_person_total_points(player['id']),
+                            })
 
     # Remove bye week
     for player in leader_board:
