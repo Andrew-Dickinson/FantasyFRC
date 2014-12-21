@@ -265,10 +265,12 @@ class update_League(webapp2.RequestHandler):
 
         #Get data from the post header
         name = self.request.get('name')
+        snake = self.request.get('snake_draft') == 'on'
 
         #Create/Update the league
         new_league = League.get_or_insert(commissioner_account_key.id())
         new_league.name = name
+        new_league.snake_draft = snake
         new_league.draft_current_position = 0
         new_league.put()
 

@@ -10,13 +10,20 @@
 	<div id="team_selector">
 		<p>{{ update_text }}</p>
 		<form action="/leagueManagement/updateLeague" method="post">
-			League Name:
-			<input type="text" value="{{ user }}'s League" name="name" size="40">
-            {% if league_name != "" %}
-                <button id="create_league" type="button" class="btn btn-primary" data-toggle="modal" data-target="#create_league_modal">Create</button>
-            {% else %}
-                <button type="submit"  class="btn btn-primary">Create</button>
-            {% endif %}
+            <p>
+                League Name:
+                <input type="text" value="{{ user }}'s League" name="name" size="40">
+            </p>
+            <p>
+                Snake Draft? <input type="checkbox" name="snake_draft">
+            </p>
+            <p>
+                {% if league_name != "" %}
+                    <button id="create_league" type="button" class="btn btn-primary" data-toggle="modal" data-target="#create_league_modal">Create</button>
+                {% else %}
+                    <button type="submit"  class="btn btn-primary">Create</button>
+                {% endif %}
+            </p>
             <!-- create_league_modal -->
             <div id="create_league_modal" class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
               <div class="modal-dialog modal-lg">

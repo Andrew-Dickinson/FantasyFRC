@@ -22,10 +22,15 @@ from datastore_classes import RootTeam, league_key, Choice, Lineup, Choice_key, 
 import jinja2
 import webapp2
 
+DRAFT_INCREASING = 1
+DRAFT_DECREASING = 2
+DRAFT_STATIONARY = 3
+
 JINJA_ENVIRONMENT = jinja2.Environment(
     loader=jinja2.FileSystemLoader(os.path.dirname(__file__)),
     extensions=['jinja2.ext.autoescape'],
     autoescape=True)
+
 
 def start_draft(league_id):
     """Sets up to prepare for a draft"""
@@ -34,13 +39,51 @@ def start_draft(league_id):
     shuffle(league_players)  # Randomize the order of the draft
 
     number_of_players = len(league_players)
-    for draft_round in range(0, globals.alliance_size):
-        for i, player in enumerate(league_players):
-            pick_key = draft_pick_key(league_key(league_id), str(number_of_players * draft_round + i + 1))
-            pick = DraftPick.get_or_insert(pick_key.id(), parent=pick_key.parent())
-            pick.player = player.key.urlsafe()
-            pick.put()
-        league = league_key(league_id).get()
+    number_of_picks = number_of_players * globals.draft_rounds
+
+    snake_draft = league_key(league_id).get().snake_draft
+
+    direction = DRAFT_INCREASING
+    pick_of_round = 0
+    display_number = 0
+    number_of_drafts = 0
+    while number_of_drafts < number_of_picks:  # Trust me on the whole +1 ordeal
+        if snake_draft:
+            if direction == DRAFT_INCREASING:
+                if pick_of_round == number_of_players:
+                    direction = DRAFT_STATIONARY
+            elif direction == DRAFT_DECREASING:
+                if pick_of_round == 1:
+                    direction = DRAFT_STATIONARY
+            elif direction == DRAFT_STATIONARY:
+                if pick_of_round == 1:
+                    direction = DRAFT_INCREASING
+                elif pick_of_round == number_of_players:
+                    direction = DRAFT_DECREASING
+        else:
+            if pick_of_round == number_of_players:
+                pick_of_round = 0  # 0 will become a 1 down below because direction = DRAFT_INCREASING
+
+        if direction == DRAFT_INCREASING:
+            pick_of_round += 1
+            display_number += 1
+        elif direction == DRAFT_DECREASING:
+            pick_of_round -= 1
+            display_number -= 1
+        elif direction == DRAFT_STATIONARY:
+            display_number += 4
+
+        logging.info(display_number)
+        player = league_players[pick_of_round - 1]
+        pick_key = draft_pick_key(league_key(league_id), str(number_of_drafts + 1))
+        pick = DraftPick.get_or_insert(pick_key.id(), parent=pick_key.parent())
+        pick.display_number = display_number
+        pick.player = player.key.urlsafe()
+        pick.put()
+
+        number_of_drafts += 1
+
+    league = league_key(league_id).get()
     league.draft_current_position = 0
     league.put()
 
@@ -173,7 +216,7 @@ def setup_for_next_pick(league_id):
     league = league_key(league_id).get()
     league_player_query = Account.query(Account.league == league_id)
     league_players = league_player_query.fetch()
-    number_of_picks = len(league_players) * globals.alliance_size
+    number_of_picks = len(league_players) * globals.draft_rounds
     if league.draft_current_position == number_of_picks: #See if the draft is over
         close_draft(league_id)
     else:
@@ -325,16 +368,28 @@ class Draft_Page(webapp2.RequestHandler):
 
 
             league_player_query = Account.query(Account.league == league_id)
-            league_players = league_player_query.fetch()
+            players_for_the_sake_of_number = league_player_query.fetch()
+            league_players = []
+
+            if draft_pick_key(league_key(league_id), 1).get():  # != None
+                for i in range(1, len(players_for_the_sake_of_number) + 1):
+                    pick = draft_pick_key(league_key(league_id), i).get()
+                    league_players.append(ndb.Key(urlsafe=pick.player).get())
+            else:
+                league_players = players_for_the_sake_of_number
 
             draft_board = []
             player_list = []
             for player in league_players:
                 player_list.append(player.nickname)
 
-            number_of_picks = len(league_players) * globals.alliance_size
+            number_of_picks = len(league_players) * globals.draft_rounds
             for position in range(1, number_of_picks + 1):
-                pick = draft_pick_key(league_key(league_id), position).get()
+                pick_query = DraftPick.query().filter(DraftPick.display_number == position)
+                query_results = pick_query.fetch(1)
+                pick = DraftPick()
+                if len(query_results) != 0:
+                    pick = query_results[0]
 
                 username = (((position % len(league_players)) - 1) % len(league_players))
                 draft_round = int((position-1)/len(league_players))

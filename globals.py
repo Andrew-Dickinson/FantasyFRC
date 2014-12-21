@@ -11,7 +11,7 @@ mechanize_timeout = 30.0 #Seconds
 debug_current_editable_week = 1
 overestimate_of_frc_teams = 6000
 
-alliance_size = 5
+draft_rounds = 5
 draft_time_minutes = 2
 number_of_locked_teams = 5
 
