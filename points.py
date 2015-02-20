@@ -193,6 +193,12 @@ def get_total_week_points(account_id, week_num):
     return total_points
 
 
+def get_bench_points(account_id, week_num):
+    league_id = account_key(account_id).get().league
+    active_teams = lineup_key(Choice_key(account_key(account_id), league_id), week_num).get().active_teams
+    # roster =
+
+
 def get_person_total_points(account_id):
     total_points = 0
     for week_num in range(1, globals.number_of_official_weeks + 1):

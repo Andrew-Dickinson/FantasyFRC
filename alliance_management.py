@@ -345,5 +345,5 @@ if __name__ == "__main__":
     main()
 
 # Down here to resolve import issues
-from league_management import get_leader_board, get_readable_schedule, get_opponent, get_opponent_name
 from points import get_team_points_at_event, get_points_to_date, get_point_breakdown_display, humman_readable_point_categories, explanation_of_point_categories
+from league_management import get_leader_board, get_readable_schedule, get_opponent, get_opponent_name

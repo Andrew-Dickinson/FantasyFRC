@@ -8,7 +8,7 @@ import logging
 year = "2014"
 first_event_wednesday = date(2014, 2, 26)
 mechanize_timeout = 30.0 #Seconds
-debug_current_editable_week = 1
+debug_current_editable_week = 3
 overestimate_of_frc_teams = 6000
 
 draft_rounds = 5

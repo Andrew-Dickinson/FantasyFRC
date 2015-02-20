@@ -10,7 +10,6 @@ from google.appengine.api import users
 from google.appengine.ext import ndb
 
 import globals
-from points import get_person_total_points
 from datastore_classes import account_key, Account, League, Choice, Choice_key, league_key, Lineup, DraftPick
 
 import jinja2
@@ -134,6 +133,7 @@ def finish_week(league_id, past_week_num):
             if opponent_points < player_points:
                 player.record[past_week_num - 1] = globals.record_win  # -1 for conversion to 0 based index
             elif opponent_points == player_points:
+                # if
                 player.record[past_week_num - 1] = globals.record_tie # -1 for conversion to 0 based index
             elif opponent_points > player_points:
                 player.record[past_week_num - 1] = globals.record_loss # -1 for conversion to 0 based index
@@ -319,4 +319,4 @@ if __name__ == "__main__":
     main()
 
 #Down here to fix import bug
-from points import get_total_week_points
+from points import get_total_week_points, get_person_total_points
