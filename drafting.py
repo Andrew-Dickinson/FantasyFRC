@@ -595,7 +595,7 @@ class Submit_Draft_Pick(webapp2.RequestHandler):
                         current_pick.put()
                         #Add the team to the user's roster
                         user_choice = Choice.get_or_insert(league_id, parent=account.key)
-                        if user_choice.current_team_roster:  # Make sure to use [] for an empty roster, not None
+                        if not user_choice.current_team_roster:  # Make sure to use [] for an empty roster, not None
                             user_choice.current_team_roster = []
                         user_choice.current_team_roster.append(int(new_team))
                         user_choice.put()
