@@ -146,8 +146,14 @@ def finish_week(league_id, past_week_num):
             if opponent_points < player_points:
                 player.record[past_week_num - 1] = globals.record_win  # -1 for conversion to 0 based index
             elif opponent_points == player_points:
-                # if
-                player.record[past_week_num - 1] = globals.record_tie # -1 for conversion to 0 based index
+                #We have to consider tiebreakers, notably bench points
+                if get_bench_points(player.key.id(), past_week_num) > get_bench_points(opponent, past_week_num):
+                    player.record[past_week_num - 1] = globals.record_win  # -1 for conversion to 0 based index
+                elif get_bench_points(player.key.id(), past_week_num) < get_bench_points(opponent, past_week_num):
+                    player.record[past_week_num - 1] = globals.record_loss # -1 for conversion to 0 based index
+                else:
+                    #Bench points and active points tie, mark it as an actual tie
+                    player.record[past_week_num - 1] = globals.record_tie # -1 for conversion to 0 based index
             elif opponent_points > player_points:
                 player.record[past_week_num - 1] = globals.record_loss # -1 for conversion to 0 based index
         else:  # Bye week
@@ -352,4 +358,4 @@ if __name__ == "__main__":
     main()
 
 #Down here to fix import bug
-from points import get_total_week_points, get_person_total_points
+from points import get_total_week_points, get_person_total_points, get_bench_points
