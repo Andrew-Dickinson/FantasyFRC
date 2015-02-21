@@ -10,8 +10,7 @@ from google.appengine.api import users
 from google.appengine.ext import ndb
 
 import globals
-from points import get_person_total_points
-from datastore_classes import account_key, Account, League, Choice, Choice_key, league_key, Lineup, DraftPick
+from datastore_classes import account_key, Account, League, Choice, choice_key, league_key, Lineup, DraftPick
 
 import jinja2
 import webapp2
@@ -23,14 +22,17 @@ JINJA_ENVIRONMENT = jinja2.Environment(
 
 
 def get_opponent_name(user_id, week_number):
+    """Return the name of the opponent of certain user_id on a specific week_number"""
     return account_key(get_opponent(user_id, week_number)).get().nickname
 
 
 def get_opponent(user_id, week_number):
+    """Return the account key of the opponent of a certain user_id on a specific week_number"""
     return account_key(user_id).get().schedule[int(week_number) - 1]  # -1 for conversion to 0 based
 
 
 def get_schedule(league_id):
+    """Return the league master schedule for a league id"""
     league_player_query = Account.query(Account.league == league_id)
     league_players = league_player_query.fetch()
     master_schedule = []
@@ -42,6 +44,7 @@ def get_schedule(league_id):
 
 
 def get_readable_schedule(league_id):
+    """Return the league master schedule for a league id in a readable format"""
     league_player_query = Account.query(Account.league == league_id)
     league_players = league_player_query.fetch()
     master_schedule = []
@@ -62,7 +65,7 @@ def get_readable_schedule(league_id):
 
 
 def get_player_record(player_id):
-    """Accesses the data store to return a player's record"""
+    """Access the data store to return a player's record"""
     account = account_key(player_id).get()
     record_WLT = [0, 0, 0, 0]
     for week in range(0, globals.number_of_official_weeks):
@@ -79,7 +82,7 @@ def get_player_record(player_id):
 
 
 def get_league_points(player_id):
-    """Uses constants in globals and the data store record to calculate league points for a player"""
+    """Use constants in globals and the data store record to calculate league points for a player"""
     record_WLT = get_player_record(player_id)
     total_points = 0
     total_points += record_WLT[0] * globals.league_points_per_win
@@ -91,7 +94,7 @@ def get_league_points(player_id):
 
 
 def get_leader_board(league_id):
-    """Returns an array of dictionaries with leader board data for a league"""
+    """Return an array of dictionaries with leader board data for a league"""
     leader_board = []
     league_player_query = Account.query(Account.league == league_id)
     league_players = league_player_query.fetch()
@@ -122,6 +125,15 @@ def get_leader_board(league_id):
 
 
 def finish_week(league_id, past_week_num):
+    """
+        Preform the operations necessary to move on to the next week
+
+        :param league_id: The league to finish
+        :param past_week_num: The week number to finish
+        This function will
+            - Calculate winners and loosers
+            - Update player records with this information
+    """
     league_player_query = Account.query(Account.league == league_id)
     league_players = league_player_query.fetch()
     for player in league_players:
@@ -134,7 +146,14 @@ def finish_week(league_id, past_week_num):
             if opponent_points < player_points:
                 player.record[past_week_num - 1] = globals.record_win  # -1 for conversion to 0 based index
             elif opponent_points == player_points:
-                player.record[past_week_num - 1] = globals.record_tie # -1 for conversion to 0 based index
+                #We have to consider tiebreakers, notably bench points
+                if get_bench_points(player.key.id(), past_week_num) > get_bench_points(opponent, past_week_num):
+                    player.record[past_week_num - 1] = globals.record_win  # -1 for conversion to 0 based index
+                elif get_bench_points(player.key.id(), past_week_num) < get_bench_points(opponent, past_week_num):
+                    player.record[past_week_num - 1] = globals.record_loss # -1 for conversion to 0 based index
+                else:
+                    #Bench points and active points tie, mark it as an actual tie
+                    player.record[past_week_num - 1] = globals.record_tie # -1 for conversion to 0 based index
             elif opponent_points > player_points:
                 player.record[past_week_num - 1] = globals.record_loss # -1 for conversion to 0 based index
         else:  # Bye week
@@ -143,11 +162,14 @@ def finish_week(league_id, past_week_num):
 
 
 def remove_from_league(user_id):
+    """
+        Remove a certain user_id from their league
+    """
     #Current user's id, used to identify their data
     account = Account.get_or_insert(user_id)
 
     #Remove user's choices and lineup for the league
-    choice = Choice_key(account_key(user_id), account.league).get()
+    choice = choice_key(account_key(user_id), account.league).get()
     if choice:
         lineup_query = Lineup.query(ancestor=choice.key).fetch()
         for lineup in lineup_query:
@@ -169,6 +191,9 @@ def remove_from_league(user_id):
 
 
 def add_to_league(user_id, league_id):
+    """
+        Add a certain user_id to a certain league_id
+    """
     account = Account.get_or_insert(user_id)
 
     #Add choice key for league
@@ -180,6 +205,7 @@ def add_to_league(user_id, league_id):
     account.put()
 
 def delete_league(league_id):
+    """Delete a particular league"""
     if league_id != '0': #Don't ever delete the default league
         league = league_key(league_id).get()
         players = Account.query().filter(Account.league == league_id).fetch()
@@ -193,12 +219,13 @@ def delete_league(league_id):
 
 
 class Show_Leagues(webapp2.RequestHandler):
+    """
+        Show a page which lists all of the leagues and includes options to join them
+    """
     def get(self):
         # Checks for active Google account session
         user = users.get_current_user()
 
-        #Current user's id, used to identify their data
-        user_id = user.user_id()
         logout_url = users.create_logout_url('/')
 
         account = globals.get_or_create_account(user)
@@ -236,12 +263,13 @@ class Show_Leagues(webapp2.RequestHandler):
         self.response.write(template.render(template_values))
 
 class create_League(webapp2.RequestHandler):
+    """
+        Setup information page for creating a league
+    """
     def get(self):
         # Checks for active Google account session
         user = users.get_current_user()
 
-        #Current user's id, used to identify their data
-        user_id = user.user_id()
         logout_url = users.create_logout_url('/')
 
         account = globals.get_or_create_account(user)
@@ -262,6 +290,9 @@ class create_League(webapp2.RequestHandler):
         self.response.write(template.render(template_values))
 
 class update_League(webapp2.RequestHandler):
+    """
+        The post handler for the creation of new leagues
+    """
     def post(self):
         user = users.get_current_user()
         account = globals.get_or_create_account(user)
@@ -284,15 +315,23 @@ class update_League(webapp2.RequestHandler):
         self.redirect('/')
 
 class leave_League(webapp2.RequestHandler):
+    """
+        A page which, when visited, will remove a user from their current league
+        The user is redirected to '/'
+    """
     def get(self):
-        id = users.get_current_user().user_id()
-        remove_from_league(id)
+        user_id = users.get_current_user().user_id()
+        remove_from_league(user_id)
         self.redirect('/')
 
 
 
 class Join_League(webapp2.RequestHandler):
     def get(self, league_id):
+        """
+            Adds a user to the specified league
+            :param league_id: Collected from url, the league to join
+        """
         user_id = users.get_current_user().user_id()
 
         if league_key(league_id).get().draft_current_position == 0:
@@ -319,4 +358,4 @@ if __name__ == "__main__":
     main()
 
 #Down here to fix import bug
-from points import get_total_week_points
+from points import get_total_week_points, get_person_total_points, get_bench_points

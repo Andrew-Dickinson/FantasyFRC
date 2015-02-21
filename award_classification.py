@@ -1,5 +1,7 @@
 #Used to interpret TBA award data
 #Shamelessly stolen from https://github.com/the-blue-alliance/the-blue-alliance/blob/master/consts/award_type.py
+
+
 class AwardType(object):
     """
     An award type defines a logical type of award that an award falls into.

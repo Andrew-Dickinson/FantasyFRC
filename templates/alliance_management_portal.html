@@ -54,7 +54,7 @@
         </tr>
         {% for player in schedule %}
             <tr>
-                <td>{{ player.name }}</td>
+                <td><b>{{ player.name }}</b></td>
                 {% for opponent in player.schedule %}
                     <td>{{ opponent }}</td>
                 {% endfor %}

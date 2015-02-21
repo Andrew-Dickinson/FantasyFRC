@@ -28,24 +28,24 @@ def root_team_key(team_number):
 
 
 #Every other key is based off of the root keys
-def team_event_key(team_key, event_id):
+def team_event_key(team_key_val, event_id):
     """Constructs a Datastore key for a team_event entity with a team_key as parent and event_id as id"""
-    return ndb.Key(TeamEvent, event_id, parent=team_key)
+    return ndb.Key(TeamEvent, event_id, parent=team_key_val)
 
 
-def Choice_key(player_key, league_id):
+def choice_key(player_key, league_id):
     """Constructs a Datastore key for a Choice entity with a player_key as parent and league_id as id"""
     return ndb.Key(Choice, str(league_id), parent=player_key)
 
 
-def lineup_key(choice_key, week_number):
+def lineup_key(choice_key_val, week_number):
     """Constructs a Datastore key for a week choice entity with a choice_key as parent and week_number as id"""
-    return ndb.Key(Lineup, str(week_number), parent=choice_key)
+    return ndb.Key(Lineup, str(week_number), parent=choice_key_val)
 
 
-def draft_pick_key(league_key, position):
+def draft_pick_key(league_key_val, position):
     """Constructs a Datastore key for a draft pick entity with a league_key as parent and a position as id"""
-    return ndb.Key(DraftPick, str(position), parent=league_key)
+    return ndb.Key(DraftPick, str(position), parent=league_key_val)
 
 
 class League(ndb.Model):
@@ -81,6 +81,7 @@ class Account(ndb.Model):
     #In the form described in https://github.com/smarthimandrew/FantasyFRC/issues/12
     schedule = ndb.StringProperty(repeated=True)
     record = ndb.StringProperty(repeated=True)  # Uses the record variables in globals
+
 
 class TeamEvent(ndb.Model):
     """Stores a team's data for a single event"""

@@ -59,11 +59,9 @@
                         </td>
                     </tr>
                     {% endfor %}
-                    {% if listloop.first %}
                         <tr><td></td>
-                            <td>Total: {{ point_totals[opponent_loop.index0] }}
+                            <td>Total: {{ point_totals[opponent_loop.index0][loop.index0] }}
                         </td></tr>
-                    {% endif %}
                     </table>
                 {% else %}
                     <p>No teams in this list</p>
