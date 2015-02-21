@@ -40,10 +40,11 @@ class About(webapp2.RequestHandler):
             user_id = user.user_id()
             logout_url = users.create_logout_url('/')
 
+            #Make call to global method to id a user
             account = globals.get_or_create_account(user)
             league_id = account.league
 
-            logging.info(account)
+            #Proccess the league info
             if league_id != '0':
                 league_name = league_key(league_id).get().name
             else:

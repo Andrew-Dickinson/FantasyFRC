@@ -39,10 +39,11 @@ class Help(webapp2.RequestHandler):
             user_id = user.user_id()
             logout_url = users.create_logout_url('/')
 
+            #Make global call to get the user data
             account = globals.get_or_create_account(user)
             league_id = account.league
 
-            logging.info(account)
+            #Proccess league info
             if league_id != '0':
                 league_name = league_key(league_id).get().name
             else:
