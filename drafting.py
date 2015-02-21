@@ -552,13 +552,20 @@ class Start_Draft(webapp2.RequestHandler):
 
         league_comissioner = league.key.id()
         if league_comissioner == user_id:
-            if league.draft_current_position == 0:
-                start_draft(league_id)
-                setup_for_next_pick(league_id)
-                self.redirect('/draft/')
+            league_player_query = Account.query(Account.league == league_id)
+            league_players = league_player_query.fetch()
+            if len(league_players) > 1:
+                if league.draft_current_position == 0:
+                    start_draft(league_id)
+                    setup_for_next_pick(league_id)
+                    self.redirect('/draft/')
+                else:
+                    template = JINJA_ENVIRONMENT.get_template('templates/error_page.html')
+                    self.response.write(template.render({'Message': "Draft is already completed or is in progress"}))
             else:
                 template = JINJA_ENVIRONMENT.get_template('templates/error_page.html')
-                self.response.write(template.render({'Message': "Draft is already completed or is in progress"}))
+                self.response.write(template.render({'Message': "You need to have at least two people to have a league. Try inviting your friends to join your league"}))
+
         else:
             template = JINJA_ENVIRONMENT.get_template('templates/error_page.html')
             self.response.write(template.render({'Message': "Only the league commissioner may perform this action"}))
