@@ -12,7 +12,7 @@ from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.ext import ndb
 from google.appengine.api import users
 
-from datastore_classes import league_key, Choice, root_event_key, Choice_key, account_key, Account
+from datastore_classes import league_key, Choice, root_event_key, choice_key, account_key, Account
 
 import jinja2
 import webapp2
@@ -40,10 +40,11 @@ class Thanks(webapp2.RequestHandler):
             user_id = user.user_id()
             logout_url = users.create_logout_url('/')
 
+            #Make global call to get account data
             account = globals.get_or_create_account(user)
             league_id = account.league
 
-            logging.info(account)
+            #Proccess league info
             if league_id != '0':
                 league_name = league_key(league_id).get().name
             else:

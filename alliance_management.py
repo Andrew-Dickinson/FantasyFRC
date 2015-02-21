@@ -11,7 +11,7 @@ from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.api import users
 from google.appengine.ext import ndb
 
-from datastore_classes import account_key, RootTeam, Account, root_event_key, root_team_key, lineup_key, Lineup, Choice_key, league_key
+from datastore_classes import account_key, RootTeam, Account, root_event_key, root_team_key, lineup_key, Lineup, choice_key, league_key
 
 import jinja2
 import webapp2
@@ -21,7 +21,24 @@ JINJA_ENVIRONMENT = jinja2.Environment(
     extensions=['jinja2.ext.autoescape'],
     autoescape=True)
 
+
 def get_team_schedule(team_number):
+    """
+        Get the schedule data for a particular team over the whole season
+
+        :parameter team_number: The number of the team whose data to return
+        :type str or int
+        :return: An array containing, for each week the team competes, a dictionary:
+            - competition_name: The name of the event (string)
+            - event_key: The datastore key for the root_event for this event (string)
+            - tba_url: The link to tba page for this event (string)
+            - points: The number of points(our system) this team scored at this event (int)
+        If the team is not competing in a particualar week, the following defualt data is returned:
+            - competition_name: ""
+            - tba_url: ""
+            - points: 0
+            - event_key: ''
+    """
     schedule = []
     for i in range(1, globals.number_of_official_weeks + 1):
         schedule.append({'competition_name': "", 'tba_url': "", 'points': 0, 'event_key':''})
@@ -39,12 +56,33 @@ def get_team_schedule(team_number):
         schedule[event_week - 1]['points'] = points
     return schedule
 
+
 def get_team_lists(user_id, week_number):
+    """
+        Return the bench and active team lists for a particular user on a particular week
+
+        :parameter user_id: The id of the user to gather lists from
+        :type str or int
+        :parameter week_number: The week to gather data on
+        :type str or int
+        :return: An array of two arrays(lineup, bench) containing, for each team in the lineup, a dictionary:
+            - number: The name of the event (int)
+            - detail_url: A link to the team's individual page (string)
+            - schedule: An array containing scheduling data (schedule) (See get_team_schedule())
+            - total_points: The number of points(our system) this team scored in total.  (int)
+                If week_number is editable, this is actually the points scored this week, not total
+            - disabled: Is 'True' if team is locked because of good performance (string(bool))
+        For each team in the bench list, the dictionary contains the following:
+            - number: The name of the event (int)
+            - total_points: The number of points(our system) this team scored in total.  (int)
+                If week_number is editable, this is actually the points scored this week, not total
+            - disabled: Is 'True' if team is locked because of good performance (string(bool))
+    """
     account = account_key(user_id).get()
-    choice = Choice_key(account.key, account.league).get()
+    choice = choice_key(account.key, account.league).get()
     roster = choice.current_team_roster
 
-    active_lineup = lineup_key(Choice_key(account.key, account.league), week_number).get().active_teams
+    active_lineup = lineup_key(choice_key(account.key, account.league), week_number).get().active_teams
 
     current_lineup = []
     for number in active_lineup:
@@ -57,8 +95,8 @@ def get_team_lists(user_id, week_number):
             team['total_points'] = get_points_to_date(int(number))
         else:
             team['total_points'] = 0
-            event_key = get_team_schedule(int(number))[int(week_number) - 1]['event_key']#-1 to convert to 0-based index
-            if event_key: #Check if the team is competing that week
+            event_key = get_team_schedule(int(number))[int(week_number) - 1]['event_key']  # -1 convert to 0-based index
+            if event_key:  # Check if the team is competing that week
                 team['total_points'] = get_team_points_at_event(int(number), event_key)
 
         if str(number) in get_top_teams(globals.number_of_locked_teams):
@@ -66,7 +104,7 @@ def get_team_lists(user_id, week_number):
         current_lineup.append(team)
 
     bench_numbers = []
-    for team in roster: #Just trust me on this one, don't mess with this
+    for team in roster:  # Just trust me on this one, don't mess with this
         bench_numbers.append(team)
     for number in active_lineup:
         if number in bench_numbers:
@@ -78,8 +116,8 @@ def get_team_lists(user_id, week_number):
             total_points = get_points_to_date(int(number))
         else:
             total_points = 0
-            event_key = get_team_schedule(int(number))[int(week_number) - 1]['event_key']#-1 to convert to 0-based index
-            if event_key: #Check if the team is competing that week
+            event_key = get_team_schedule(int(number))[int(week_number) - 1]['event_key']  # -1 convert to 0-based index
+            if event_key:  # Check if the team is competing that week
                 total_points = get_team_points_at_event(int(number), event_key)
         disabled = ''
         if str(number) in get_top_teams(globals.number_of_locked_teams):
@@ -92,6 +130,7 @@ def get_team_lists(user_id, week_number):
 
 
 def get_top_teams(number):
+    """Return a list of the top teams"""
     query = RootTeam.query().order(-RootTeam.total_points)
     teams = query.fetch(number)
     teamlist = []
@@ -101,12 +140,20 @@ def get_top_teams(number):
 
 
 def is_week_editable(week_number):
-    """Returns if the week is editable or not"""
+    """Return if the week is editable or not"""
     return globals.debug_current_editable_week <= int(week_number)
 
+
 class alliance_portal(webapp2.RequestHandler):
-    """The main dashboard for league info"""
     def get(self):
+        """
+            The main dashboard for league + personal info
+
+            Contains information on the following:
+                - The league schedule, including bye weeks and who plays who
+                - The leader board, showing bench points and league points for each player, ranked
+                - The current user's lineup for each week, including the points scored for past weeks
+         """
         # Checks for active Google account session
         user = users.get_current_user()
 
@@ -114,11 +161,14 @@ class alliance_portal(webapp2.RequestHandler):
         user_id = user.user_id()
         logout_url = users.create_logout_url('/')
 
+        #Make global call to get user information
         account = globals.get_or_create_account(user)
         league_id = account.league
         draft_over = league_key(league_id).get().draft_current_position == -1
 
+        #Only allow access to this page after the draft has completed
         if draft_over:
+            #Proccess league info
             if league_id != '0':
                 league_name = league_key(league_id).get().name
             else:
@@ -163,11 +213,19 @@ class alliance_portal(webapp2.RequestHandler):
             template = JINJA_ENVIRONMENT.get_template('templates/error_page.html')
             self.response.write(template.render({'Message':"This page requires that the draft be completed before accessing it"}))
 
-        
-        
+
 class update_lineup(webapp2.RequestHandler):
     def get(self, week_number):
-        """Updates the active teams for the user"""
+        """
+            Update the active teams for the user and redirects them to /viewAlliance/ for the week number
+            Expects a post parameter: 'action' to be one of the following:
+                - bench: Takes a team off the active lineup
+                - putin: Adds a team to the lineup
+                - drop: Drops a team from the user's roster
+            Expects a post parameter: 'team_number' to be the number of the team to perform this action on
+
+            :parameter week_number: Taken from the url, in string form
+        """
         #The choice_key of the request
         action = self.request.get('action')
         team_number = self.request.get('team_number')
@@ -180,15 +238,16 @@ class update_lineup(webapp2.RequestHandler):
         account = globals.get_or_create_account(user)
         league_id = account.league
 
+        #Only allow changes to the lineup if the week is editable
         if is_week_editable(week_number):
-            active_lineup = lineup_key(Choice_key(account.key, league_id), week_number).get()
+            active_lineup = lineup_key(choice_key(account.key, league_id), week_number).get()
             if action == "bench":
                 active_lineup.active_teams.remove(int(team_number))
             elif action == "putin":
                 active_lineup.active_teams.append(int(team_number))
             elif action == "drop":
                 if not str(team_number) in get_top_teams(globals.number_of_locked_teams):
-                    choice = Choice_key(account.key, league_id).get()
+                    choice = choice_key(account.key, league_id).get()
                     choice.current_team_roster.remove(int(team_number))
                     if int(team_number) in active_lineup.active_teams:
                         active_lineup.active_teams.remove(int(team_number))
@@ -197,9 +256,16 @@ class update_lineup(webapp2.RequestHandler):
 
         self.redirect('/allianceManagement/viewAlliance/' + str(week_number))
 
+
 class view_alliance(webapp2.RequestHandler):
-    """Handles the requests to see data for all alliances"""
     def get(self, week_number):
+        """
+            Handle the requests to see data for all alliances. Displays a past_alliance or alliance_management tab appropriately.
+
+            :parameter week_number: Week number taken from the url, string form
+            For each team on the bench and active lineup: displays information about each team's past performance
+            Also displays opponent's active and bench lineup
+        """
         # Checks for active Google account session
         user = users.get_current_user()
 
@@ -253,13 +319,20 @@ class view_alliance(webapp2.RequestHandler):
             self.response.write(template.render(template_values))
         else:
             template = JINJA_ENVIRONMENT.get_template('templates/error_page.html')
-            self.response.write(template.render({'Message':"This page requires that the draft be completed before accessing it"}))
+            self.response.write(template.render({
+                'Message':"This page requires that the draft be completed before accessing it"}))
 
-
-        
 
 class team_detail_page(webapp2.RequestHandler):
     def get(self, team_number):
+        """
+            Display detailed information on a single team
+
+            :param team_number: The team number, gathered from the url, in string form
+            Includes the following information:
+                - Schedule: Which events is this team attending. Also gives the points scored (for past events)
+                - Point breakdown: For each event, a detailed breakdown of where all of their points came
+        """
         # Checks for active Google account session
         user = users.get_current_user()
 
@@ -289,29 +362,32 @@ class team_detail_page(webapp2.RequestHandler):
                 event_breakdowns.append(get_point_breakdown_display(int(team_number), event['event_key']))
         
         for i, name in enumerate(humman_readable_point_categories):
-            point_breakdown.append([]) #Create the new row
-            title = {'title':name, 'explanation': explanation_of_point_categories[i]} #Build the data neccessary for the title/tooltip
-            point_breakdown[i].append(title) #Add the tile for the first column
+            point_breakdown.append([])  # Create the new row
+
+            #Build the data neccessary for the title/tooltip
+            title = {'title':name, 'explanation': explanation_of_point_categories[i]}
+
+            point_breakdown[i].append(title)  # Add the tile for the first column
             category_total = 0
             for event in event_breakdowns:
                 #Event is a value in the form [cat1,cat2...] 
-                category_total += event[i]['points'] #Build the total for the end of the row
+                category_total += event[i]['points']  # Build the total for the end of the row
                 event_text = ""
-                if 'tooltip' in event[i]: #If there's a tooltip, pass it on to the page
+                if 'tooltip' in event[i]:  # If there's a tooltip, pass it on to the page
                     point_breakdown[i].append({'points': event[i]['display'], 'tooltip': event[i]['tooltip']})
                 else:
-                    point_breakdown[i].append(event[i]['display']) #For each event, add the point display
-            point_breakdown[i].append(category_total) #Finally, add the total
+                    point_breakdown[i].append(event[i]['display'])  # For each event, add the point display
+            point_breakdown[i].append(category_total)  # Finally, add the total
 
-        point_breakdown.append([]) #For totals 
+        point_breakdown.append([])  # For totals
         index_of_totals_row = len(humman_readable_point_categories)
         overall_total = 0
-        point_breakdown[index_of_totals_row].append('Overall Total:') #Left column row title
+        point_breakdown[index_of_totals_row].append('Overall Total:')  # Left column row title
         for event in get_team_schedule(int(team_number)):
             if event['competition_name'] != '' and event['competition_name']:
                 overall_total += event['points']
-                point_breakdown[index_of_totals_row].append("") #For each event, add the total value
-        point_breakdown[index_of_totals_row].append(overall_total) #Finally, add the total
+                point_breakdown[index_of_totals_row].append("")  # For each event, add the total value
+        point_breakdown[index_of_totals_row].append(overall_total)  # Finally, add the total
 
         #Send html data to browser
         template_values = {
@@ -327,15 +403,12 @@ class team_detail_page(webapp2.RequestHandler):
         self.response.write(template.render(template_values))
 
 
-
-
-application = webapp2.WSGIApplication([
-                                       ('/allianceManagement/viewAlliance', alliance_portal),
-                                       ('/allianceManagement/viewAlliance/(.*)', view_alliance),
-                                       ('/allianceManagement/updateLineup/(.*)', update_lineup),
-                                       ('/allianceManagement/teamDetail/(.*)', team_detail_page),
-                                       
+application = webapp2.WSGIApplication([('/allianceManagement/viewAlliance', alliance_portal),
+                                       ('/allianceManagement/viewAlliance/(.*)', view_alliance),  # Team number
+                                       ('/allianceManagement/updateLineup/(.*)', update_lineup),  # Team number
+                                       ('/allianceManagement/teamDetail/(.*)', team_detail_page),  # Team number
                                        ], debug=True)
+
 
 def main():
     logging.getLogger().setLevel(logging.DEBUG)
@@ -345,5 +418,6 @@ if __name__ == "__main__":
     main()
 
 # Down here to resolve import issues
-from points import get_team_points_at_event, get_points_to_date, get_point_breakdown_display, humman_readable_point_categories, explanation_of_point_categories
+from points import get_team_points_at_event, get_points_to_date, get_point_breakdown_display, \
+    humman_readable_point_categories, explanation_of_point_categories
 from league_management import get_leader_board, get_readable_schedule, get_opponent, get_opponent_name
