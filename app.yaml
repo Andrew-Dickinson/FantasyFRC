@@ -6,6 +6,9 @@ module: default
 threadsafe: false
 
 handlers:
+- url: /favicon\.ico
+  static_files: static/icons/favicon.ico
+  upload: static/icons/favicon\.ico
 - url: /static
   static_dir: static
 - url: /updateTeams/.*
