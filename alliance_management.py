@@ -6,6 +6,7 @@ import os
 import logging
 
 import globals
+from globals import maximum_active_teams
 
 from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.api import users
@@ -240,11 +241,17 @@ class update_lineup(webapp2.RequestHandler):
 
         #Only allow changes to the lineup if the week is editable
         if is_week_editable(week_number):
+            error = False
             active_lineup = lineup_key(choice_key(account.key, league_id), week_number).get()
             if action == "bench":
                 active_lineup.active_teams.remove(int(team_number))
             elif action == "putin":
-                active_lineup.active_teams.append(int(team_number))
+                if len(active_lineup.active_teams) < maximum_active_teams:
+                    active_lineup.active_teams.append(int(team_number))
+                else:
+                    error = True
+                    template = JINJA_ENVIRONMENT.get_template('templates/error_page.html')
+                    self.response.write(template.render({'Message': 'You have reached the maximum capacity for active teams in  a single week'}))
             elif action == "drop":
                 if not str(team_number) in get_top_teams(globals.number_of_locked_teams):
                     choice = choice_key(account.key, league_id).get()
@@ -253,8 +260,8 @@ class update_lineup(webapp2.RequestHandler):
                         active_lineup.active_teams.remove(int(team_number))
                     choice.put()
             active_lineup.put()
-
-        self.redirect('/allianceManagement/viewAlliance/' + str(week_number))
+        if not error:
+            self.redirect('/allianceManagement/viewAlliance/' + str(week_number))
 
 
 class view_alliance(webapp2.RequestHandler):

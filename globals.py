@@ -15,6 +15,9 @@ draft_rounds = 5  # Number of rounds in a particular draft
 draft_time_minutes = 2  # Time per person per round
 number_of_locked_teams = 5  # Number of non-transferable teams to have at the top of the rankings
 
+maximum_roster_size = 30  # The maximum number of teams a player can have on their roster
+maximum_active_teams = 2  # The maximum number of teams a player can have active at once
+
 number_of_official_weeks = 7  # Used in general to iterate over schedule
 number_of_round_robin_weeks = 7  # Used to create the schedule
 
