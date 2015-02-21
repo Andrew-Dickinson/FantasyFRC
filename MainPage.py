@@ -6,14 +6,11 @@ import os
 import logging
 
 import globals
-from globals import get_team_list
 
 from google.appengine.ext.webapp.util import run_wsgi_app
-from google.appengine.ext import ndb
 from google.appengine.api import users
 
-from league_management import  finish_week
-from datastore_classes import league_key, Choice, root_event_key, choice_key, account_key, Account
+from datastore_classes import league_key
 
 import jinja2
 import webapp2
@@ -22,47 +19,6 @@ JINJA_ENVIRONMENT = jinja2.Environment(
     loader=jinja2.FileSystemLoader(os.path.dirname(__file__)),
     extensions=['jinja2.ext.autoescape'],
     autoescape=True)
-
-def get_taken_teams(league_id):
-    """Returns a list of taken teams based on a league and event id"""
-    taken_teams = []
-    league_player_query = Account.query(Account.league == league_id)
-    league_players = league_player_query.fetch()
-    for player in league_players:
-        choice = choice_key(account_key(player.key.id()), league_id).get()
-        if choice:
-            taken_teams.append(str(choice.drafted_team))
-    return taken_teams
-
-def isValidTeam(team, league_id):
-        """Parses and returns whether a team is present at a given event"""
-        team_list = get_team_list('2014txsa')
-        taken_list = get_taken_teams(league_id)
-        try:
-            number = int(team)
-        except:
-            return "Invalid number"
-        if str(team) in taken_list:
-            return "Team already taken (Possibly by you!)"
-        if not (str(number) in team_list):
-            return "Team not present at this event"
-        return "Good" #Will indicate no errors
-
-def group_list_in_n_size(list, size):
-    """Groups a list into sub-lists of size: size"""
-    grouped_list = []
-    for i in range(size, len(list), size):
-        team_segment = []
-        for j in range(size, 0, -1):
-            team_segment.append(list[i-j])
-        grouped_list.append(team_segment)
-
-    last_segment = []
-    remaining_teams = len(list) % size
-    for i in range(len(list)-remaining_teams, len(list)):
-        last_segment.append(list[i])
-    grouped_list.append(last_segment)
-    return grouped_list
 
 class MainPage(webapp2.RequestHandler):
 
@@ -77,8 +33,6 @@ class MainPage(webapp2.RequestHandler):
             template = JINJA_ENVIRONMENT.get_template('templates/index.html')
             self.response.write(template.render(template_values))
         else:
-            #Current user's id, used to identify their data
-            user_id = user.user_id()
             logout_url = users.create_logout_url('/')
 
             account = globals.get_or_create_account(user)
