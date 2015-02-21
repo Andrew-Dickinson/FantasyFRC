@@ -11,7 +11,7 @@ import datetime
 import calendar
 
 import globals
-from globals import get_team_list
+from globals import get_team_list, maximum_roster_size, maximum_active_teams
 
 from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.ext import ndb
@@ -698,12 +698,13 @@ class Submit_Pick(webapp2.RequestHandler):
         new_team = self.request.get('team')
 
         selection_error = is_valid_team(new_team, post_Choice_key.parent().get().league)
-
+        logging.info(selection_error)
         #Form data into entity and submit
         post_Choice = Choice.get_or_insert(post_Choice_key.id(), parent=post_Choice_key.parent())
         if selection_error == "Good":
-            post_Choice.current_team_roster.append(int(new_team))
-            str(post_Choice.put())
+            if len(choice_key(account_key(user_id), league_id).get().current_team_roster) < maximum_roster_size:
+                post_Choice.current_team_roster.append(int(new_team))
+                str(post_Choice.put())
         #             close_draft(post_Choice_key.parent().get().league)
 
         #Display the homepage
@@ -729,9 +730,12 @@ class Submit_Pick(webapp2.RequestHandler):
         #Form data into entity and submit
         post_Choice = Choice.get_or_insert(post_Choice_key.id(), parent=post_Choice_key.parent())
         if selection_error == "Good":
-            post_Choice.current_team_roster.append(int(new_team))
-            str(post_Choice.put())
-        #             close_draft(post_Choice_key.parent().get().league)
+            if len(choice_key(account_key(user_id), league_id).get().current_team_roster) < maximum_roster_size:
+                post_Choice.current_team_roster.append(int(new_team))
+                str(post_Choice.put())
+            else:
+                selection_error = "You have reached the maximum capacity for teams on your roster"
+            #             close_draft(post_Choice_key.parent().get().league)
 
         #Display the homepage
         self.redirect('/draft/pickUp/?updated=' + selection_error)
