@@ -17,11 +17,13 @@ from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.ext import ndb
 from google.appengine.api import users
 
-from datastore_classes import RootTeam, league_key, Choice, Lineup, choice_key, account_key, Account, lineup_key, DraftPick, draft_pick_key
+from datastore_classes import RootTeam, league_key, Choice, Lineup, choice_key, account_key, Account, lineup_key, \
+    DraftPick, draft_pick_key
 
 import jinja2
 import webapp2
 
+# Constants to indicate the current direction of the draft
 DRAFT_INCREASING = 1
 DRAFT_DECREASING = 2
 DRAFT_STATIONARY = 3
@@ -33,7 +35,16 @@ JINJA_ENVIRONMENT = jinja2.Environment(
 
 
 def start_draft(league_id):
-    """Sets up to prepare for a draft"""
+    """
+        Set up to prepare for a draft
+
+        :parameter league_id: The league to prepare for a draft
+        Do the following:
+            - Create a random order
+            - Use this order to generate a single list of exactly what pick happens in what order
+            - Use this to create the necessary pick objects with the correct order properties
+            - Place the league in a position to begin the draft
+    """
     league_player_query = Account.query(Account.league == league_id)
     league_players = league_player_query.fetch()
     shuffle(league_players)  # Randomize the order of the draft
@@ -47,7 +58,7 @@ def start_draft(league_id):
     pick_of_round = 0
     display_number = 0
     number_of_drafts = 0
-    while number_of_drafts < number_of_picks:  # Trust me on the whole +1 ordeal
+    while number_of_drafts < number_of_picks:
         if snake_draft:
             if direction == DRAFT_INCREASING:
                 if pick_of_round == number_of_players:
@@ -89,6 +100,14 @@ def start_draft(league_id):
 
 
 def get_lat_lng_json(league_id):
+    """
+        Return the latitude and longitude data for all available teams in a league
+
+        :parameter league_id: The league used to determine which teams are available
+        :type: string
+        :return: A json object containing all of the information.
+                This is intended to be read by the javascript on the browser side
+    """
     team_data = []
     teams = RootTeam.query().fetch()
     taken_teams = get_taken_teams(league_id)
@@ -104,6 +123,7 @@ def get_lat_lng_json(league_id):
     extra_stupid_layer = {'data': team_data}
     return json.dumps(extra_stupid_layer)
 
+
 def make_schedule_fit(original_schedule):
     """Takes a schedule and truncates or expands it as necessary.
         Is only fair if the original schedule is randomly generated"""
@@ -118,7 +138,14 @@ def make_schedule_fit(original_schedule):
 
 
 def generate_schedule(league_id):
-    """Generates and distributes a schedule based on a round robin system"""
+    """
+        Generate and distribute a schedule based on a round robin system where team members play each other fairly
+
+        :parameter  league_id: The id of the league to generate the schedule for
+        :type: string
+        Generate a random schedule in which all members play each other at least once before playing each other again
+        Take this schedule and use to assign an individual schedule to each player
+    """
     player_ids_list = []
 
     league_player_query = Account.query(Account.league == league_id)
@@ -129,7 +156,8 @@ def generate_schedule(league_id):
     logging.info(player_ids_list)
     shuffle(player_ids_list)
     if len(player_ids_list) % 2 == 1:  # Check if the number of players is odd
-        player_ids_list.insert(0, globals.schedule_bye_week)  # Add 0 to represent bye week, added to beginning to solve last player issue
+        # Add 0 to represent bye week, added to beginning to solve last player issue
+        player_ids_list.insert(0, globals.schedule_bye_week)
     number_of_players = len(player_ids_list)
 
     if number_of_players > 2:
@@ -155,10 +183,10 @@ def generate_schedule(league_id):
         last_player_schedule = []
         for week in range(1, number_of_players + 1):
             #This equation comes from a mathematica document. Truss me about it - 2014 season
-            last_player_schedule.append(player_ids_list[int(.25*((-1)**week) *
-                                        ((number_of_players - 1) +
-                                        (number_of_players - 3)*((-1)**week) +
-                                        2*((-1)**week)*week))])
+            last_player_schedule.append(player_ids_list[int(.25 * ((-1) ** week) *
+                                                            ((number_of_players - 1) +
+                                                             (number_of_players - 3) * ((-1) ** week) +
+                                                             2 * ((-1) ** week) * week))])
         last_player_schedule = make_schedule_fit(last_player_schedule)
         last_player.schedule = last_player_schedule
         logging.info(last_player_schedule)
@@ -179,7 +207,7 @@ def generate_schedule(league_id):
 
 
 def get_taken_teams(league_id):
-    """Returns a list of taken teams based on a league and event id"""
+    """Return a list of teams that have already been drafted based on a league and event id"""
     taken_teams = []
     league_player_query = Account.query(Account.league == league_id)
     league_players = league_player_query.fetch()
@@ -191,40 +219,72 @@ def get_taken_teams(league_id):
                 taken_teams.append(str(team))
     return taken_teams
 
-def isValidTeam(team, league_id):
-        """Parses and returns whether a team exists and is not taken"""
-        team_list = get_team_list()
-        taken_list = get_taken_teams(league_id)
-        try:
-            number = int(team)
-        except:
-            return "Invalid number"
-        if str(team) in taken_list:
-            return "Team already taken"
-        if not (str(number) in team_list):
-            return "Team does not exist"
-        return "Good" #Will indicate no errors
 
-def setup_lineup(id, choice):
-    lineup = Lineup.get_or_insert(lineup_key(choice.key, id).id(), parent=choice.key)
+def is_valid_team(team, league_id):
+    """
+            Parse and return whether a team is a valid choice in the draft.
+            :parameter team: the number of the team
+            :type: string or int
+            :parameter league_id: the id of the league this draft is being conducted in
+            :type: string
+            :return: An error message if the team is not a valid choice, if valid choice, return 'Good'
+        """
+    team_list = get_team_list()
+    taken_list = get_taken_teams(league_id)
+    try:
+        number = int(team)
+    except ValueError:
+        return "Invalid number"
+    if str(team) in taken_list:
+        return "Team already taken"
+    if not (str(number) in team_list):
+        return "Team does not exist"
+    return "Good"  # Will indicate no errors
+
+
+def initialize_lineup(lineup_id, choice):
+    """
+        Creates a lineup for a given id
+        :param lineup_id: The week number used to identify the lineup
+        :param choice: The parent for this lineup item
+    """
+    lineup = Lineup.get_or_insert(lineup_key(choice.key, lineup_id).id(), parent=choice.key)
     #Only initialize if its' empty
-    if lineup.active_teams == None:
-        lineup.active_teams = []
+    if lineup.active_teams:  # If active_teams == None,
+        lineup.active_teams = []  # Initialize it to an empty array
     lineup.put()
 
+
 def setup_for_next_pick(league_id):
+    """
+        Set the database so that the next person can make a selection
+
+        :param league_id: League to do this in
+        If the draft is finished, appropriately call lose_draft
+        If the draft is still in progress, increase the current draft_position by one and reset the timeout
+    """
     league = league_key(league_id).get()
     league_player_query = Account.query(Account.league == league_id)
     league_players = league_player_query.fetch()
     number_of_picks = len(league_players) * globals.draft_rounds
-    if league.draft_current_position == number_of_picks: #See if the draft is over
+    if league.draft_current_position == number_of_picks:  # See if the draft is over
         close_draft(league_id)
     else:
-        league.draft_current_position = league.draft_current_position + 1
-        league.draft_current_timeout = datetime.datetime.utcnow() + datetime.timedelta(minutes = globals.draft_time_minutes)
+        league.draft_current_position += 1
+        league.draft_current_timeout = datetime.datetime.utcnow() \
+                                       + datetime.timedelta(minutes=globals.draft_time_minutes)
         league.put()
 
+
 def close_draft(league_id):
+    """
+        Preform all of the operations necessary to finish the drafting process
+        :param league_id: The league to do this in
+
+        Called at the end of the draft
+        Initialize lineup items
+        Generate schedule
+    """
     league = league_key(league_id).get()
     league.draft_current_position = -1  # Indicate the draft is over
     league.draft_current_timeout = None
@@ -240,12 +300,18 @@ def close_draft(league_id):
         #For the active system
         choice = Choice.get_or_insert(league_id, parent=player.key)
         for i in range(1, globals.number_of_official_weeks + 1):
-            setup_lineup(i, choice)  # Initialize weekly lineups
+            initialize_lineup(i, choice)  # Initialize weekly lineups
             player.record.append('')
         player.put()
 
 
 def get_max_free_agent_pages(league_id):
+    """
+        Return the maximum number of free agent pages possible in a specific league
+
+        :param league_id: The league to calculate this in
+        :return: The maximum number of pages in the free agent list
+    """
     query = RootTeam.query().order(-RootTeam.total_points)
     extra_teams = query.fetch()
 
@@ -259,12 +325,23 @@ def get_max_free_agent_pages(league_id):
 
     number_of_teams = len(extra_teams)
     if number_of_teams % globals.free_agent_pagination == 0:
-        return number_of_teams/globals.free_agent_pagination
+        return number_of_teams / globals.free_agent_pagination
     else:
-        return math.floor(number_of_teams/globals.free_agent_pagination) + 1
+        return math.floor(number_of_teams / globals.free_agent_pagination) + 1
 
 
 def get_free_agent_list(league_id, page):
+    """
+        Return the list of free agents for a given league. Only return those on a certain page
+
+        :param league_id: The league to generate the list for
+        :param page: The number of the page to get
+        :return: A list of dictionaries with the following information for each team:
+            - rank: Rank in the free agent list
+            - name: The name of the team
+            - number: The team numer
+            - total points: The total number of points(our system) that this team has accumulated
+    """
     query = RootTeam.query().order(-RootTeam.total_points)
     extra_teams = query.fetch(globals.free_agent_pagination * page * 4)
 
@@ -284,7 +361,8 @@ def get_free_agent_list(league_id, page):
             taken_teams.remove(team.key.id())  # Not necessary, but improves efficiency
 
     free_agent_list = []
-    for i, team in enumerate(extra_teams[(page - 1) * globals.free_agent_pagination : page * globals.free_agent_pagination]):
+    for i, team in enumerate(extra_teams[(page - 1) * globals.free_agent_pagination: page
+            * globals.free_agent_pagination]):
         free_agent_list.append({
             'rank': i + ((page - 1) * globals.free_agent_pagination) + 1,
             'name': team.name,
@@ -297,11 +375,18 @@ def get_free_agent_list(league_id, page):
 
 class FreeAgentListPage(webapp2.RequestHandler):
     def get(self, page):
+        """
+            Display a certain page of the free agent list
+
+            :param page: The page to display
+
+            The free agent list is a list of teams that have not been drafted by any player.
+            They are sorted by the total points of each team
+            Users have the option to pick up teams or "flag" them to get updates about them
+        """
         # Checks for active Google account session
         user = users.get_current_user()
 
-        #Current user's id, used to identify their data
-        user_id = user.user_id()
         logout_url = users.create_logout_url('/')
 
         account = globals.get_or_create_account(user)
@@ -319,29 +404,29 @@ class FreeAgentListPage(webapp2.RequestHandler):
 
             #Send html data to browser
             template_values = {
-                        'user': user.nickname(),
-                        'logout_url': logout_url,
-                        'league_name': league_name,
-                        'free_agent_list': free_agent_list,
-                        'page': page,
-                        'max_page': get_max_free_agent_pages(league_id),
-                        }
+                'user': user.nickname(),
+                'logout_url': logout_url,
+                'league_name': league_name,
+                'free_agent_list': free_agent_list,
+                'page': page,
+                'max_page': get_max_free_agent_pages(league_id),
+            }
             template = JINJA_ENVIRONMENT.get_template('templates/falist.html')
             self.response.write(template.render(template_values))
 
         else:
             template = JINJA_ENVIRONMENT.get_template('templates/error_page.html')
-            self.response.write(template.render({'Message':'Must be a member of a league to perform this action'}))
+            self.response.write(template.render({'Message': 'Must be a member of a league to perform this action'}))
 
 
 class Draft_Page(webapp2.RequestHandler):
-
     def get(self):
+        """
+            The draft page contains the draft board, a timer, and a map; all that is necessary for the draft process
+        """
         # Checks for active Google account session
         user = users.get_current_user()
 
-        #Current user's id, used to identify their data
-        user_id = user.user_id()
         logout_url = users.create_logout_url('/')
 
         account = globals.get_or_create_account(user)
@@ -353,19 +438,16 @@ class Draft_Page(webapp2.RequestHandler):
             current_timeout = league_key(league_id).get().draft_current_timeout
             draft_pick = draft_pick_key(league_key(league_id), league_key(league_id).get().draft_current_position).get()
             if current_timeout:
-                if current_time > current_timeout: #The time has expired
+                if current_time > current_timeout:  # The time has expired
                     logging.info("Forefit")
-                    draft_pick.team = 0 #Set the pick to indicate it was forefited
+                    draft_pick.team = 0  # Set the pick to indicate it was forefited
                     draft_pick.put()
-                    setup_for_next_pick(league_id) #Move the pick along to the next person
-
+                    setup_for_next_pick(league_id)  # Move the pick along to the next person
 
             #Display update text for the status of the last choice update
             update_text = self.request.get('updated')
             if self.request.get('updated') == "Good":
                 update_text = "Team added successfully"
-
-
 
             league_player_query = Account.query(Account.league == league_id)
             players_for_the_sake_of_number = league_player_query.fetch()
@@ -392,7 +474,7 @@ class Draft_Page(webapp2.RequestHandler):
                     pick = query_results[0]
 
                 username = (((position % len(league_players)) - 1) % len(league_players))
-                draft_round = int((position-1)/len(league_players))
+                draft_round = int((position - 1) / len(league_players))
                 if username == 0:
                     draft_board.append([])
                     for i in range(0, len(league_players)):
@@ -403,7 +485,6 @@ class Draft_Page(webapp2.RequestHandler):
                         draft_board[draft_round][username] = "<i>Forfeited</i>"
                 else:
                     draft_board[draft_round][username] = "<i>TBD</i>"
-
 
             if league_id != '0':
                 league_name = league_key(league_id).get().name
@@ -422,7 +503,7 @@ class Draft_Page(webapp2.RequestHandler):
                 current_unix_timeout = calendar.timegm(current_timeout.timetuple())
 
             current_position = league_key(league_id).get().draft_current_position
-            draft_status = "Mid"
+
             if current_position == 0:
                 draft_status = "Pre"
             elif current_position == -1:
@@ -434,32 +515,36 @@ class Draft_Page(webapp2.RequestHandler):
 
             #Send html data to browser
             template_values = {
-                        'user': user.nickname(),
-                        'logout_url': logout_url,
-                        'draft_board': draft_board,
-                        'player_list': player_list,
-                        'update_text': update_text,
-                        'league_name': league_name,
-                        'users_turn': users_turn,
-                        'picking_user': picking_user,
-                        'current_unix_timeout': current_unix_timeout,
-                        'draft_status': draft_status,
-                        'team_map_data': team_map_data,
-                        }
+                'user': user.nickname(),
+                'logout_url': logout_url,
+                'draft_board': draft_board,
+                'player_list': player_list,
+                'update_text': update_text,
+                'league_name': league_name,
+                'users_turn': users_turn,
+                'picking_user': picking_user,
+                'current_unix_timeout': current_unix_timeout,
+                'draft_status': draft_status,
+                'team_map_data': team_map_data,
+            }
             template = JINJA_ENVIRONMENT.get_template('templates/draft_main.html')
             self.response.write(template.render(template_values))
         else:
             template = JINJA_ENVIRONMENT.get_template('templates/error_page.html')
-            self.response.write(template.render({'Message':'Must be a member of a league to perform this action'}))
+            self.response.write(template.render({'Message': 'Must be a member of a league to perform this action'}))
+
 
 class Start_Draft(webapp2.RequestHandler):
     def get(self):
+        """
+            When visited by the league commissioner, the draft is started
+            The commissioner is then redirected to the draft page
+        """
         # Checks for active Google account session
         user = users.get_current_user()
 
         #Current user's id, used to identify their data
         user_id = user.user_id()
-        logout_url = users.create_logout_url('/')
 
         account = globals.get_or_create_account(user)
         league_id = account.league
@@ -473,46 +558,44 @@ class Start_Draft(webapp2.RequestHandler):
                 self.redirect('/draft/')
             else:
                 template = JINJA_ENVIRONMENT.get_template('templates/error_page.html')
-                self.response.write(template.render({'Message':"Draft is already completed or is in progress"}))
+                self.response.write(template.render({'Message': "Draft is already completed or is in progress"}))
         else:
             template = JINJA_ENVIRONMENT.get_template('templates/error_page.html')
-            self.response.write(template.render({'Message':"Only the league commissioner may perform this action"}))
+            self.response.write(template.render({'Message': "Only the league commissioner may perform this action"}))
+
 
 class Submit_Draft_Pick(webapp2.RequestHandler):
-
+    """
+        Take the field data from the draft page and process it
+    """
     def post(self):
         # Checks for active Google account session
         user = users.get_current_user()
 
-        #Current user's id, used to identify their data
-        user_id = user.user_id()
-        logout_url = users.create_logout_url('/')
-
         account = globals.get_or_create_account(user)
         league_id = account.league
 
-        selection_error = ""
         league_entity = league_key(league_id).get()
         current_position = league_entity.draft_current_position
         current_timeout = league_entity.draft_current_timeout
         current_time = datetime.datetime.utcnow()
 
-        if current_position != 0 and current_position != -1: #Don't process if draft is over or yet to begin
+        if current_position != 0 and current_position != -1:  #Don't process if draft is over or yet to begin
             current_pick = draft_pick_key(league_entity.key, current_position).get()
-            if current_pick.player == account.key.urlsafe(): #Check that the calling player is actually within their turn
-                if current_time < current_timeout: #Check that the calling player is within their time constraints
+            if current_pick.player == account.key.urlsafe():  #Check that the calling player is actually within their turn
+                if current_time < current_timeout:  #Check that the calling player is within their time constraints
                     #Get the new team from the post header
                     new_team = self.request.get('team')
 
                     #Validate the selection
-                    selection_error = isValidTeam(new_team, league_id)
+                    selection_error = is_valid_team(new_team, league_id)
                     if selection_error == "Good":
                         #S'all good, update the datastore
                         current_pick.team = int(new_team)
                         current_pick.put()
                         #Add the team to the user's roster
                         user_choice = Choice.get_or_insert(league_id, parent=account.key)
-                        if user_choice.current_team_roster == None:
+                        if user_choice.current_team_roster:  # Make sure to use [] for an empty roster, not None
                             user_choice.current_team_roster = []
                         user_choice.current_team_roster.append(int(new_team))
                         user_choice.put()
@@ -530,7 +613,9 @@ class Submit_Draft_Pick(webapp2.RequestHandler):
 
 
 class Pick_up_Page(webapp2.RequestHandler):
-
+    """
+        Allows a user to pick up a single team after the draft has completed
+    """
     def get(self):
         # Checks for active Google account session
         user = users.get_current_user()
@@ -547,8 +632,8 @@ class Pick_up_Page(webapp2.RequestHandler):
             league_id = account.league
 
             #Get user's choices for the current league
-            find_Choice_key = choice_key(account_key(user_id), str(league_id))
-            found_Choice = find_Choice_key.get()
+            find_choice_key = choice_key(account_key(user_id), str(league_id))
+            found_choice = find_choice_key.get()
 
             #Display update text for the status of the last choice update
             update_text = self.request.get('updated')
@@ -557,18 +642,19 @@ class Pick_up_Page(webapp2.RequestHandler):
 
             #Display the user's current roster
             user_roster = []
-            if found_Choice:
-                user_roster = found_Choice.current_team_roster
+            if found_choice:
+                user_roster = found_choice.current_team_roster
 
 
             #Get list of players in the league and their choices
             league_table = [{'player_team': 'Roster', 'player_name': 'Player'}]
             league_player_query = Account.query(Account.league == league_id)
-            league_players = league_player_query.fetch() #league_player_query.order(Account.nickname).fetch()
+            league_players = league_player_query.fetch()  #league_player_query.order(Account.nickname).fetch()
             for player in league_players:
                 choice = choice_key(account_key(player.key.id()), league_id).get()
                 if choice:
-                    league_table.append({'player_team': str(choice.current_team_roster), 'player_name': player.nickname})
+                    league_table.append(
+                        {'player_team': str(choice.current_team_roster), 'player_name': player.nickname})
                 else:
                     league_table.append({'player_team': 'None', 'player_name': player.nickname})
 
@@ -579,18 +665,23 @@ class Pick_up_Page(webapp2.RequestHandler):
 
             #Send html data to browser
             template_values = {
-                        'user': user.nickname(),
-                        'logout_url': logout_url,
-                        'update_text': update_text,
-                        'league_table': league_table,
-                        'league_name': league_name,
-                        'roster': user_roster,
-                        'default_team': self.request.get('team'),
-                        }
+                'user': user.nickname(),
+                'logout_url': logout_url,
+                'update_text': update_text,
+                'league_table': league_table,
+                'league_name': league_name,
+                'roster': user_roster,
+                'default_team': self.request.get('team'),
+            }
             template = JINJA_ENVIRONMENT.get_template('templates/pick_up_main.html')
             self.response.write(template.render(template_values))
 
+
 class Submit_Pick(webapp2.RequestHandler):
+    """
+        Adds a team to the roster of the account who visits the page. Has appropriate checks for validity
+        Expects a field, 'team' to be the team number to pick up
+    """
     def get(self):
         user = users.get_current_user()
 
@@ -606,14 +697,14 @@ class Submit_Pick(webapp2.RequestHandler):
 
         new_team = self.request.get('team')
 
-        selection_error = isValidTeam(new_team, post_Choice_key.parent().get().league)
+        selection_error = is_valid_team(new_team, post_Choice_key.parent().get().league)
 
         #Form data into entity and submit
         post_Choice = Choice.get_or_insert(post_Choice_key.id(), parent=post_Choice_key.parent())
         if selection_error == "Good":
             post_Choice.current_team_roster.append(int(new_team))
             str(post_Choice.put())
-#             close_draft(post_Choice_key.parent().get().league)
+        #             close_draft(post_Choice_key.parent().get().league)
 
         #Display the homepage
         self.redirect(self.request.referer)
@@ -633,31 +724,33 @@ class Submit_Pick(webapp2.RequestHandler):
 
         new_team = self.request.get('team')
 
-        selection_error = isValidTeam(new_team, post_Choice_key.parent().get().league)
+        selection_error = is_valid_team(new_team, post_Choice_key.parent().get().league)
 
         #Form data into entity and submit
         post_Choice = Choice.get_or_insert(post_Choice_key.id(), parent=post_Choice_key.parent())
         if selection_error == "Good":
             post_Choice.current_team_roster.append(int(new_team))
             str(post_Choice.put())
-#             close_draft(post_Choice_key.parent().get().league)
+        #             close_draft(post_Choice_key.parent().get().league)
 
         #Display the homepage
         self.redirect('/draft/pickUp/?updated=' + selection_error)
 
 
-application = webapp2.WSGIApplication([('/draft/freeAgentList/(.*)', FreeAgentListPage),
+application = webapp2.WSGIApplication([('/draft/freeAgentList/(.*)', FreeAgentListPage),  # Page number
                                        ('/draft/pickUp/submitPick', Submit_Pick),
                                        ('/draft/pickUp/', Pick_up_Page),
                                        ('/draft/submitPick', Submit_Draft_Pick),
                                        ('/draft/startDraft', Start_Draft),
                                        ('/draft/', Draft_Page)
 
-                                       ], debug=True)
+                                      ], debug=True)
+
 
 def main():
     logging.getLogger().setLevel(logging.DEBUG)
     run_wsgi_app(application)
+
 
 if __name__ == "__main__":
     main()
