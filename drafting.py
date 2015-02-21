@@ -342,26 +342,20 @@ def get_free_agent_list(league_id, page):
             - number: The team numer
             - total points: The total number of points(our system) that this team has accumulated
     """
+    taken_teams = get_taken_teams(league_id)
     query = RootTeam.query().order(-RootTeam.total_points)
     extra_teams = query.fetch(globals.free_agent_pagination * page * 4)
 
-    taken_teams = get_taken_teams(league_id)
-
+    free_agent_teams = []
     #Get rid of the taken teams from the list
     for team in extra_teams:
-        if team.key.id() in taken_teams:
-            extra_teams.remove(team)
-            taken_teams.remove(team.key.id())  # Not necessary, but improves efficiency
-
-    #Unorthadox, yes. Necessary to fix the 118 bug. *Shudder* Don't remove!
-    #Actually, we don't really know what causes the 148 bug... Please fix this somebody...
-    for team in extra_teams:
-        if team.key.id() in taken_teams:
-            extra_teams.remove(team)
+        if not (team.key.id() in taken_teams):  # If this team has not been taken
+            free_agent_teams.append(team)
+        else:  # This team has been taken
             taken_teams.remove(team.key.id())  # Not necessary, but improves efficiency
 
     free_agent_list = []
-    for i, team in enumerate(extra_teams[(page - 1) * globals.free_agent_pagination: page
+    for i, team in enumerate(free_agent_teams[(page - 1) * globals.free_agent_pagination: page
             * globals.free_agent_pagination]):
         free_agent_list.append({
             'rank': i + ((page - 1) * globals.free_agent_pagination) + 1,
@@ -389,6 +383,9 @@ class FreeAgentListPage(webapp2.RequestHandler):
 
         logout_url = users.create_logout_url('/')
 
+        #Display update text for the status of the last choice update
+        update_text = self.request.get('updated')
+
         account = globals.get_or_create_account(user)
         league_id = account.league
 
@@ -407,6 +404,7 @@ class FreeAgentListPage(webapp2.RequestHandler):
                 'user': user.nickname(),
                 'logout_url': logout_url,
                 'league_name': league_name,
+                'update_text': update_text,
                 'free_agent_list': free_agent_list,
                 'page': page,
                 'max_page': get_max_free_agent_pages(league_id),
@@ -712,10 +710,11 @@ class Submit_Pick(webapp2.RequestHandler):
             if len(choice_key(account_key(user_id), league_id).get().current_team_roster) < maximum_roster_size:
                 post_Choice.current_team_roster.append(int(new_team))
                 str(post_Choice.put())
-        #             close_draft(post_Choice_key.parent().get().league)
+            else:
+                selection_error = "Your roster is full"
 
-        #Display the homepage
-        self.redirect(self.request.referer)
+        #Send them back to the previous page
+        self.redirect(str(self.request.referer.split('?', 1)[0] + '?updated=' + selection_error))
 
     def post(self):
         user = users.get_current_user()
