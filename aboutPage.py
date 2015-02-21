@@ -12,7 +12,7 @@ from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.ext import ndb
 from google.appengine.api import users
 
-from datastore_classes import league_key, Choice, root_event_key, Choice_key, account_key, Account
+from datastore_classes import league_key, Choice, root_event_key, choice_key, account_key, Account
 
 import jinja2
 import webapp2

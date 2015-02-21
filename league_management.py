@@ -10,7 +10,7 @@ from google.appengine.api import users
 from google.appengine.ext import ndb
 
 import globals
-from datastore_classes import account_key, Account, League, Choice, Choice_key, league_key, Lineup, DraftPick
+from datastore_classes import account_key, Account, League, Choice, choice_key, league_key, Lineup, DraftPick
 
 import jinja2
 import webapp2
@@ -147,7 +147,7 @@ def remove_from_league(user_id):
     account = Account.get_or_insert(user_id)
 
     #Remove user's choices and lineup for the league
-    choice = Choice_key(account_key(user_id), account.league).get()
+    choice = choice_key(account_key(user_id), account.league).get()
     if choice:
         lineup_query = Lineup.query(ancestor=choice.key).fetch()
         for lineup in lineup_query:

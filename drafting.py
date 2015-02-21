@@ -17,7 +17,7 @@ from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.ext import ndb
 from google.appengine.api import users
 
-from datastore_classes import RootTeam, league_key, Choice, Lineup, Choice_key, account_key, Account, lineup_key, DraftPick, draft_pick_key
+from datastore_classes import RootTeam, league_key, Choice, Lineup, choice_key, account_key, Account, lineup_key, DraftPick, draft_pick_key
 
 import jinja2
 import webapp2
@@ -547,7 +547,7 @@ class Pick_up_Page(webapp2.RequestHandler):
             league_id = account.league
 
             #Get user's choices for the current league
-            find_Choice_key = Choice_key(account_key(user_id), str(league_id))
+            find_Choice_key = choice_key(account_key(user_id), str(league_id))
             found_Choice = find_Choice_key.get()
 
             #Display update text for the status of the last choice update
@@ -566,7 +566,7 @@ class Pick_up_Page(webapp2.RequestHandler):
             league_player_query = Account.query(Account.league == league_id)
             league_players = league_player_query.fetch() #league_player_query.order(Account.nickname).fetch()
             for player in league_players:
-                choice = Choice_key(account_key(player.key.id()), league_id).get()
+                choice = choice_key(account_key(player.key.id()), league_id).get()
                 if choice:
                     league_table.append({'player_team': str(choice.current_team_roster), 'player_name': player.nickname})
                 else:
@@ -601,7 +601,7 @@ class Submit_Pick(webapp2.RequestHandler):
         account = globals.get_or_create_account(user)
         league_id = account.league
 
-        find_Choice_key = Choice_key(account_key(user_id), str(league_id))
+        find_Choice_key = choice_key(account_key(user_id), str(league_id))
         post_Choice_key = find_Choice_key
 
         new_team = self.request.get('team')
@@ -628,7 +628,7 @@ class Submit_Pick(webapp2.RequestHandler):
         account = globals.get_or_create_account(user)
         league_id = account.league
 
-        find_Choice_key = Choice_key(account_key(user_id), str(league_id))
+        find_Choice_key = choice_key(account_key(user_id), str(league_id))
         post_Choice_key = find_Choice_key
 
         new_team = self.request.get('team')

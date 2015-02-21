@@ -13,7 +13,7 @@ from google.appengine.ext import ndb
 from google.appengine.api import users
 
 from league_management import  finish_week
-from datastore_classes import league_key, Choice, root_event_key, Choice_key, account_key, Account
+from datastore_classes import league_key, Choice, root_event_key, choice_key, account_key, Account
 
 import jinja2
 import webapp2
@@ -29,7 +29,7 @@ def get_taken_teams(league_id):
     league_player_query = Account.query(Account.league == league_id)
     league_players = league_player_query.fetch()
     for player in league_players:
-        choice = Choice_key(account_key(player.key.id()), league_id).get()
+        choice = choice_key(account_key(player.key.id()), league_id).get()
         if choice:
             taken_teams.append(str(choice.drafted_team))
     return taken_teams

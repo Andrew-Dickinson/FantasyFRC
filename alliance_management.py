@@ -11,7 +11,7 @@ from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.api import users
 from google.appengine.ext import ndb
 
-from datastore_classes import account_key, RootTeam, Account, root_event_key, root_team_key, lineup_key, Lineup, Choice_key, league_key
+from datastore_classes import account_key, RootTeam, Account, root_event_key, root_team_key, lineup_key, Lineup, choice_key, league_key
 
 import jinja2
 import webapp2
@@ -79,10 +79,10 @@ def get_team_lists(user_id, week_number):
             - disabled: Is 'True' if team is locked because of good performance (string(bool))
     """
     account = account_key(user_id).get()
-    choice = Choice_key(account.key, account.league).get()
+    choice = choice_key(account.key, account.league).get()
     roster = choice.current_team_roster
 
-    active_lineup = lineup_key(Choice_key(account.key, account.league), week_number).get().active_teams
+    active_lineup = lineup_key(choice_key(account.key, account.league), week_number).get().active_teams
 
     current_lineup = []
     for number in active_lineup:
@@ -240,14 +240,14 @@ class update_lineup(webapp2.RequestHandler):
 
         #Only allow changes to the lineup if the week is editable
         if is_week_editable(week_number):
-            active_lineup = lineup_key(Choice_key(account.key, league_id), week_number).get()
+            active_lineup = lineup_key(choice_key(account.key, league_id), week_number).get()
             if action == "bench":
                 active_lineup.active_teams.remove(int(team_number))
             elif action == "putin":
                 active_lineup.active_teams.append(int(team_number))
             elif action == "drop":
                 if not str(team_number) in get_top_teams(globals.number_of_locked_teams):
-                    choice = Choice_key(account.key, league_id).get()
+                    choice = choice_key(account.key, league_id).get()
                     choice.current_team_roster.remove(int(team_number))
                     if int(team_number) in active_lineup.active_teams:
                         active_lineup.active_teams.remove(int(team_number))
