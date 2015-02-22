@@ -14,6 +14,7 @@ from datastore_classes import account_key, Account, League, Choice, choice_key, 
 
 import jinja2
 import webapp2
+import error_messages
 
 JINJA_ENVIRONMENT = jinja2.Environment(
     loader=jinja2.FileSystemLoader(os.path.dirname(__file__)),
@@ -339,7 +340,7 @@ class Join_League(webapp2.RequestHandler):
             add_to_league(user_id, league_id) #Add to new one
             self.redirect('/')
         else:
-            globals.display_error_page(self, self.request.referer, 'This league has already begun, or has finished its draft')
+            globals.display_error_page(self, self.request.referer, error_messages.league_already_started)
 
 application = webapp2.WSGIApplication([
                                        ('/leagueManagement/updateLeague', update_League),

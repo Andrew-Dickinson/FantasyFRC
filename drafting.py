@@ -22,7 +22,7 @@ from datastore_classes import RootTeam, league_key, Choice, Lineup, choice_key, 
 
 import jinja2
 import webapp2
-
+import error_messages
 # Constants to indicate the current direction of the draft
 DRAFT_INCREASING = 1
 DRAFT_DECREASING = 2
@@ -413,7 +413,7 @@ class FreeAgentListPage(webapp2.RequestHandler):
             self.response.write(template.render(template_values))
 
         else:
-            globals.display_error_page(self, self.request.referer,'Must be a member of a league to perform this action')
+            globals.display_error_page(self, self.request.referer, error_messages.need_to_be_a_member_of_a_league)
 
 
 class Draft_Page(webapp2.RequestHandler):
@@ -527,7 +527,7 @@ class Draft_Page(webapp2.RequestHandler):
             template = JINJA_ENVIRONMENT.get_template('templates/draft_main.html')
             self.response.write(template.render(template_values))
         else:
-            globals.display_error_page(self, self.request.referer,'Must be a member of a league to perform this action')
+            globals.display_error_page(self, self.request.referer,error_messages.need_to_be_a_member_of_a_league)
 
 
 class Start_Draft(webapp2.RequestHandler):
@@ -556,11 +556,11 @@ class Start_Draft(webapp2.RequestHandler):
                     setup_for_next_pick(league_id)
                     self.redirect('/draft/')
                 else:
-                    globals.display_error_page(self, self.request.referer,"Draft is already completed or is in progress")
+                    globals.display_error_page(self, self.request.referer, error_messages.draft_already_completed)
             else:
-                globals.display_error_page(self, self.request.referer,"You need to have at least two people to have a league. Try inviting your friends to join your league")
+                globals.display_error_page(self, self.request.referer, error_messages.league_too_small)
         else:
-            globals.display_error_page(self, self.request.referer,"Only the league commissioner may perform this action")
+            globals.display_error_page(self, self.request.referer,error_messages.access_denied)
 
 
 class Submit_Draft_Pick(webapp2.RequestHandler):
