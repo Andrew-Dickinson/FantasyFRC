@@ -166,54 +166,56 @@ class alliance_portal(webapp2.RequestHandler):
         #Make global call to get user information
         account = globals.get_or_create_account(user)
         league_id = account.league
-        draft_over = league_key(league_id).get().draft_current_position == -1
+        if league_id != '0':
+            draft_over = league_key(league_id).get().draft_current_position == -1
 
-        #Only allow access to this page after the draft has completed
-        if draft_over:
-            #Proccess league info
-            if league_id != '0':
-                league_name = league_key(league_id).get().name
-            else:
-                league_name = ""
-
-            total_points = 0
-            week_table = []
-            for weeknum in range(1, globals.number_of_official_weeks + 1):
-                teams = get_team_lists(user_id, weeknum)[0]
-                points = 0
-                lineup = []
-                for team in teams:
-                    event_key = get_team_schedule(int(team['number']))[int(weeknum) - 1]['event_key']#-1 to convert to 0-based index
-                    if event_key: #Check if the team is competing that week
-                        points += get_team_points_at_event(team['number'], event_key)
-                    lineup.append(team['number'])
-
-                if is_week_editable(weeknum):
-                    points = "<i>No Data</i>"
+            #Only allow access to this page after the draft has completed
+            if draft_over:
+                #Proccess league info
+                if league_id != '0':
+                    league_name = league_key(league_id).get().name
                 else:
-                    total_points += points
+                    league_name = ""
 
-                week_row = {'week': str(weeknum), 'active_lineup': lineup, 'points': points}
-                week_table.append(week_row)
+                total_points = 0
+                week_table = []
+                for weeknum in range(1, globals.number_of_official_weeks + 1):
+                    teams = get_team_lists(user_id, weeknum)[0]
+                    points = 0
+                    lineup = []
+                    for team in teams:
+                        event_key = get_team_schedule(int(team['number']))[int(weeknum) - 1]['event_key']#-1 to convert to 0-based index
+                        if event_key: #Check if the team is competing that week
+                            points += get_team_points_at_event(team['number'], event_key)
+                        lineup.append(team['number'])
 
-            leader_board = get_leader_board(league_id)
-            league_schedule = get_readable_schedule(league_id)
+                    if is_week_editable(weeknum):
+                        points = "<i>No Data</i>"
+                    else:
+                        total_points += points
 
-            template_values = {
-                            'user': user.nickname(),
-                            'logout_url': logout_url,
-                            'league_name': league_name,
-                            'week_table': week_table,
-                            'total_points': total_points,
-                            'leader_board': leader_board,
-                            'schedule': league_schedule,
-                            }
+                    week_row = {'week': str(weeknum), 'active_lineup': lineup, 'points': points}
+                    week_table.append(week_row)
 
-            template = JINJA_ENVIRONMENT.get_template('templates/alliance_management_portal.html')
-            self.response.write(template.render(template_values))
+                leader_board = get_leader_board(league_id)
+                league_schedule = get_readable_schedule(league_id)
+
+                template_values = {
+                                'user': user.nickname(),
+                                'logout_url': logout_url,
+                                'league_name': league_name,
+                                'week_table': week_table,
+                                'total_points': total_points,
+                                'leader_board': leader_board,
+                                'schedule': league_schedule,
+                                }
+
+                template = JINJA_ENVIRONMENT.get_template('templates/alliance_management_portal.html')
+                self.response.write(template.render(template_values))
+            else:
+                globals.display_error_page(self, self.request.referer, error_messages.draft_needs_to_be_completed)
         else:
-
-            globals.display_error_page(self, self.request.referer, error_messages.draft_needs_to_be_completed)
+            globals.display_error_page(self, self.request.referer, error_messages.need_to_be_a_member_of_a_league)
 
 
 class update_lineup(webapp2.RequestHandler):
