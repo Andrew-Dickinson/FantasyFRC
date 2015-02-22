@@ -181,7 +181,7 @@ def generate_schedule(league_id):
         #For the last player, whose schedule doesn't follow the same pattern
         last_player = account_key(player_ids_list[number_of_players - 1]).get()
         last_player_schedule = []
-        for week in range(1, number_of_players + 1):
+        for week in range(1, number_of_players):
             #This equation comes from a mathematica document. Truss me about it - 2014 season
             last_player_schedule.append(player_ids_list[int(.25 * ((-1) ** week) *
                                                             ((number_of_players - 1) +

@@ -14,7 +14,7 @@ from award_classification import AwardType
 
 from google.appengine.ext.webapp.util import run_wsgi_app
 from progress_through_elimination_classification import convert_TBA_level_to_progress, FINALIST, WINNER
-from datastore_classes import RootEvent, root_event_key, TeamEvent, team_event_key, team_key, root_team_key, RootTeam, League
+from datastore_classes import RootEvent, root_event_key, TeamEvent, team_event_key, team_key, root_team_key, RootTeam, League, Account, Choice, Lineup, DraftPick
 import time
 from points import get_points_to_date
 
@@ -218,8 +218,33 @@ class UpdateDB(webapp2.RequestHandler):
         geocode_within_limit()
         update_total_points()
 
+class ClearLeagueData(webapp2.RequestHandler):
+    def get(self):
+        accountQuery = Account.query()
+        accounts = accountQuery.fetch()
+        for account in accounts:
+            account.key.delete()
+        choiceQuery = Choice.query()
+        choices = choiceQuery.fetch()
+        for choice in choices:
+            choice.key.delete()
+        draftPickQuery = DraftPick.query()
+        draftPicks = draftPickQuery.fetch()
+        for draftPick in draftPicks:
+            draftPick.key.delete()
+        lineupQuery = Lineup.query()
+        lineups = lineupQuery.fetch()
+        for lineup in lineups:
+            lineup.key.delete()
+        leagueQuery = League.query()
+        leagues = leagueQuery.fetch()
+        for league in leagues:
+            league.key.delete()
+
+
 application = webapp2.WSGIApplication([
-                                       ('/updateTeams/', UpdateDB)
+                                       ('/updateTeams/clear', ClearLeagueData),
+                                       ('/updateTeams/', UpdateDB),
                                        ], debug=True)
 
 def main():
