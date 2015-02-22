@@ -4,6 +4,7 @@ from __future__ import unicode_literals
 
 import os
 import logging
+import error_messages
 
 import globals
 from globals import maximum_active_teams
@@ -212,7 +213,7 @@ class alliance_portal(webapp2.RequestHandler):
             self.response.write(template.render(template_values))
         else:
 
-            globals.display_error_page(self, self.request.referer, "This page requires that the draft be completed before accessing it")
+            globals.display_error_page(self, self.request.referer, error_messages.draft_needs_to_be_completed)
 
 
 class update_lineup(webapp2.RequestHandler):
@@ -250,7 +251,7 @@ class update_lineup(webapp2.RequestHandler):
                     active_lineup.active_teams.append(int(team_number))
                 else:
                     error = True
-                    globals.display_error_page(self, self.request.referer,  'You have reached the maximum capacity for active teams in  a single week')
+                    globals.display_error_page(self, self.request.referer,  error_messages.maximum_active_teams_reached)
             elif action == "drop":
                 if not str(team_number) in get_top_teams(globals.number_of_locked_teams):
                     choice = choice_key(account.key, league_id).get()
@@ -324,7 +325,7 @@ class view_alliance(webapp2.RequestHandler):
                 template = JINJA_ENVIRONMENT.get_template('templates/past_alliances.html')
             self.response.write(template.render(template_values))
         else:
-            globals.display_error_page(self, self.request.referer,"This page requires that the draft be completed before accessing it")
+            globals.display_error_page(self, self.request.referer, error_messages.draft_needs_to_be_completed)
 
 
 class team_detail_page(webapp2.RequestHandler):
