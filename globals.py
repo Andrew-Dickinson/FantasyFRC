@@ -4,6 +4,13 @@
 from datastore_classes import RootTeam, Account
 from datetime import date
 import logging
+import jinja2
+import os
+
+JINJA_ENVIRONMENT = jinja2.Environment(
+    loader=jinja2.FileSystemLoader(os.path.dirname(__file__)),
+    extensions=['jinja2.ext.autoescape'],
+    autoescape=True)
 
 year = "2014"  # Used by tba api calls
 first_event_wednesday = date(2014, 2, 26)  # used to convert timestamps to week numbers
@@ -91,3 +98,7 @@ def get_or_create_account(user):
         account.league = '0'
         account.put()
     return account
+
+def display_error_page(self, referer, message):
+    template = JINJA_ENVIRONMENT.get_template('templates/error_page.html')
+    self.response.write(template.render({'Message': message, 'Back_Link': referer}))

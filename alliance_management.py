@@ -211,8 +211,8 @@ class alliance_portal(webapp2.RequestHandler):
             template = JINJA_ENVIRONMENT.get_template('templates/alliance_management_portal.html')
             self.response.write(template.render(template_values))
         else:
-            template = JINJA_ENVIRONMENT.get_template('templates/error_page.html')
-            self.response.write(template.render({'Message':"This page requires that the draft be completed before accessing it"}))
+
+            globals.display_error_page(self, self.request.referer, "This page requires that the draft be completed before accessing it")
 
 
 class update_lineup(webapp2.RequestHandler):
@@ -250,8 +250,7 @@ class update_lineup(webapp2.RequestHandler):
                     active_lineup.active_teams.append(int(team_number))
                 else:
                     error = True
-                    template = JINJA_ENVIRONMENT.get_template('templates/error_page.html')
-                    self.response.write(template.render({'Message': 'You have reached the maximum capacity for active teams in  a single week'}))
+                    globals.display_error_page(self, self.request.referer,  'You have reached the maximum capacity for active teams in  a single week')
             elif action == "drop":
                 if not str(team_number) in get_top_teams(globals.number_of_locked_teams):
                     choice = choice_key(account.key, league_id).get()
@@ -325,9 +324,7 @@ class view_alliance(webapp2.RequestHandler):
                 template = JINJA_ENVIRONMENT.get_template('templates/past_alliances.html')
             self.response.write(template.render(template_values))
         else:
-            template = JINJA_ENVIRONMENT.get_template('templates/error_page.html')
-            self.response.write(template.render({
-                'Message':"This page requires that the draft be completed before accessing it"}))
+            globals.display_error_page(self, self.request.referer,"This page requires that the draft be completed before accessing it")
 
 
 class team_detail_page(webapp2.RequestHandler):
