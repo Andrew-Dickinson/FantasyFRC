@@ -55,6 +55,15 @@ class League(ndb.Model):
     snake_draft = ndb.BooleanProperty()
     draft_current_position = ndb.IntegerProperty()
     draft_current_timeout = ndb.DateTimeProperty()
+    auto_start_draft_time = ndb.DateProperty()
+    time_per_draft_pick = ndb.FloatProperty() #Minutes
+    league_access_type = ndb.StringProperty()
+    league_player_size_limit = ndb.IntegerProperty()
+    number_of_locked_teams = ndb.IntegerProperty()
+    number_of_draft_rounds = ndb.IntegerProperty()
+    roster_size = ndb.IntegerProperty()
+    active_lineup_size = ndb.IntegerProperty()
+
 
 
 class RootEvent(ndb.Model):
