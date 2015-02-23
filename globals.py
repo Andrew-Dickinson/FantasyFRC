@@ -52,9 +52,6 @@ app_id = "frc3546:FantasyFRC:v0.1"
 #Used to access google's geocode system
 google_api_key = "AIzaSyAfJd7wBMespDYqfmMivW7GtMDe1ZRkKbc"
 
-#Used to display a lack of data
-no_data_display = "<i>No Data</i>"
-
 #Number of teams to list on the free agent page
 free_agent_pagination = 50
 

@@ -178,7 +178,7 @@ def get_point_breakdown_display(team_number, event_id):
     else: #There is no data
         for i in humman_readable_point_categories:
             display_output.append({
-                                'display': no_data_display,
+                                'display': "<i>No Data</i>",
                                 'points': 0
                                 })
     return display_output
