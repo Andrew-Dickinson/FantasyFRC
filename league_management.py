@@ -164,31 +164,32 @@ def finish_week(league_id, past_week_num):
 
 def remove_from_league(user_id):
     """
-        Remove a certain user_id from their league
+        Remove a certain user_id from their league, only if the draft hasn't already started
     """
     #Current user's id, used to identify their data
     account = Account.get_or_insert(user_id)
 
-    #Remove user's choices and lineup for the league
-    choice = choice_key(account_key(user_id), account.league).get()
-    if choice:
-        lineup_query = Lineup.query(ancestor=choice.key).fetch()
-        for lineup in lineup_query:
-            lineup.key.delete()
-        choice.key.delete()
+    if league_key(account.league).get() and league_key(account.league).get().draft_current_position == 0:
+        #Remove user's choices and lineup for the league
+        choice = choice_key(account_key(user_id), account.league).get()
+        if choice:
+            lineup_query = Lineup.query(ancestor=choice.key).fetch()
+            for lineup in lineup_query:
+                lineup.key.delete()
+            choice.key.delete()
 
-    #If this is the last person in the league, delete it after they leave
-    players = Account.query().filter(Account.league == account.league).fetch()
-    if len(players) == 1:
-        past_league = account.league
+        #If this is the last person in the league, or this is the commissioner, delete it after they leave
+        players = Account.query().filter(Account.league == account.league).fetch()
+        if len(players) == 1 or account.league == account.key.id():
+            past_league = account.league
+            #Remove User's association with league
+            account.league = '0'
+            account.put()
+            delete_league(past_league)
+
         #Remove User's association with league
         account.league = '0'
         account.put()
-        delete_league(past_league)
-
-    #Remove User's association with league
-    account.league = '0'
-    account.put()
 
 
 def add_to_league(user_id, league_id):
@@ -322,8 +323,11 @@ class leave_League(webapp2.RequestHandler):
     """
     def get(self):
         user_id = users.get_current_user().user_id()
-        remove_from_league(user_id)
-        self.redirect('/')
+        if league_key(account_key(user_id).get().league).get().draft_current_position == 0:
+            remove_from_league(user_id)
+            self.redirect('/')
+        else:
+            globals.display_error_page(self, self.request.referer, error_messages.league_already_started_leaving)
 
 
 
