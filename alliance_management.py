@@ -245,6 +245,12 @@ class update_lineup(webapp2.RequestHandler):
         account = globals.get_or_create_account(user)
         league_id = account.league
 
+        choice = choice_key(account_key(user_id), league_key(league_id))
+        roster = []
+
+        for team in choice.current_team_roster:
+            roster.append(int(team))
+
         #Only allow changes to the lineup if the week is editable
         if is_week_editable(week_number):
             error = False
@@ -253,7 +259,10 @@ class update_lineup(webapp2.RequestHandler):
                 active_lineup.active_teams.remove(int(team_number))
             elif action == "putin":
                 if len(active_lineup.active_teams) < maximum_active_teams:
-                    active_lineup.active_teams.append(int(team_number))
+                    if int(team_number) in roster:
+                        active_lineup.active_teams.append(int(team_number))
+                    else:
+                        error = True
                 else:
                     error = True
                     globals.display_error_page(self, self.request.referer,  error_messages.maximum_active_teams_reached)
