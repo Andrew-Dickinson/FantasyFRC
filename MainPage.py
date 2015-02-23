@@ -39,7 +39,10 @@ class MainPage(webapp2.RequestHandler):
             league_id = account.league
 
             if league_id != '0':
-                league_name = league_key(league_id).get().name
+                if league_key(league_id).get().draft_current_position == 0:
+                    league_name = league_key(league_id).get().name
+                else:
+                    league_name = globals.draft_started_sentinel
             else:
                 league_name = ""
 

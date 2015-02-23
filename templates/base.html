@@ -38,14 +38,18 @@
                   <ul class="nav navbar-nav">
                     <li><a href="/allianceManagement/viewAlliance"><span class="glyphicon glyphicon-list-alt"></span> View Lineup</a></li>
                     <li><a href="/draft/"><span class="glyphicon glyphicon-user"></span> Draft Board</a></li>
+                  </ul>
+                  <ul class="nav navbar-nav navbar-right">
+                    <li><p class="navbar-text">
+                        {% if league_name == "f35f0a1295224ac2a1d21c8ce9768a70" %}{% else %}
+                            {% if league_name == ""%}Not a member of a league - <a href="/leagueManagement/createLeague">Click to Create one!</a>{% endif %}
+                            {% if league_name != ""%}League: {{ league_name }} - <a id="leave_league" href="#"  data-toggle="modal"
+                                                                                data-target="#leave_league_modal">Click to leave</a>{% endif %}
+                        {% endif %}
+						</p></li>
                     <li><p class="navbar-text">
                         Loggen in as {{ user }} - <a href="{{ logout_url }}">Log out</a>
                     </p></li>
-                    <li><p class="navbar-text">
-                        {% if league_name == ""%}Not a member of a league - <a href="/leagueManagement/createLeague">Click to Create one!</a>{% endif %}
-                        {% if league_name != ""%}League: {{ league_name }} - <a id="leave_league" href="#"  data-toggle="modal"
-                                                                            data-target="#leave_league_modal">Click to leave</a>{% endif %}
-						</p></li>
                   </ul>
                 </div>
             {% else %}
