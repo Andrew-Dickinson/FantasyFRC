@@ -164,31 +164,32 @@ def finish_week(league_id, past_week_num):
 
 def remove_from_league(user_id):
     """
-        Remove a certain user_id from their league
+        Remove a certain user_id from their league, only if the draft hasn't already started
     """
     #Current user's id, used to identify their data
     account = Account.get_or_insert(user_id)
 
-    #Remove user's choices and lineup for the league
-    choice = choice_key(account_key(user_id), account.league).get()
-    if choice:
-        lineup_query = Lineup.query(ancestor=choice.key).fetch()
-        for lineup in lineup_query:
-            lineup.key.delete()
-        choice.key.delete()
+    if league_key(account.league).get() and league_key(account.league).get().draft_current_position == 0:
+        #Remove user's choices and lineup for the league
+        choice = choice_key(account_key(user_id), account.league).get()
+        if choice:
+            lineup_query = Lineup.query(ancestor=choice.key).fetch()
+            for lineup in lineup_query:
+                lineup.key.delete()
+            choice.key.delete()
 
-    #If this is the last person in the league, delete it after they leave
-    players = Account.query().filter(Account.league == account.league).fetch()
-    if len(players) == 1:
-        past_league = account.league
+        #If this is the last person in the league, or this is the commissioner, delete it after they leave
+        players = Account.query().filter(Account.league == account.league).fetch()
+        if len(players) == 1 or account.league == account.key.id():
+            past_league = account.league
+            #Remove User's association with league
+            account.league = '0'
+            account.put()
+            delete_league(past_league)
+
         #Remove User's association with league
         account.league = '0'
         account.put()
-        delete_league(past_league)
-
-    #Remove User's association with league
-    account.league = '0'
-    account.put()
 
 
 def add_to_league(user_id, league_id):
@@ -249,7 +250,10 @@ class Show_Leagues(webapp2.RequestHandler):
                                   })
 
         if league_id != '0':
-            league_name = league_key(league_id).get().name
+            if league_key(league_id).get().draft_current_position == 0:
+                league_name = league_key(league_id).get().name
+            else:
+                league_name = globals.draft_started_sentinel
         else:
             league_name = ""
 
@@ -277,7 +281,10 @@ class create_League(webapp2.RequestHandler):
         league_id = account.league
 
         if league_id != '0':
-            league_name = league_key(league_id).get().name
+            if league_key(league_id).get().draft_current_position == 0:
+                league_name = league_key(league_id).get().name
+            else:
+                league_name = globals.draft_started_sentinel
         else:
             league_name = ""
 
@@ -300,20 +307,26 @@ class update_League(webapp2.RequestHandler):
 
         commissioner_account_key = account.key
 
+        current_league = league_key(commissioner_account_key.get().league).get()
+
         #Get data from the post header
         name = self.request.get('name')
         snake = self.request.get('snake_draft') == 'on'
 
-        #Create/Update the league
-        new_league = League.get_or_insert(commissioner_account_key.id())
-        new_league.name = name
-        new_league.snake_draft = snake
-        new_league.draft_current_position = 0
-        new_league.put()
+        if current_league.draft_current_position == 0:
+            if name != globals.draft_started_sentinel:
+                #Create/Update the league
+                new_league = League.get_or_insert(commissioner_account_key.id())
+                new_league.name = name
+                new_league.snake_draft = snake
+                new_league.draft_current_position = 0
+                new_league.put()
 
-        add_to_league(user.user_id(), new_league.key.id())
+                add_to_league(user.user_id(), new_league.key.id())
 
-        self.redirect('/')
+            self.redirect('/')
+        else:
+            globals.display_error_page(self, self.request.referer, error_messages.league_already_started_leaving)
 
 class leave_League(webapp2.RequestHandler):
     """
@@ -322,8 +335,11 @@ class leave_League(webapp2.RequestHandler):
     """
     def get(self):
         user_id = users.get_current_user().user_id()
-        remove_from_league(user_id)
-        self.redirect('/')
+        if league_key(account_key(user_id).get().league).get().draft_current_position == 0:
+            remove_from_league(user_id)
+            self.redirect('/')
+        else:
+            globals.display_error_page(self, self.request.referer, error_messages.league_already_started_leaving)
 
 
 
@@ -334,13 +350,16 @@ class Join_League(webapp2.RequestHandler):
             :param league_id: Collected from url, the league to join
         """
         user_id = users.get_current_user().user_id()
-
-        if league_key(league_id).get().draft_current_position == 0:
-            remove_from_league(user_id) #Remove from old league
-            add_to_league(user_id, league_id) #Add to new one
-            self.redirect('/')
+        current_league = league_key(account_key(user_id).get().league).get()
+        if current_league.draft_current_position == 0:
+            if league_key(league_id).get().draft_current_position == 0:
+                remove_from_league(user_id) #Remove from old league
+                add_to_league(user_id, league_id) #Add to new one
+                self.redirect('/')
+            else:
+                globals.display_error_page(self, self.request.referer, error_messages.league_already_started)
         else:
-            globals.display_error_page(self, self.request.referer, error_messages.league_already_started)
+            globals.display_error_page(self, self.request.referer, error_messages.league_already_started_leaving)
 
 application = webapp2.WSGIApplication([
                                        ('/leagueManagement/updateLeague', update_League),

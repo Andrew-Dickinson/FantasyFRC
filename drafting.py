@@ -395,7 +395,10 @@ class FreeAgentListPage(webapp2.RequestHandler):
             else:
                 page = int(page)
 
-            league_name = league_key(league_id).get().name
+            if league_key(league_id).get().draft_current_position == 0:
+                league_name = league_key(league_id).get().name
+            else:
+                league_name = globals.draft_started_sentinel
 
             free_agent_list = get_free_agent_list(league_id, page)
 
@@ -484,7 +487,10 @@ class Draft_Page(webapp2.RequestHandler):
                     draft_board[draft_round][username] = "<i>TBD</i>"
 
             if league_id != '0':
-                league_name = league_key(league_id).get().name
+                if league_key(league_id).get().draft_current_position == 0:
+                    league_name = league_key(league_id).get().name
+                else:
+                    league_name = globals.draft_started_sentinel
             else:
                 league_name = ""
 
@@ -658,7 +664,10 @@ class Pick_up_Page(webapp2.RequestHandler):
                     league_table.append({'player_team': 'None', 'player_name': player.nickname})
 
             if league_id != '0':
-                league_name = league_key(league_id).get().name
+                if league_key(league_id).get().draft_current_position == 0:
+                    league_name = league_key(league_id).get().name
+                else:
+                    league_name = globals.draft_started_sentinel
             else:
                 league_name = ""
 
