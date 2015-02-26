@@ -351,7 +351,7 @@ class Join_League(webapp2.RequestHandler):
         """
         user_id = users.get_current_user().user_id()
         current_league = league_key(account_key(user_id).get().league).get()
-        if current_league.draft_current_position == 0:
+        if not current_league or current_league.draft_current_position == 0:
             if league_key(league_id).get().draft_current_position == 0:
                 remove_from_league(user_id) #Remove from old league
                 add_to_league(user_id, league_id) #Add to new one

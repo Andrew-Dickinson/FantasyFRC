@@ -7,59 +7,128 @@
 	
 	<ol class="breadcrumb">
 		<li><a href="/">Home</a></li>
-		<li class="active">View Alliance</li>
+		<li class="active">Alliance Portal</li>
 	</ol>
-	<h1>Lineup Overview</h1>
-	<table class="table">
-		<tr><td>Week</td><td>Active Teams</td><td>Points</td></tr>
-		{% for week in week_table %}
-		<tr>
-			<td><a href="/allianceManagement/viewAlliance/{{ week.week }}">{{ week.week }}</a></td>
-			<td><a href="/allianceManagement/viewAlliance/{{ week.week }}">
-				{% if week.active_lineup %}
-					{% for team in week.active_lineup %}{{ team }}{% if not loop.last %}, {% endif %}{% endfor %}
-				{% else %}
-					<i>No Teams</i>
-				{% endif %}
-			</a></td>
-			<td><a href="/allianceManagement/viewAlliance/{{ week.week }}">
-				{% autoescape false %}{{ week.points }}{% endautoescape %}
-			</a></td>
-		</tr>
-		{% endfor %}
-		<tr><td></td><td></td><td><b>Total: {{ total_points }}</b></td></tr>
-	</table>
-    <h1>League Standings</h1>
-    <table class="table">
-        <tr><td>Rank</td><td>Name</td><td>W-L-T</td><td>Total Points</td></tr>
-            {% for player in leader_board %}
-                <tr>
-                    <td>{{ loop.index }}</td>
-                    <td>{{ player.name }}</td>
-                    <td>
-                        {% for number in player.record %}{{ number }}{% if not loop.last %}-{% endif %}{% endfor %}
-                    </td>
-                    <td>{{ player.points }}</td>
-                </tr>
 
-            {% endfor %}
-    </table>
-    <h1>League Schedule</h1>
-    <table class="table">
-        <tr>
-            <td>Player</td>
-            {% for week in week_table %}
-                <td>Week {{ loop.index }}</td>
-            {% endfor %}
-        </tr>
-        {% for player in schedule %}
-            <tr>
-                <td><b>{{ player.name }}</b></td>
-                {% for opponent in player.schedule %}
-                    <td>{{ opponent }}</td>
+    <ul class="nav nav-tabs" role="tablist">
+        <li role="presentation" class="active"><a href="#league" aria-controls="league" role="tab" data-toggle="tab">My League</a> </li>
+        <li role="presentation"><a href="#alliance" aria-controls="alliance" role="tab" data-toggle="tab">My Alliance</a> </li>
+    </ul>
+
+    <div class="tab-content">
+        <div role="tabpanel" class="tab-pane" id="alliance">
+            <h1>My Roster</h1>
+            <table class="table">
+                <tr><td></td><td>Number</td><td>Name</td><td>Drop</td><td>Total Points</td></tr>
+                {% for team in roster %}
+                    <tr>
+                        <td>
+                            {% if team.disabled == "True" %}
+                                <a class="category-tooltip" href="#" data-toggle="tooltip"
+								data-original-title="This team is unable to be dropped because of its presence in the top 5">
+                                    <img src="/static/icons/lock.png" alt="Team Locked"/>
+                                </a>
+                            {% endif %}
+                        </td>
+                        <td><a href="{{ team.detail_url }}">{{ team.number }}</a></td>
+                        <td><a href="{{ team.detail_url }}">{{ team.name }}</a></td>
+                        <td>
+                            <a href="#"  data-toggle="modal" data-target="#drop_team_modal_{{ team.number }}">
+                            <img src="/static/icons/delete.png" alt="Drop Team"/> Drop</a>
+                        </td>
+                        <td><a href="{{ team.detail_url }}">{{ team.total_points }}</a></td>
+                    </tr>
                 {% endfor %}
-            </tr>
-        {% endfor %}
-    </table>
+            </table>
+            <h1>Lineup Overview</h1>
+            <table class="table">
+                <tr><td>Week</td><td>Active Teams</td><td>Points</td></tr>
+                {% for week in week_table %}
+                <tr>
+                    <td><a href="/allianceManagement/viewAlliance/{{ week.week }}">{{ week.week }}</a></td>
+                    <td><a href="/allianceManagement/viewAlliance/{{ week.week }}">
+                        {% if week.active_lineup %}
+                            {% for team in week.active_lineup %}{{ team }}{% if not loop.last %}, {% endif %}{% endfor %}
+                        {% else %}
+                            <i>No Teams</i>
+                        {% endif %}
+                    </a></td>
+                    <td><a href="/allianceManagement/viewAlliance/{{ week.week }}">
+                        {% autoescape false %}{{ week.points }}{% endautoescape %}
+                    </a></td>
+                </tr>
+                {% endfor %}
+                <tr><td></td><td></td><td><b>Total: {{ total_points }}</b></td></tr>
+            </table>
+        </div>
+        <div role="tabpanel" class="tab-pane active" id="league">
+            <h1>League Standings</h1>
+            <table class="table">
+                <tr><td>Rank</td><td>Name</td><td>W-L-T</td><td>Total Points</td></tr>
+                    {% for player in leader_board %}
+                        <tr>
+                            <td>{{ loop.index }}</td>
+                            <td>{{ player.name }}</td>
+                            <td>
+                                {% for number in player.record %}{{ number }}{% if not loop.last %}-{% endif %}{% endfor %}
+                            </td>
+                            <td>{{ player.points }}</td>
+                        </tr>
+
+                    {% endfor %}
+            </table>
+            <h1>League Schedule</h1>
+            <table class="table">
+                <tr>
+                    <td>Player</td>
+                    {% for week in week_table %}
+                        <td>Week {{ loop.index }}</td>
+                    {% endfor %}
+                </tr>
+                {% for player in schedule %}
+                    <tr>
+                        <td><b>{{ player.name }}</b></td>
+                        {% for opponent in player.schedule %}
+                            <td>{{ opponent }}</td>
+                        {% endfor %}
+                    </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </div>
 </div>
+
+    {% for team in roster %}
+            <!-- drop_team_modals -->
+            <div id="drop_team_modal_{{ team.number }}" class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+              <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                      <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                      <h4 class="modal-title">Woah, Careful now&hellip;</h4>
+                    </div>
+                    <div class="modal-body">
+                      <p>Dropping a team is a serious decision. This will remove this team from your roster. You will <b>not</b> earn points in the future from dropped teams.
+                          <i>Points scored for this team in past weeks will remain</i>
+                      </p>
+
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                      <a role="button" href="/allianceManagement/updateLineup/{{ week_number }}?action=drop&team_number={{ team.number }}" class="btn btn-primary btn-danger">Drop Team</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+        {% endfor %}
+{% endblock %}
+
+{% block inline_javascript %}
+<script type="text/javascript">
+$(document).ready(function(){
+    $(".category-tooltip").tooltip({
+        placement : 'left'
+    });
+});
+</script>
 {% endblock %}
