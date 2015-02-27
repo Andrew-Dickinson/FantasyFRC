@@ -84,7 +84,6 @@ def start_draft(league_id):
         elif direction == DRAFT_STATIONARY:
             display_number += 4
 
-        logging.info(display_number)
         player = league_players[pick_of_round - 1]
         pick_key = draft_pick_key(league_key(league_id), str(number_of_drafts + 1))
         pick = DraftPick.get_or_insert(pick_key.id(), parent=pick_key.parent())
@@ -153,7 +152,6 @@ def generate_schedule(league_id):
     for player in league_players:
         player_ids_list.append(player.key.id())
 
-    logging.info(player_ids_list)
     shuffle(player_ids_list)
     if len(player_ids_list) % 2 == 1:  # Check if the number of players is odd
         # Add 0 to represent bye week, added to beginning to solve last player issue
@@ -189,7 +187,6 @@ def generate_schedule(league_id):
                                                              2 * ((-1) ** week) * week))])
         last_player_schedule = make_schedule_fit(last_player_schedule)
         last_player.schedule = last_player_schedule
-        logging.info(last_player_schedule)
         last_player.put()
     elif number_of_players == 2:
         #If there's only two players, they just constantly play each other
@@ -439,7 +436,6 @@ class Draft_Page(webapp2.RequestHandler):
             draft_pick = draft_pick_key(league_key(league_id), league_key(league_id).get().draft_current_position).get()
             if current_timeout:
                 if current_time > current_timeout:  # The time has expired
-                    logging.info("Forefit")
                     draft_pick.team = 0  # Set the pick to indicate it was forefited
                     draft_pick.put()
                     setup_for_next_pick(league_id)  # Move the pick along to the next person
@@ -706,7 +702,7 @@ class Submit_Pick(webapp2.RequestHandler):
         new_team = self.request.get('team')
 
         selection_error = is_valid_team(new_team, post_Choice_key.parent().get().league)
-        logging.info(selection_error)
+
         #Form data into entity and submit
         post_Choice = Choice.get_or_insert(post_Choice_key.id(), parent=post_Choice_key.parent())
         if selection_error == "Good":

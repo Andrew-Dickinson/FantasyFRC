@@ -53,7 +53,6 @@ def get_team_schedule(team_number):
         points = 0
         points = get_team_points_at_event(team_number, event_id)
         schedule[event_week - 1]['competition_name'] = root_event.name
-        # logging.info(root_event.key.id())
         schedule[event_week - 1]['event_key'] = root_event.key.id()
         schedule[event_week - 1]['tba_url'] = globals.public_event_url.format(root_event.key.id())
         schedule[event_week - 1]['points'] = points
@@ -127,7 +126,6 @@ def get_team_lists(user_id, week_number):
             disabled = 'True'
         current_bench.append({'number':number, 'total_points': total_points, 'disabled': disabled})
 
-    logging.info(current_bench)
 
     return [current_lineup, current_bench]
 

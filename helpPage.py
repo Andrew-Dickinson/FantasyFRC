@@ -81,7 +81,6 @@ class PointsPage(webapp2.RequestHandler):
             account = globals.get_or_create_account(user)
             league_id = account.league
 
-            logging.info(account)
             if league_id != '0':
                 if league_key(league_id).get().draft_current_position == 0:
                     league_name = league_key(league_id).get().name

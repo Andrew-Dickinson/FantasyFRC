@@ -181,7 +181,6 @@ class OpenerDirector(urllib2.OpenerDirector):
         request_processors = list(request_processors)
         request_processors.sort()
         for processor in request_processors:
-            logging.info(processor)
             for meth_name in ["any_request", req_scheme+"_request"]:
                 meth = getattr(processor, meth_name, None)
                 if meth:

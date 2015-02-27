@@ -76,11 +76,9 @@ gecode_url = "https://maps.googleapis.com/maps/api/geocode/json?key=" + google_a
 def get_team_list():
     """Accesses the datastore to return a team list"""
     team_list = RootTeam.query().fetch(overestimate_of_frc_teams)
-    logging.info(team_list)
     team_numbers = []
     for team in team_list:
         team_numbers.append(team.key.id())
-    logging.info(team_numbers)
     return team_numbers
 
 def get_team_list_per_event(event_id):
