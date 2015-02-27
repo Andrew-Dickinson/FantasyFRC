@@ -71,7 +71,6 @@ def get_readable_user_schedule(user_id):
 
     #Convert to nicknames
     for i, opponent in enumerate(schedule):
-        logging.info(opponent)
         if opponent != globals.schedule_bye_week:
             schedule[i] = opponent
         else:
@@ -156,8 +155,6 @@ def finish_week(league_id, past_week_num):
         if opponent != globals.schedule_bye_week:
             opponent_points = get_total_week_points(opponent, past_week_num)
             player_points = get_total_week_points(player.key.id(), past_week_num)
-            logging.info(player_points)
-            logging.info(opponent_points)
             if opponent_points < player_points:
                 player.record[past_week_num - 1] = globals.record_win  # -1 for conversion to 0 based index
             elif opponent_points == player_points:

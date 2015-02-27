@@ -65,19 +65,15 @@ def geocode_within_limit():
 
     for team in teams:
         if num_this_second < 5:
-            logging.info("bladslj")
             team.latlon = geocode(team.address)
-            logging.info(team.latlon)
             team.put()
             num_this_second += 1
         else:
-            logging.info("bla")
             while this_second >= time.gmtime():
                 time.sleep(0.1)
             num_this_second = 0
             this_second = time.gmtime()
             team.latlon = geocode(team.address)
-            logging.info(team.latlon)
             team.put()
 
 
@@ -148,7 +144,6 @@ def proccess_event_data(raw_data, event_id):
             team_list.append(int(data[1]))
     #Store the root event team list data
     root_event.teams = team_list
-    logging.info(get_data_from_web(globals.team_url, data[1])['nickname'])
     root_event.name = get_data_from_web(globals.event_url, event_id)['name']
     root_event.put()
 
@@ -204,7 +199,6 @@ class UpdateDB(webapp2.RequestHandler):
     def get(self):
         setup_default_league()
         raw_data = get_data_from_web(globals.rankings_url, '2014txsa')
-        logging.info(raw_data)
         proccess_event_data(raw_data, '2014txsa')
         alamo_teams = root_event_key('2014txsa').get().teams
         for team in alamo_teams:

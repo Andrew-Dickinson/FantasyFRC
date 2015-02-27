@@ -10,7 +10,6 @@ included with the distribution).
 
 import logging,sys
 
-logging.info("path: %s" % sys.path)
 import re, copy, htmlentitydefs
 import sgmllib, ClientForm
 
