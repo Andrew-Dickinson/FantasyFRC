@@ -64,6 +64,20 @@ def get_readable_schedule(league_id):
 
     return master_schedule
 
+def get_readable_user_schedule(user_id):
+    """Return the schedule of a single person in readable format"""
+    player = account_key(user_id).get()
+    schedule = player.schedule
+
+    #Convert to nicknames
+    for i, opponent in enumerate(schedule):
+        logging.info(opponent)
+        if opponent != globals.schedule_bye_week:
+            schedule[i] = opponent
+        else:
+            schedule[i] = "Bye"
+
+    return schedule
 
 def get_player_record(player_id):
     """Access the data store to return a player's record"""
@@ -351,7 +365,7 @@ class Join_League(webapp2.RequestHandler):
         """
         user_id = users.get_current_user().user_id()
         current_league = league_key(account_key(user_id).get().league).get()
-        if current_league.draft_current_position == 0:
+        if not current_league or current_league.draft_current_position == 0:
             if league_key(league_id).get().draft_current_position == 0:
                 remove_from_league(user_id) #Remove from old league
                 add_to_league(user_id, league_id) #Add to new one

@@ -17,6 +17,7 @@ from datastore_classes import account_key, RootTeam, Account, root_event_key, ro
 
 import jinja2
 import webapp2
+from operator import itemgetter
 
 JINJA_ENVIRONMENT = jinja2.Environment(
     loader=jinja2.FileSystemLoader(os.path.dirname(__file__)),
@@ -131,6 +132,38 @@ def get_team_lists(user_id, week_number):
     return [current_lineup, current_bench]
 
 
+def get_current_roster(user_id):
+    """
+        Return the list of teams currently on the roster
+
+        :parameter user_id: The id of the user to gather list from
+        :type str or int
+        :return: An array containing, for each team in the roster, a dictionary:
+            - number: The team number(int)
+            - name: The team name (string)
+            - detail_url: A link to the team's individual page (string)
+            - total_points: The number of points(our system) this team scored in total.  (int)
+            - disabled: Is 'True' if team is locked because of good performance (string(bool))
+    """
+    account = account_key(user_id).get()
+    choice = choice_key(account.key, account.league).get()
+    roster = choice.current_team_roster
+
+    current_roster = []
+    for number in roster:
+        team = {}
+        team['number'] = number
+        team['name'] = root_team_key(str(number)).get().name
+        team['detail_url'] = '/allianceManagement/teamDetail/%s' % number
+        team['total_points'] = get_points_to_date(int(number))
+
+        if str(number) in get_top_teams(globals.number_of_locked_teams):
+            team['disabled'] = 'True'
+
+        current_roster.append(team)
+
+    return sorted(current_roster, key=itemgetter('total_points'), reverse=True)
+
 def get_top_teams(number):
     """Return a list of the top teams"""
     query = RootTeam.query().order(-RootTeam.total_points)
@@ -155,6 +188,7 @@ class alliance_portal(webapp2.RequestHandler):
                 - The league schedule, including bye weeks and who plays who
                 - The leader board, showing bench points and league points for each player, ranked
                 - The current user's lineup for each week, including the points scored for past weeks
+                - The current user's current roster
          """
         # Checks for active Google account session
         user = users.get_current_user()
@@ -203,6 +237,10 @@ class alliance_portal(webapp2.RequestHandler):
                 leader_board = get_leader_board(league_id)
                 league_schedule = get_readable_schedule(league_id)
 
+                current_roster = get_current_roster(user_id)
+
+                user_schedule = get_readable_user_schedule(user_id)
+
                 template_values = {
                                 'user': user.nickname(),
                                 'logout_url': logout_url,
@@ -211,6 +249,9 @@ class alliance_portal(webapp2.RequestHandler):
                                 'total_points': total_points,
                                 'leader_board': leader_board,
                                 'schedule': league_schedule,
+                                'roster': current_roster,
+                                'week_number': globals.debug_current_editable_week,
+                                'user_schedule': user_schedule
                                 }
 
                 template = JINJA_ENVIRONMENT.get_template('templates/alliance_management_portal.html')
@@ -245,7 +286,7 @@ class update_lineup(webapp2.RequestHandler):
         account = globals.get_or_create_account(user)
         league_id = account.league
 
-        choice = choice_key(account_key(user_id), league_key(league_id))
+        choice = choice_key(account_key(user_id), league_id).get()
         roster = []
 
         for team in choice.current_team_roster:
@@ -275,7 +316,7 @@ class update_lineup(webapp2.RequestHandler):
                     choice.put()
             active_lineup.put()
         if not error:
-            self.redirect('/allianceManagement/viewAlliance/' + str(week_number))
+            self.redirect(self.request.referer)
 
 
 class view_alliance(webapp2.RequestHandler):
@@ -445,4 +486,4 @@ if __name__ == "__main__":
 # Down here to resolve import issues
 from points import get_team_points_at_event, get_points_to_date, get_point_breakdown_display, \
     humman_readable_point_categories, explanation_of_point_categories
-from league_management import get_leader_board, get_readable_schedule, get_opponent, get_opponent_name
+from league_management import get_leader_board, get_readable_schedule, get_opponent, get_opponent_name, get_readable_user_schedule

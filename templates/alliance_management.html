@@ -59,9 +59,10 @@
 					</td>
 					<td>
                         {% if team.disabled == 'True' %}
-                            <span href="" class="text-disabled">Drop<a class="category-tooltip" href="" data-toggle="tooltip"
-								data-original-title="This team is unable to be dropped because of its presence in the top 5">?</a>
-                            </span>
+                         <a class="category-tooltip" href="" data-toggle="tooltip"
+								data-original-title="This team is unable to be dropped because of its presence in the top 5">
+                             <img src="/static/icons/lock.png" alt="Team Locked"/></a>
+                            <span href="" class="text-disabled"> Drop</span>
                         {% else %}
                             <a href="#"  data-toggle="modal" data-target="#drop_team_modal_{{ team.number }}">
                             <img src="/static/icons/delete.png" alt="Drop Team"/> Drop</a>
@@ -131,7 +132,7 @@
 <script type="text/javascript">
 $(document).ready(function(){
     $(".category-tooltip").tooltip({
-        placement : 'right'
+        placement : 'left'
     });
 });
 </script>

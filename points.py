@@ -1,7 +1,6 @@
 import logging
 import globals
 
-from globals import no_data_display
 from award_classification import AwardType
 
 from datastore_classes import TeamEvent, team_event_key, team_key, lineup_key, Lineup, choice_key, account_key
