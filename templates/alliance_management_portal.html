@@ -40,6 +40,23 @@
                     </tr>
                 {% endfor %}
             </table>
+            <h1>My Schedule</h1>
+            <div>
+            <table class="table" style="width: auto !important">
+                {% for opponent in user_schedule %}
+                    <tr>
+                        <td>
+                            {% if loop.index == week_number %}<b>{% endif %}
+                            Week {{ loop.index }}
+                            {% if loop.index == week_number %}</b>{% endif %}
+                        </td>
+                        <td>
+                            {% if loop.index == week_number %}<b>{% endif %}
+                            <a href="/allianceManagement/viewAlliance/{{ loop.index }}">{{ opponent }}</a>
+                            {% if loop.index == week_number %}</b>{% endif %}</td>
+                    </tr>
+                {% endfor %}
+            </table></div>
             <h1>Lineup Overview</h1>
             <table class="table">
                 <tr><td>Week</td><td>Active Teams</td><td>Points</td></tr>

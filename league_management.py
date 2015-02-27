@@ -64,6 +64,20 @@ def get_readable_schedule(league_id):
 
     return master_schedule
 
+def get_readable_user_schedule(user_id):
+    """Return the schedule of a single person in readable format"""
+    player = account_key(user_id).get()
+    schedule = player.schedule
+
+    #Convert to nicknames
+    for i, opponent in enumerate(schedule):
+        logging.info(opponent)
+        if opponent != globals.schedule_bye_week:
+            schedule[i] = opponent
+        else:
+            schedule[i] = "Bye"
+
+    return schedule
 
 def get_player_record(player_id):
     """Access the data store to return a player's record"""
