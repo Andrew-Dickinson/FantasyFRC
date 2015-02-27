@@ -356,14 +356,21 @@ class view_alliance(webapp2.RequestHandler):
                     point_total += team['total_points']
                 point_totals.append(point_total)
 
-            opponent_team_lists = get_team_lists(get_opponent(user_id, week_number), week_number)
+            opponent_name = ""
             opponent_point_totals = []
-            for team_list in team_lists:
-                opponent_point_total = 0
-                for team in team_list:
-                    opponent_point_total += team['total_points']
-                opponent_point_totals.append(opponent_point_total)
+            opponent_team_lists = []
+            team_listss = [team_lists]
+            if get_opponent(user_id, week_number) != globals.schedule_bye_week:
+                opponent_team_lists = get_team_lists(get_opponent(user_id, week_number), week_number)
+                opponent_point_totals = []
+                for team_list in team_lists:
+                    opponent_point_total = 0
+                    for team in team_list:
+                        opponent_point_total += team['total_points']
+                    opponent_point_totals.append(opponent_point_total)
 
+                opponent_name = get_opponent_name(user_id, week_number)
+                team_listss.append(opponent_team_lists)
 
 
             #Send html data to browser
@@ -373,8 +380,8 @@ class view_alliance(webapp2.RequestHandler):
                             'league_name': league_name,
                             'week_number': int(week_number),
                             'point_totals': [point_totals, opponent_point_totals],
-                            'team_listss': [team_lists, opponent_team_lists],
-                            'opponent_name': get_opponent_name(user_id, week_number),
+                            'team_listss': team_listss,
+                            'opponent_name': opponent_name,
                             }
 
             if is_week_editable(week_number):

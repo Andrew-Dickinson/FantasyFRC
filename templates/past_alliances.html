@@ -33,6 +33,11 @@
         {% set opponent_loop = loop %}
         {% if loop.first %}
             <h1>Your Lineup</h1>
+            {% if opponent_name == "" %}
+                <div class="alert alert-warning">
+                    <b>Note:</b> Since this was a bye week for you, you did not earn any league points.
+                </div>
+            {% endif %}
         {% else %}
             <hr/>
             <h1>{{ opponent_name }}'s Lineup</h1>
