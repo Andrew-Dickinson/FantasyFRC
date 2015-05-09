@@ -396,23 +396,26 @@ class manage_league(webapp2.RequestHandler):
         account = globals.get_or_create_account(user)
         league_id = account.league
 
-        if league_id != '0':
-            if league_key(league_id).get().draft_current_position == 0:
-                league_name = league_key(league_id).get().name
+        if league_id == account.key.id():
+            if league_id != '0':
+                if league_key(league_id).get().draft_current_position == 0:
+                    league_name = league_key(league_id).get().name
+                else:
+                    league_name = globals.draft_started_sentinel
             else:
-                league_name = globals.draft_started_sentinel
-        else:
-            league_name = ""
+                league_name = ""
 
-        #Send html data to browser
-        template_values = {
-                        'user': user.nickname(),
-                        'logout_url': logout_url,
-                        'league_name': league_name,
-                        'snake_draft': league_key(league_id).get().snake_draft
-                        }
-        template = JINJA_ENVIRONMENT.get_template('templates/manage_league.html')
-        self.response.write(template.render(template_values))
+            #Send html data to browser
+            template_values = {
+                            'user': user.nickname(),
+                            'logout_url': logout_url,
+                            'league_name': league_name,
+                            'snake_draft': league_key(league_id).get().snake_draft
+                            }
+            template = JINJA_ENVIRONMENT.get_template('templates/manage_league.html')
+            self.response.write(template.render(template_values))
+        else:
+            globals.display_error_page(self, self.request.referer,error_messages.access_denied)
 
 class delete_League(webapp2.RequestHandler):
     """
