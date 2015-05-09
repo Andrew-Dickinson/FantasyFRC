@@ -91,6 +91,8 @@ class Account(ndb.Model):
     schedule = ndb.StringProperty(repeated=True)
     record = ndb.StringProperty(repeated=True)  # Uses the record variables in globals
 
+    watchlist = ndb.IntegerProperty(repeated=True)
+
 
 class TeamEvent(ndb.Model):
     """Stores a team's data for a single event"""

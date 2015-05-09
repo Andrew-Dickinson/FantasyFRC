@@ -239,6 +239,9 @@ class alliance_portal(webapp2.RequestHandler):
 
                 user_schedule = get_readable_user_schedule(user_id)
 
+                watchlist_raw = account.watchlist
+                watch_list = get_watchlist(watchlist_raw)
+
                 template_values = {
                                 'user': user.nickname(),
                                 'logout_url': logout_url,
@@ -248,6 +251,7 @@ class alliance_portal(webapp2.RequestHandler):
                                 'leader_board': leader_board,
                                 'schedule': league_schedule,
                                 'roster': current_roster,
+                                'watch_list': watch_list,
                                 'week_number': globals.debug_current_editable_week,
                                 'user_schedule': user_schedule
                                 }
@@ -272,7 +276,6 @@ class update_lineup(webapp2.RequestHandler):
 
             :parameter week_number: Taken from the url, in string form
         """
-        #The choice_key of the request
         action = self.request.get('action')
         team_number = self.request.get('team_number')
 
@@ -492,3 +495,4 @@ if __name__ == "__main__":
 from points import get_team_points_at_event, get_points_to_date, get_point_breakdown_display, \
     humman_readable_point_categories, explanation_of_point_categories
 from league_management import get_leader_board, get_readable_schedule, get_opponent, get_opponent_name, get_readable_user_schedule
+from drafting import get_watchlist

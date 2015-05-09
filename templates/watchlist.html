@@ -4,25 +4,7 @@
 
 {% block content %}
 <div class="container">
-    <nav>
-	  <ul class="pager">
-	  	{% if page == 1 %}
-	  		<li class="previous disabled"><a href="">&larr; Previous Page</a></li>
-	    {% else %}
-	    	<li class="previous">
-	    		<a href="/draft/freeAgentList/{{ page - 1 }}">&larr; Previous Page</a>
-	  		</li>
-	    {% endif %}
-	    {% if page == max_page %}
-	   		<li class="next disabled"><a href="">Next Page &rarr;</a></li>
-	    {% else %}
-	    	<li class="next">
-	    		<a href="/draft/freeAgentList/{{ page + 1 }}">Next Page &rarr;</a>
-	    	</li>
-	    {% endif %}
-	  </ul>
-	</nav>
-    <h1>List of Free Agents</h1>
+    <h1>Watchlist</h1>
     {% if update_text != "" %}
         <div class="alert alert-{% if update_text == 'Good' %}success{% else %}danger{% endif %}">
             <button id="dismisswarning" type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
@@ -35,52 +17,36 @@
     {% endif %}
     <h2>Sorted by Points</h2>
     <table class="table">
-        <th><td>Number</td><td>Name</td><td>Actions</td><td>Total Points</td></th>
-        {% for team in free_agent_list %}
+        <tr><td>Number</td><td>Name</td><td>Current Owner</td><td>Actions</td><td>Total Points</td></tr>
+        {% for team in watch_list %}
         <tr>
-            <td>{{ team.rank }}</td>
             <td><a href="/allianceManagement/teamDetail/{{ team.number }}">{{ team.number }}</a></td>
             <td>{{ team.name }}</td>
+            <td>{{ team.owner }}</td>
             <td><a href="/draft/pickUp/submitPick?team={{ team.number }}"><img src="/static/icons/add.png"></a>
-                {% if team.on_watchlist %}
-                    <a href="/draft/watchList/update/?action=drop&team={{ team.number }}"><img src="/static/icons/flag_blue_delete.png"></a></td>
-                {% else %}
-                    <a href="/draft/watchList/update/?action=add&team={{ team.number }}"><img src="/static/icons/flag_blue.png"></a></td>
-                {% endif %}
+                <a href="/draft/watchList/update/?action=drop&team={{ team.number }}"><img src="/static/icons/flag_blue_delete.png"></a></td>
             <td>{{ team.total_points }}</td>
         </tr>
         {% endfor %}
     </table>
-    <nav>
-	  <ul class="pager">
-	  	{% if page == 1 %}
-	  		<li class="previous disabled"><a href="">&larr; Previous Page</a></li>
-	    {% else %}
-	    	<li class="previous">
-	    		<a href="/draft/freeAgentList/{{ page - 1 }}">&larr; Previous Page</a>
-	  		</li>
-	    {% endif %}
-	    {% if page == max_page %}
-	   		<li class="next disabled"><a href="">Next Page &rarr;</a></li>
-	    {% else %}
-	    	<li class="next">
-	    		<a href="/draft/freeAgentList/{{ page + 1 }}">Next Page &rarr;</a>
-	    	</li>
-	    {% endif %}
-	  </ul>
-	</nav>
 
-    <h1>Or Manually Select a Team</h1>
+    <h1>Adding a team</h1>
+    <h2>Using the free agent list</h2>
+    The easiest way to add a team to your watchlist is to find it in the <a href="/draft/freeAgentList/">free agent list</a> and click its flag (<img src="/static/icons/flag_blue.png">).
+    <h2>Manual Entry</h2>
+    You can also add a team to your watchlist by typing it's number below.
     <div id="team_selector">
-		<h2>Enter a Team Number:</h2>
-		<form action="/draft/pickUp/submitPick" method="post">
+		<h3>Enter a Team Number:</h3>
+		<form action="/draft/watchList/update/" method="get">
 			Team Number:
 			<input type="text" value="{{ default_team }}" name="team">
+            <input type="hidden" value="add" name="action">
 			<button type="submit"  class="btn btn-primary">Submit</button>
 		</form>
 	</div>
     <div id="Current Roster">
 		<h2>Current Roster</h2>
+        A copy of your current roster is listed for convenience
 		{% if roster|length > 0%}
                     <table class="table">
                         <tr><td></td><td>Number</td><td>Name</td><td>Drop</td><td>Total Points</td></tr>

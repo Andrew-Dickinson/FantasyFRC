@@ -17,7 +17,7 @@ from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.ext import ndb
 from google.appengine.api import users
 
-from datastore_classes import RootTeam, league_key, Choice, Lineup, choice_key, account_key, Account, lineup_key, \
+from datastore_classes import RootTeam, root_team_key, league_key, Choice, Lineup, choice_key, account_key, Account, lineup_key, \
     DraftPick, draft_pick_key
 
 import jinja2
@@ -327,12 +327,13 @@ def get_max_free_agent_pages(league_id):
         return math.floor(number_of_teams / globals.free_agent_pagination) + 1
 
 
-def get_free_agent_list(league_id, page):
+def get_free_agent_list(league_id, page, account_id):
     """
         Return the list of free agents for a given league. Only return those on a certain page
 
         :param league_id: The league to generate the list for
         :param page: The number of the page to get
+        :param account_id: The account id of the person viewing this page
         :return: A list of dictionaries with the following information for each team:
             - rank: Rank in the free agent list
             - name: The name of the team
@@ -358,11 +359,31 @@ def get_free_agent_list(league_id, page):
             'rank': i + ((page - 1) * globals.free_agent_pagination) + 1,
             'name': team.name,
             'number': team.key.id(),
-            'total_points': team.total_points
+            'total_points': team.total_points,
+            'on_watchlist': int(team.key.id()) in account_key(account_id).get().watchlist
         })
 
     return free_agent_list
 
+def get_watchlist(watchlist_raw):
+    watch_list = []
+    for team_number in watchlist_raw:
+        logging.info(team_number)
+        team = root_team_key(str(team_number)).get()
+        choice_query = Choice.query(Choice.current_team_roster == team_number)
+        choice_entity = choice_query.fetch(1)
+        if len(choice_entity) > 0:
+            owner = choice_entity[0].key.parent().get()
+            name = owner.nickname
+        else:
+            name = "Unowned"
+        watch_list.append({
+            'name': team.name,
+            'number': team_number,
+            'total_points': team.total_points,
+            'owner': name
+        })
+    return watch_list
 
 class FreeAgentListPage(webapp2.RequestHandler):
     def get(self, page):
@@ -397,7 +418,7 @@ class FreeAgentListPage(webapp2.RequestHandler):
             else:
                 league_name = globals.draft_started_sentinel
 
-            free_agent_list = get_free_agent_list(league_id, page)
+            free_agent_list = get_free_agent_list(league_id, page, account.key.id())
 
             current_roster = get_current_roster(account.key.id())
 
@@ -417,6 +438,83 @@ class FreeAgentListPage(webapp2.RequestHandler):
 
         else:
             globals.display_error_page(self, self.request.referer, error_messages.need_to_be_a_member_of_a_league)
+
+class WatchListPage(webapp2.RequestHandler):
+    def get(self):
+        """
+            Display the watchlist for this user
+
+            The watch list is a list of teams that the player has selected to keep tabs on.
+            They are sorted by the total points of each team
+            Users have the option to pick up teams or remove them from the watchlist
+        """
+        # Checks for active Google account session
+        user = users.get_current_user()
+
+        logout_url = users.create_logout_url('/')
+
+        #Display update text for the status of the last choice update
+        update_text = self.request.get('updated')
+
+        account = globals.get_or_create_account(user)
+        league_id = account.league
+
+        if league_id != '0':
+
+            if league_key(league_id).get().draft_current_position == 0:
+                league_name = league_key(league_id).get().name
+            else:
+                league_name = globals.draft_started_sentinel
+
+            watchlist_raw = account.watchlist
+
+            watch_list = get_watchlist(watchlist_raw);
+
+            current_roster = get_current_roster(account.key.id())
+
+            #Send html data to browser
+            template_values = {
+                'user': user.nickname(),
+                'logout_url': logout_url,
+                'league_name': league_name,
+                'update_text': update_text,
+                'watch_list': watch_list,
+                'roster': current_roster,
+            }
+            template = JINJA_ENVIRONMENT.get_template('templates/watchlist.html')
+            self.response.write(template.render(template_values))
+
+        else:
+            globals.display_error_page(self, self.request.referer, error_messages.need_to_be_a_member_of_a_league)
+
+class UpdateWatchlist(webapp2.RequestHandler):
+    def get(self):
+        """
+            Update the watchlist for the user
+            Expects a post parameter: 'action' to be one of the following:
+                - add: Adds the team to the watchlist
+                - drop: Removes the team from the watchlist
+            Expects a post parameter: 'team_number' to be the number of the team to perform this action on
+        """
+        action = self.request.get('action')
+        team_number = self.request.get('team')
+
+        user = users.get_current_user()
+
+        account = globals.get_or_create_account(user)
+
+        watchlist = account.watchlist
+
+        if action == "add":
+            if not int(team_number) in watchlist:
+                account.watchlist.append(int(team_number))
+                account.put()
+        elif action == "drop":
+            if int(team_number) in watchlist:
+                account.watchlist.remove(int(team_number))
+                account.put()
+
+        self.redirect(self.request.referer)
 
 
 class Draft_Page(webapp2.RequestHandler):
@@ -686,6 +784,8 @@ application = webapp2.WSGIApplication([('/draft/freeAgentList/(.*)', FreeAgentLi
                                        ('/draft/pickUp/submitPick', Submit_Pick),
                                        ('/draft/submitPick', Submit_Draft_Pick),
                                        ('/draft/startDraft', Start_Draft),
+                                       ('/draft/watchList/update/', UpdateWatchlist),
+                                       ('/draft/watchList', WatchListPage),
                                        ('/draft/', Draft_Page)
 
                                       ], debug=True)
