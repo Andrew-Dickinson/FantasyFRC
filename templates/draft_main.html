@@ -81,8 +81,9 @@
 			{% elif draft_status == "Post"  %}
 				<i>Final Results - <a href="/allianceManagement/viewAlliance">Manage Alliance</a></i>
 			{% elif draft_status == "Pre" %}
-				<i>Draft has not yet begun - Tell your commissioner to <a href="/draft/startDraft">start the draft</a></i>
-			{% endif %}
+				<i>Draft has not yet begun - Tell your commissioner to <a href="/draft/startDraft">start the draft</a>.</i><br/><br/>
+			    <i>The commissioner may also want to <a href="/leagueManagement/manageLeague">edit</a> the league settings</i>
+            {% endif %}
 		</h2>
 		<table class="table">
 		<th>
