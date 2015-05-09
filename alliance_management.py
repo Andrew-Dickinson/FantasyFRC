@@ -294,8 +294,8 @@ class update_lineup(webapp2.RequestHandler):
             roster.append(int(team))
 
         #Only allow changes to the lineup if the week is editable
+        error = False
         if is_week_editable(week_number):
-            error = False
             active_lineup = lineup_key(choice_key(account.key, league_id), week_number).get()
             if action == "bench":
                 active_lineup.active_teams.remove(int(team_number))
@@ -312,8 +312,12 @@ class update_lineup(webapp2.RequestHandler):
                 if not str(team_number) in get_top_teams(globals.number_of_locked_teams):
                     choice = choice_key(account.key, league_id).get()
                     choice.current_team_roster.remove(int(team_number))
-                    if int(team_number) in active_lineup.active_teams:
-                        active_lineup.active_teams.remove(int(team_number))
+
+                    for week_num in range(week_number, globals.number_of_official_weeks):
+                        lineup = lineup_key(choice.key, week_num).get()
+                        if int(team_number) in lineup.active_teams:
+                            active_lineup.active_teams.remove(int(team_number))
+
                     choice.put()
             active_lineup.put()
         if not error:
