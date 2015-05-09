@@ -181,6 +181,17 @@ def remove_from_league(user_id):
     account = Account.get_or_insert(user_id)
 
     if league_key(account.league).get() and league_key(account.league).get().draft_current_position == 0:
+        remove_from_league_indiscriminately(user_id)
+
+def remove_from_league_indiscriminately(user_id):
+    """
+        Remove a certain user_id from their league, doesn't care if the draft has already started
+        To be called directly only on the destruction of a league
+    """
+    #Current user's id, used to identify their data
+    account = Account.get_or_insert(user_id)
+
+    if league_key(account.league).get():
         #Remove user's choices and lineup for the league
         choice = choice_key(account_key(user_id), account.league).get()
         if choice:
@@ -310,7 +321,7 @@ class create_League(webapp2.RequestHandler):
 
 class update_League(webapp2.RequestHandler):
     """
-        The post handler for the creation of new leagues
+        The post handler for the creation and update of leagues
     """
     def post(self):
         user = users.get_current_user()
@@ -372,12 +383,70 @@ class Join_League(webapp2.RequestHandler):
         else:
             globals.display_error_page(self, self.request.referer, error_messages.league_already_started_leaving)
 
+class manage_league(webapp2.RequestHandler):
+    def get(self):
+        """
+            Allows deletion of a league and the modification of settings
+        """
+        # Checks for active Google account session
+        user = users.get_current_user()
+
+        logout_url = users.create_logout_url('/')
+
+        account = globals.get_or_create_account(user)
+        league_id = account.league
+
+        if league_id != '0':
+            if league_key(league_id).get().draft_current_position == 0:
+                league_name = league_key(league_id).get().name
+            else:
+                league_name = globals.draft_started_sentinel
+        else:
+            league_name = ""
+
+        #Send html data to browser
+        template_values = {
+                        'user': user.nickname(),
+                        'logout_url': logout_url,
+                        'league_name': league_name,
+                        'snake_draft': league_key(league_id).get().snake_draft
+                        }
+        template = JINJA_ENVIRONMENT.get_template('templates/manage_league.html')
+        self.response.write(template.render(template_values))
+
+class delete_League(webapp2.RequestHandler):
+    """
+        The post handler for the deletion of leagues
+    """
+    def get(self):
+        user = users.get_current_user()
+        account = globals.get_or_create_account(user)
+
+        league = league_key(account.league).get()
+        league_id = league.key.id()
+
+        commissioner_account_id = league.key.id()
+
+        if account.key.id() == commissioner_account_id:
+            #Only the commissioner may delete a league
+            league_player_query = Account.query(Account.league == league_id)
+            league_players = league_player_query.fetch()
+            for player in league_players:
+                remove_from_league_indiscriminately(player.key.id())  # We can only do this because we're about to destroy the league
+            league.key.delete()
+
+            self.redirect('/')
+        else:
+            globals.display_error_page(self, self.request.referer, error_messages.access_denied)
+
 application = webapp2.WSGIApplication([
                                        ('/leagueManagement/updateLeague', update_League),
                                        ('/leagueManagement/createLeague', create_League),
                                        ('/leagueManagement/showLeagues', Show_Leagues),
-                                        ('/leagueManagement/joinLeague/(.*)', Join_League),
-                                       ('/leagueManagement/leaveLeague', leave_League)
+                                       ('/leagueManagement/joinLeague/(.*)', Join_League),
+                                       ('/leagueManagement/leaveLeague', leave_League),
+                                       ('/leagueManagement/manageLeague', manage_league),
+                                       ('/leagueManagement/deleteLeague', delete_League),
                                        ], debug=True)
 
 def main():

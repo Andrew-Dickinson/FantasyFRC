@@ -1,0 +1,46 @@
+{% extends "/templates/base.html" %}
+{% block content %}
+<div class="container">
+	<ol class="breadcrumb">
+		<li><a href="/">Home</a></li>
+		<li class="active">Manage League</li>
+	</ol>
+
+	<h1>Manage your league</h1>
+	<div id="team_selector">
+		<p>{{ update_text }}</p>
+		<form action="/leagueManagement/updateLeague" method="post">
+            <p>
+                League Name:
+                <input type="text" value="{{ league_name }}" name="name" size="40">
+            </p>
+            <p>
+                Snake Draft? <input type="checkbox" name="snake_draft" {% if snake_draft %}checked{% endif %}>
+            </p>
+            <p>
+                <button id="delete_league" type="button" class="btn btn-primary  btn-danger" data-toggle="modal" data-target="#delete_league_modal">Delete League</button>
+                <button type="submit"  class="btn btn-primary">Save</button>
+            </p>
+            <!-- delete league_modal -->
+            <div id="delete_league_modal" class="modal fade bs-example-modal-lg" tabindex="-1" role="dialog" aria-labelledby="myLargeModalLabel" aria-hidden="true">
+              <div class="modal-dialog modal-lg">
+                <div class="modal-content">
+                    <div class="modal-header">
+                      <button type="button" class="close" data-dismiss="modal"><span aria-hidden="true">&times;</span><span class="sr-only">Close</span></button>
+                      <h4 class="modal-title">Woah, Careful now&hellip;</h4>
+                    </div>
+                    <div class="modal-body">
+                      <p>Are you sure you want to delete this league permanently (a very long time)?</p>
+                    </div>
+                    <div class="modal-footer">
+                      <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+                      <a role="button" href="/leagueManagement/deleteLeague" class="btn btn-primary btn-danger">Delete League</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+		</form>
+	</div>
+</div>
+{% endblock %}
