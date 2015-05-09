@@ -90,13 +90,13 @@ def get_team_list_per_event(event_id):
     return team_numbers
 
 def get_or_create_account(user):
-    """Called periodically to get (all pages) to get the current user, or to create a new one if null"""
+    """Called periodically (all pages) to get the current user, or to create a new one if null"""
     account = Account.get_or_insert(user.user_id(), nickname=user.nickname(), league='0')
-    if account.league == None:
+    if not account.league:  # Makes compiler happy. Equivalent to "if account.league == None:"
         account.league = '0'
         account.put()
     return account
 
-def display_error_page(self, referer, message):
+def display_error_page(self, referrer, message):
     template = JINJA_ENVIRONMENT.get_template('templates/error_page.html')
-    self.response.write(template.render({'Message': message, 'Back_Link': referer}))
+    self.response.write(template.render({'Message': message, 'Back_Link': referrer}))
