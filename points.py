@@ -49,7 +49,7 @@ point_breakdown_display_style = [
 
 explanation_of_point_categories = [
     "Every match won in the qualification rounds earns a team 2 points",
-    "Every match lost in the qualification rounds earns a team 1 point",
+    "Every match tied in the qualification rounds earns a team 1 point",
     "Teams get no points for matches lost during the qualification rounds",
     "Teams get points for their progress through elemination rounds as follows: Quarterfinalist: 4, Semifinalist: 10, Finalist: 20, Winner: 30",
     "Teams seeded 1st get 20, 2nd-3rd get 12, 4th-8th get 6, 9th-12th get 3, 13th-16th get 2",
