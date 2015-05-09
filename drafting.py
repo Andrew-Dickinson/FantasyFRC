@@ -684,7 +684,6 @@ class Submit_Pick(webapp2.RequestHandler):
 
 application = webapp2.WSGIApplication([('/draft/freeAgentList/(.*)', FreeAgentListPage),  # Page number
                                        ('/draft/pickUp/submitPick', Submit_Pick),
-                                       ('/draft/pickUp/', Pick_up_Page),
                                        ('/draft/submitPick', Submit_Draft_Pick),
                                        ('/draft/startDraft', Start_Draft),
                                        ('/draft/', Draft_Page)
