@@ -18,31 +18,44 @@
     <div class="tab-content">
         <div role="tabpanel" class="tab-pane" id="alliance">
             <h1>My Roster</h1>
-            <table class="table">
-                <tr><td></td><td>Number</td><td>Name</td><td>Drop</td><td>Total Points</td></tr>
-                {% for team in roster %}
-                    <tr>
-                        <td>
-                            {% if team.disabled == "True" %}
-                                <a class="category-tooltip" href="#" data-toggle="tooltip"
-								data-original-title="This team is unable to be dropped because of its presence in the top 5">
-                                    <img src="/static/icons/lock.png" alt="Team Locked"/>
-                                </a>
-                            {% endif %}
-                        </td>
-                        <td><a href="{{ team.detail_url }}">{{ team.number }}</a></td>
-                        <td><a href="{{ team.detail_url }}">{{ team.name }}</a></td>
-                        <td>
-                            <a href="#"  data-toggle="modal" data-target="#drop_team_modal_{{ team.number }}">
-                            <img src="/static/icons/delete.png" alt="Drop Team"/> Drop</a>
-                        </td>
-                        <td><a href="{{ team.detail_url }}">{{ team.total_points }}</a></td>
-                    </tr>
-                {% endfor %}
-            </table>
+                {% if roster|length > 0%}
+                    <table class="table">
+                        <tr><td></td><td>Number</td><td>Name</td><td>Drop</td><td>Total Points</td></tr>
+                        {% for team in roster %}
+                            <tr>
+                                <td>
+                                    {% if team.disabled == "True" %}
+                                        <a class="category-tooltip" href="#" data-toggle="tooltip"
+                                        data-original-title="This team is unable to be dropped because of its presence in the top 5">
+                                            <img src="/static/icons/lock.png" alt="Team Locked"/>
+                                        </a>
+                                    {% endif %}
+                                </td>
+                                <td><a href="{{ team.detail_url }}">{{ team.number }}</a></td>
+                                <td><a href="{{ team.detail_url }}">{{ team.name }}</a></td>
+                                <td>
+                                    {% if team.disabled == 'True' %}
+                                        <a class="category-tooltip" href="#" data-toggle="tooltip"
+                                            data-original-title="This team is unable to be dropped because of its presence in the top 5">
+                                        <span href="" class="text-disabled"> Drop</span></a>
+                                    {% else %}
+                                        <a href="#"  data-toggle="modal" data-target="#drop_team_modal_{{ team.number }}">
+                                        <img src="/static/icons/delete.png" alt="Drop Team"/> Drop</a>
+                                    {% endif %}
+                                </td>
+                                <td><a href="{{ team.detail_url }}">{{ team.total_points }}</a></td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                    You can add more teams to your alliance via the <a href="/draft/freeAgentList/">free agent list</a>.
+                {% else %}
+                    There are no teams on your roster. Add some via the <a href="/draft/freeAgentList/">free agent list</a>.
+                {% endif %}
+
             <h1>My Schedule</h1>
             <div>
             <table class="table" style="width: auto !important">
+                <tr><td>Week</td><td>Opponent</td></tr>
                 {% for opponent in user_schedule %}
                     <tr>
                         <td>

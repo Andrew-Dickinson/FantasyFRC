@@ -64,5 +64,61 @@
 	    {% endif %}
 	  </ul>
 	</nav>
+
+    <h1>Or Manually Select a Team</h1>
+    <div id="team_selector">
+		<h2>Enter a Team Number:</h2>
+		<form action="/draft/pickUp/submitPick" method="post">
+			Team Number:
+			<input type="text" value="{{ default_team }}" name="team">
+			<button type="submit"  class="btn btn-primary">Submit</button>
+		</form>
+	</div>
+    <div id="Current Roster">
+		<h2>Current Roster</h2>
+		{% if roster|length > 0%}
+                    <table class="table">
+                        <tr><td></td><td>Number</td><td>Name</td><td>Drop</td><td>Total Points</td></tr>
+                        {% for team in roster %}
+                            <tr>
+                                <td>
+                                    {% if team.disabled == "True" %}
+                                        <a class="category-tooltip" href="#" data-toggle="tooltip"
+                                        data-original-title="This team is unable to be dropped because of its presence in the top 5">
+                                            <img src="/static/icons/lock.png" alt="Team Locked"/>
+                                        </a>
+                                    {% endif %}
+                                </td>
+                                <td><a href="{{ team.detail_url }}">{{ team.number }}</a></td>
+                                <td><a href="{{ team.detail_url }}">{{ team.name }}</a></td>
+                                <td>
+                                    {% if team.disabled == 'True' %}
+                                        <a class="category-tooltip" href="#" data-toggle="tooltip"
+                                            data-original-title="This team is unable to be dropped because of its presence in the top 5">
+                                        <span href="" class="text-disabled"> Drop</span></a>
+                                    {% else %}
+                                        <a href="#"  data-toggle="modal" data-target="#drop_team_modal_{{ team.number }}">
+                                        <img src="/static/icons/delete.png" alt="Drop Team"/> Drop</a>
+                                    {% endif %}
+                                </td>
+                                <td><a href="{{ team.detail_url }}">{{ team.total_points }}</a></td>
+                            </tr>
+                        {% endfor %}
+                    </table>
+                {% else %}
+                    There are no teams on your roster
+        {% endif %}
+	</div>
+
 </div>
+{% endblock %}
+
+{% block inline_javascript %}
+<script type="text/javascript">
+$(document).ready(function(){
+    $(".category-tooltip").tooltip({
+        placement : 'left'
+    });
+});
+</script>
 {% endblock %}

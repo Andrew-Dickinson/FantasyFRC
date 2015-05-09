@@ -399,6 +399,8 @@ class FreeAgentListPage(webapp2.RequestHandler):
 
             free_agent_list = get_free_agent_list(league_id, page)
 
+            current_roster = get_current_roster(account.key.id())
+
             #Send html data to browser
             template_values = {
                 'user': user.nickname(),
@@ -406,6 +408,7 @@ class FreeAgentListPage(webapp2.RequestHandler):
                 'league_name': league_name,
                 'update_text': update_text,
                 'free_agent_list': free_agent_list,
+                'roster': current_roster,
                 'page': page,
                 'max_page': get_max_free_agent_pages(league_id),
             }
@@ -613,72 +616,6 @@ class Submit_Draft_Pick(webapp2.RequestHandler):
         self.redirect('/draft/?updated=' + selection_error)
 
 
-class Pick_up_Page(webapp2.RequestHandler):
-    """
-        Allows a user to pick up a single team after the draft has completed
-    """
-    def get(self):
-        # Checks for active Google account session
-        user = users.get_current_user()
-
-        #Force user login
-        if user is None:
-            self.redirect(users.create_login_url(self.request.uri))
-        else:
-            #Current user's id, used to identify their data
-            user_id = user.user_id()
-            logout_url = users.create_logout_url('/')
-
-            account = globals.get_or_create_account(user)
-            league_id = account.league
-
-            #Get user's choices for the current league
-            find_choice_key = choice_key(account_key(user_id), str(league_id))
-            found_choice = find_choice_key.get()
-
-            #Display update text for the status of the last choice update
-            update_text = self.request.get('updated')
-            if self.request.get('updated') == "Good":
-                update_text = "Team added successfully"
-
-            #Display the user's current roster
-            user_roster = []
-            if found_choice:
-                user_roster = found_choice.current_team_roster
-
-
-            #Get list of players in the league and their choices
-            league_table = [{'player_team': 'Roster', 'player_name': 'Player'}]
-            league_player_query = Account.query(Account.league == league_id)
-            league_players = league_player_query.fetch()  #league_player_query.order(Account.nickname).fetch()
-            for player in league_players:
-                choice = choice_key(account_key(player.key.id()), league_id).get()
-                if choice:
-                    league_table.append(
-                        {'player_team': str(choice.current_team_roster), 'player_name': player.nickname})
-                else:
-                    league_table.append({'player_team': 'None', 'player_name': player.nickname})
-
-            if league_id != '0':
-                if league_key(league_id).get().draft_current_position == 0:
-                    league_name = league_key(league_id).get().name
-                else:
-                    league_name = globals.draft_started_sentinel
-            else:
-                league_name = ""
-
-            #Send html data to browser
-            template_values = {
-                'user': user.nickname(),
-                'logout_url': logout_url,
-                'update_text': update_text,
-                'league_table': league_table,
-                'league_name': league_name,
-                'roster': user_roster,
-                'default_team': self.request.get('team'),
-            }
-            template = JINJA_ENVIRONMENT.get_template('templates/pick_up_main.html')
-            self.response.write(template.render(template_values))
 
 
 class Submit_Pick(webapp2.RequestHandler):
@@ -740,10 +677,9 @@ class Submit_Pick(webapp2.RequestHandler):
                 str(post_Choice.put())
             else:
                 selection_error = "You have reached the maximum capacity for teams on your roster"
-            #             close_draft(post_Choice_key.parent().get().league)
 
-        #Display the homepage
-        self.redirect('/draft/pickUp/?updated=' + selection_error)
+        #Send them back to the previous page
+        self.redirect(str(self.request.referer.split('?', 1)[0] + '?updated=' + selection_error))
 
 
 application = webapp2.WSGIApplication([('/draft/freeAgentList/(.*)', FreeAgentListPage),  # Page number
@@ -763,3 +699,5 @@ def main():
 
 if __name__ == "__main__":
     main()
+
+from alliance_management import get_current_roster
