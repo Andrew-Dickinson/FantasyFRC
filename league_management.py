@@ -324,7 +324,7 @@ class update_League(webapp2.RequestHandler):
         name = self.request.get('name')
         snake = self.request.get('snake_draft') == 'on'
 
-        if current_league.draft_current_position == 0:
+        if not current_league or current_league.draft_current_position == 0:
             if name != globals.draft_started_sentinel:
                 #Create/Update the league
                 new_league = League.get_or_insert(commissioner_account_key.id())
