@@ -1,7 +1,7 @@
 from google.appengine.ext import ndb
 
 
-#There are 5 root keys
+#There are 6 root keys
 def league_key(commissioner_id):
     """League keys are based off of the id of the person who commissions them"""
     return ndb.Key(League, commissioner_id)
@@ -25,6 +25,10 @@ def root_event_key(event_id):
 def root_team_key(team_number):
     """Constructs the Datastore key for a root team given its number"""
     return ndb.Key(RootTeam, team_number)
+
+def global_settings_key():
+    """Constructs the key for the global settings entity"""
+    return ndb.Key(GlobalSettings, '0')
 
 
 #Every other key is based off of the root keys
@@ -94,6 +98,11 @@ class Account(ndb.Model):
     watchlist = ndb.IntegerProperty(repeated=True)
 
 
+class GlobalSettings(ndb.Model):
+    """Stores dynamic global settings"""
+    editable_week = ndb.IntegerProperty()
+
+
 class TeamEvent(ndb.Model):
     """Stores a team's data for a single event"""
     rank = ndb.IntegerProperty()
@@ -120,7 +129,7 @@ class Choice(ndb.Model):
 class Lineup(ndb.Model):
     """Stores the lineup for a single week for a single account"""
     active_teams = ndb.IntegerProperty(repeated=True)
-
+    weekly_roster = ndb.IntegerProperty(repeated=True)
 
 class DraftPick(ndb.Model):
     """Stores all of the information about one draft pick for a single league"""

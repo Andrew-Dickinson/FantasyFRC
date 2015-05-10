@@ -1,7 +1,7 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-from datastore_classes import RootTeam, Account
+from datastore_classes import RootTeam, Account, GlobalSettings
 from datetime import date
 import logging
 import jinja2
@@ -15,7 +15,6 @@ JINJA_ENVIRONMENT = jinja2.Environment(
 year = "2014"  # Used by tba api calls
 first_event_wednesday = date(2014, 2, 26)  # used to convert timestamps to week numbers
 mechanize_timeout = 30.0  # Seconds to wait for mechanize to gather data from tba
-debug_current_editable_week = 3  # Allow editing of this week and all weeks after this
 overestimate_of_frc_teams = 6000  # Makes getting all the teams in FRC slightly more efficient
 
 draft_rounds = 5  # Number of rounds in a particular draft
@@ -100,3 +99,15 @@ def get_or_create_account(user):
 def display_error_page(self, referrer, message):
     template = JINJA_ENVIRONMENT.get_template('templates/error_page.html')
     self.response.write(template.render({'Message': message, 'Back_Link': referrer}))
+
+def get_current_editable_week():
+    global_settings = GlobalSettings.get_or_insert('0', editable_week=None)
+    if not global_settings.editable_week:
+        global_settings.editable_week = 1
+        global_settings.put()
+    return global_settings.editable_week
+
+def set_current_editable_week(week_num):
+    global_settings = GlobalSettings.get_or_insert('0')
+    global_settings.editable_week = week_num
+    global_settings.put()

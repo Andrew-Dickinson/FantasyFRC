@@ -68,23 +68,28 @@ def get_team_lists(user_id, week_number):
         :parameter week_number: The week to gather data on
         :type str or int
         :return: An array of two arrays(lineup, bench) containing, for each team in the lineup, a dictionary:
-            - number: The name of the event (int)
+            - number: The number of the team (int)
             - detail_url: A link to the team's individual page (string)
             - schedule: An array containing scheduling data (schedule) (See get_team_schedule())
             - total_points: The number of points(our system) this team scored in total.  (int)
-                If week_number is editable, this is actually the points scored this week, not total
+                If week_number is not editable, this is actually the points scored this week, not total
             - disabled: Is 'True' if team is locked because of good performance (string(bool))
         For each team in the bench list, the dictionary contains the following:
-            - number: The name of the event (int)
+            - number: The number of the team (int)
             - total_points: The number of points(our system) this team scored in total.  (int)
-                If week_number is editable, this is actually the points scored this week, not total
+                If week_number not is editable, this is actually the points scored this week, not total
             - disabled: Is 'True' if team is locked because of good performance (string(bool))
     """
     account = account_key(user_id).get()
     choice = choice_key(account.key, account.league).get()
-    roster = choice.current_team_roster
 
-    active_lineup = lineup_key(choice_key(account.key, account.league), week_number).get().active_teams
+    lineup = lineup_key(choice_key(account.key, account.league), week_number).get()
+    active_lineup = lineup.active_teams
+
+    if week_number < globals.get_current_editable_week():
+        roster = lineup.weekly_roster
+    else:
+        roster = choice.current_team_roster
 
     current_lineup = []
     for number in active_lineup:
@@ -174,7 +179,7 @@ def get_top_teams(number):
 
 def is_week_editable(week_number):
     """Return if the week is editable or not"""
-    return globals.debug_current_editable_week <= int(week_number)
+    return globals.get_current_editable_week() <= int(week_number)
 
 
 class alliance_portal(webapp2.RequestHandler):
@@ -252,7 +257,7 @@ class alliance_portal(webapp2.RequestHandler):
                                 'schedule': league_schedule,
                                 'roster': current_roster,
                                 'watch_list': watch_list,
-                                'week_number': globals.debug_current_editable_week,
+                                'week_number': globals.get_current_editable_week(),
                                 'user_schedule': user_schedule
                                 }
 
@@ -313,7 +318,7 @@ class update_lineup(webapp2.RequestHandler):
                     choice = choice_key(account.key, league_id).get()
                     choice.current_team_roster.remove(int(team_number))
 
-                    for week_num in range(week_number, globals.number_of_official_weeks):
+                    for week_num in range(int(week_number), globals.number_of_official_weeks):
                         lineup = lineup_key(choice.key, week_num).get()
                         if int(team_number) in lineup.active_teams:
                             active_lineup.active_teams.remove(int(team_number))
@@ -368,7 +373,7 @@ class view_alliance(webapp2.RequestHandler):
             if get_opponent(user_id, week_number) != globals.schedule_bye_week:
                 opponent_team_lists = get_team_lists(get_opponent(user_id, week_number), week_number)
                 opponent_point_totals = []
-                for team_list in team_lists:
+                for team_list in opponent_team_lists:
                     opponent_point_total = 0
                     for team in team_list:
                         opponent_point_total += team['total_points']
@@ -482,8 +487,8 @@ class team_detail_page(webapp2.RequestHandler):
 
 
 application = webapp2.WSGIApplication([('/allianceManagement/viewAlliance', alliance_portal),
-                                       ('/allianceManagement/viewAlliance/(.*)', view_alliance),  # Team number
-                                       ('/allianceManagement/updateLineup/(.*)', update_lineup),  # Team number
+                                       ('/allianceManagement/viewAlliance/(.*)', view_alliance),  # Week number
+                                       ('/allianceManagement/updateLineup/(.*)', update_lineup),  # Week number
                                        ('/allianceManagement/teamDetail/(.*)', team_detail_page),  # Team number
                                        ], debug=True)
 

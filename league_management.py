@@ -10,7 +10,7 @@ from google.appengine.api import users
 from google.appengine.ext import ndb
 
 import globals
-from datastore_classes import account_key, Account, League, Choice, choice_key, league_key, Lineup, DraftPick
+from datastore_classes import account_key, Account, League, Choice, choice_key, league_key, Lineup, lineup_key, DraftPick
 
 import jinja2
 import webapp2
@@ -140,7 +140,7 @@ def get_leader_board(league_id):
 
 def finish_week(league_id, past_week_num):
     """
-        Preform the operations necessary to move on to the next week
+        Preform the operations necessary to move on to the next week. Called around Monday-ish
 
         :param league_id: The league to finish
         :param past_week_num: The week number to finish
@@ -151,7 +151,7 @@ def finish_week(league_id, past_week_num):
     league_player_query = Account.query(Account.league == league_id)
     league_players = league_player_query.fetch()
     for player in league_players:
-        opponent = player.schedule[past_week_num - 1]  # -1 for conversion to 0 based index
+        opponent = get_opponent(player.key.id(), past_week_num)
         if opponent != globals.schedule_bye_week:
             opponent_points = get_total_week_points(opponent, past_week_num)
             player_points = get_total_week_points(player.key.id(), past_week_num)
@@ -171,6 +171,26 @@ def finish_week(league_id, past_week_num):
         else:  # Bye week
             player.record[past_week_num - 1] = globals.record_bye  # -1 for conversion to 0 based index
         player.put()
+
+def run_week_begin(begin_week_num):
+    """
+        Called around Wednesday-ish. Starts things off for a new competition week
+
+        This function:
+            - restricts editing to the previous week
+            - Seals rosters in the books so benches and such will work correctly
+    """
+
+    #Seal rosters
+    all_choice_entities = Choice.query().fetch()
+    for choice in all_choice_entities:
+        lineup_object = lineup_key(choice.key, begin_week_num).get()
+        roster = choice.current_team_roster
+        for team_number in roster:
+            lineup_object.weekly_roster.append(team_number)
+
+    #Restrict editing
+    globals.set_current_editable_week(int(begin_week_num) + 1)
 
 
 def remove_from_league(user_id):
@@ -446,7 +466,7 @@ application = webapp2.WSGIApplication([
                                        ('/leagueManagement/updateLeague', update_League),
                                        ('/leagueManagement/createLeague', create_League),
                                        ('/leagueManagement/showLeagues', Show_Leagues),
-                                       ('/leagueManagement/joinLeague/(.*)', Join_League),
+                                       ('/leagueManagement/joinLeague/(.*)', Join_League),  # The id of the league
                                        ('/leagueManagement/leaveLeague', leave_League),
                                        ('/leagueManagement/manageLeague', manage_league),
                                        ('/leagueManagement/deleteLeague', delete_League),
