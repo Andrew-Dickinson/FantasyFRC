@@ -9,6 +9,24 @@
   text-align: center;
 }
 
+.logo{
+	height: 40px;
+	margin-top: -9px;
+}
+
+.body h1{
+	font-size: 40px;
+}
+
+.container_main{
+	background-color: #fff;
+	padding: 20px;
+}
+
+.hr{
+  border-top: 1px solid #333;
+}
+
 #footer {
   text-align: center;
   margin-bottom: 25px;
