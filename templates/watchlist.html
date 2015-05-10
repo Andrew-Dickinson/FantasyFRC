@@ -4,7 +4,14 @@
 
 {% block content %}
 <div class="container">
-    <h1>Watchlist</h1>
+
+    <ol class="breadcrumb">
+        <li><a href="/">Home</a></li>
+        <li><a href="/allianceManagement/viewAlliance">Alliance Portal</a></li>
+        <li class="active">Watchlist</li>
+    </ol>
+
+    <h2>Watchlist</h2>
     {% if update_text != "" %}
         <div class="alert alert-{% if update_text == 'Good' %}success{% else %}danger{% endif %}">
             <button id="dismisswarning" type="button" class="close" data-dismiss="alert" aria-label="Close"><span aria-hidden="true">&times;</span></button>
@@ -15,7 +22,7 @@
             {% endif %}
         </div>
     {% endif %}
-    <h2>Sorted by Points</h2>
+    <h3>Sorted by Points</h3>
     <table class="table">
         <tr><td>Number</td><td>Name</td><td>Current Owner</td><td>Actions</td><td>Total Points</td></tr>
         {% for team in watch_list %}
@@ -30,22 +37,29 @@
         {% endfor %}
     </table>
 
-    <h1>Adding a team</h1>
-    <h2>Using the free agent list</h2>
-    The easiest way to add a team to your watchlist is to find it in the <a href="/draft/freeAgentList/">free agent list</a> and click its flag (<img src="/static/icons/flag_blue.png">).
-    <h2>Manual Entry</h2>
-    You can also add a team to your watchlist by typing it's number below.
-    <div id="team_selector">
-		<h3>Enter a Team Number:</h3>
-		<form action="/draft/watchList/update/" method="get">
-			Team Number:
-			<input type="text" value="{{ default_team }}" name="team">
-            <input type="hidden" value="add" name="action">
-			<button type="submit"  class="btn btn-primary">Submit</button>
-		</form>
-	</div>
+    <div class="container">
+        <div class="row">
+            <div class="addto col-md-12">
+                <h4>Adding a Team to Your Watchlist</h4>
+                    <ul>
+                        <li> <h5>Using the free agent list</h5> </li>
+                        The easiest way to add a team to your watchlist is to find it in the <a href="/draft/freeAgentList/">free agent list</a> and click its flag (<img src="/static/icons/flag_blue.png">).
+                        <li> <h5>Manual Entry</h5> </li>
+                        You can also add a team to your watchlist by typing it's number below.
+                        <div id="team_selector">
+                    		<form action="/draft/watchList/update/" method="get">
+                    			Team Number:
+                    			<input type="text" value="{{ default_team }}" name="team">
+                                <input type="hidden" value="add" name="action">
+                    			<button type="submit"  class="btn btn-primary">Submit</button>
+                    		</form>
+                    	</div><!--/team_selector-->
+                    </ul>
+            </div><!--/addto-->
+        </div><!--/row-->
+    </div><!--/conatiner-->
     <div id="Current Roster">
-		<h2>Current Roster</h2>
+		<h3>Current Roster</h3>
         A copy of your current roster is listed for convenience
 		{% if roster|length > 0%}
                     <table class="table">

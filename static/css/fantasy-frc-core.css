@@ -45,6 +45,17 @@
 	padding: 20px;
 }*/
 
+.addto{
+  background-color: #e3e3e3;
+}
+
+.addto .btn{
+  padding: 2px 8px;
+}
+
+.addto #team_selector{
+  margin-top: 7px;
+}
 
 .hr{
   border-top: 1px solid #333;
