@@ -19,7 +19,7 @@
 
     <div class="tab-content">
         <div role="tabpanel" class="tab-pane" id="alliance">
-            <h1>My Roster</h1>
+            <h2>My Roster</h2>
                 {% if roster|length > 0%}
                     <table class="table">
                         <tr><td></td><td>Number</td><td>Name</td><td>Drop</td><td>Total Points</td></tr>
@@ -54,7 +54,7 @@
                     There are no teams on your roster. Add some via the <a href="/draft/freeAgentList/">free agent list</a>.
                 {% endif %}
 
-            <h1>My Schedule</h1>
+            <h2>My Schedule</h2>
             <div>
             <table class="table" style="width: auto !important">
                 <tr><td>Week</td><td>Opponent</td></tr>
@@ -72,7 +72,7 @@
                     </tr>
                 {% endfor %}
             </table></div>
-            <h1>Lineup Overview</h1>
+            <h2>Lineup Overview</h2>
             <table class="table">
                 <tr><td>Week</td><td>Active Teams</td><td>Points</td></tr>
                 {% for week in week_table %}
@@ -94,7 +94,7 @@
             </table>
         </div>
         <div role="tabpanel" class="tab-pane active" id="league">
-            <h1>League Standings</h1>
+            <h2>League Standings</h2>
             <table class="table">
                 <tr><td>Rank</td><td>Name</td><td>W-L-T</td><td>Total Points</td></tr>
                     {% for player in leader_board %}
@@ -109,7 +109,7 @@
 
                     {% endfor %}
             </table>
-            <h1>League Schedule</h1>
+            <h2>League Schedule</h2>
             <table class="table">
                 <tr>
                     <td>Player</td>
@@ -128,7 +128,7 @@
             </table>
         </div>
         <div role="tabpanel" class="tab-pane" id="watchlist">
-            <h2>Sorted by Points</h2>
+            <h3>Sorted by Points</h3>
             <table class="table">
                 <tr><td>Number</td><td>Name</td><td>Current Owner</td><td>Actions</td><td>Total Points</td></tr>
                 {% for team in watch_list %}

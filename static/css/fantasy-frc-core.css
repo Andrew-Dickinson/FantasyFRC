@@ -55,6 +55,7 @@
 
 .addto #team_selector{
   margin-top: 7px;
+  padding-bottom: 7px;
 }
 
 .hr{
@@ -80,6 +81,6 @@ td {
 }
 
 nav#admin{
-    background-color: #EC0000;
-    border-color: #ffffff;
+    background-color: #d9534f;
+    border-color: #d43f3a;
 }
