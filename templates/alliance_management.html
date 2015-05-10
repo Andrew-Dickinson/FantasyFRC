@@ -30,7 +30,7 @@
 	  </ul>
 	</nav>
 
-	<h1>View Alliance</h1>
+	<h2>View Alliance</h2>
     {% if opponent_name == "" %}
         <div class="alert alert-warning">
             <b>Note:</b> This is is a bye week for you, you may pick active teams, and they will be scored, but you will not earn any league points for this week.
@@ -39,12 +39,12 @@
 	<div id="team_list">
 			{% for list in team_listss[0] %}
 			{% set listloop = loop %}
-			<h2>{% if listloop.first %}
+			<h3>{% if listloop.first %}
 				Alliance Lineup:
 				{% else %}
 				Bench:
 				{% endif %}
-			</h2>
+			</h3>
 			{% if list %}
 				<table class="table">
 				<tr><td>Team</td><td>Swap Action</td><td>Drop</td><td>Points to Date</td></tr>
@@ -83,7 +83,7 @@
 				<p>No teams in this list</p>
 			{% endif %}	
 			{% endfor %}
-			<h2>Other options:</h2>
+			<h3>Other options:</h3>
 			<a href="/draft/freeAgentList/">Pick up free agent</a>
 	</div>
 	<nav>

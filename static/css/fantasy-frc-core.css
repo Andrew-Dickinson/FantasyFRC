@@ -45,6 +45,18 @@
 	padding: 20px;
 }*/
 
+.addto{
+  background-color: #e3e3e3;
+}
+
+.addto .btn{
+  padding: 2px 8px;
+}
+
+.addto #team_selector{
+  margin-top: 7px;
+  padding-bottom: 7px;
+}
 
 .hr{
   border-top: 1px solid #333;
@@ -69,6 +81,6 @@ td {
 }
 
 nav#admin{
-    background-color: #EC0000;
-    border-color: #ffffff;
+    background-color: #d9534f;
+    border-color: #d43f3a;
 }
