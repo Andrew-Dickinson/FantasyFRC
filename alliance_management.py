@@ -68,16 +68,16 @@ def get_team_lists(user_id, week_number):
         :parameter week_number: The week to gather data on
         :type str or int
         :return: An array of two arrays(lineup, bench) containing, for each team in the lineup, a dictionary:
-            - number: The name of the event (int)
+            - number: The number of the team (int)
             - detail_url: A link to the team's individual page (string)
             - schedule: An array containing scheduling data (schedule) (See get_team_schedule())
             - total_points: The number of points(our system) this team scored in total.  (int)
-                If week_number is editable, this is actually the points scored this week, not total
+                If week_number is not editable, this is actually the points scored this week, not total
             - disabled: Is 'True' if team is locked because of good performance (string(bool))
         For each team in the bench list, the dictionary contains the following:
-            - number: The name of the event (int)
+            - number: The number of the team (int)
             - total_points: The number of points(our system) this team scored in total.  (int)
-                If week_number is editable, this is actually the points scored this week, not total
+                If week_number not is editable, this is actually the points scored this week, not total
             - disabled: Is 'True' if team is locked because of good performance (string(bool))
     """
     account = account_key(user_id).get()
@@ -313,7 +313,7 @@ class update_lineup(webapp2.RequestHandler):
                     choice = choice_key(account.key, league_id).get()
                     choice.current_team_roster.remove(int(team_number))
 
-                    for week_num in range(week_number, globals.number_of_official_weeks):
+                    for week_num in range(int(week_number), globals.number_of_official_weeks):
                         lineup = lineup_key(choice.key, week_num).get()
                         if int(team_number) in lineup.active_teams:
                             active_lineup.active_teams.remove(int(team_number))
@@ -482,8 +482,8 @@ class team_detail_page(webapp2.RequestHandler):
 
 
 application = webapp2.WSGIApplication([('/allianceManagement/viewAlliance', alliance_portal),
-                                       ('/allianceManagement/viewAlliance/(.*)', view_alliance),  # Team number
-                                       ('/allianceManagement/updateLineup/(.*)', update_lineup),  # Team number
+                                       ('/allianceManagement/viewAlliance/(.*)', view_alliance),  # Week number
+                                       ('/allianceManagement/updateLineup/(.*)', update_lineup),  # Week number
                                        ('/allianceManagement/teamDetail/(.*)', team_detail_page),  # Team number
                                        ], debug=True)
 
