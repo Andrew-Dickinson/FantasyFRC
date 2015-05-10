@@ -81,8 +81,13 @@
   </div>
 </div>
 
-{% block content %}
-{% endblock %}
+<div class="container">
+  <div class="maincontent col-md-12">
+    {% block content %}
+    {% endblock %}
+  </div><!--/maincontent-->
+</div><!--/container-->
+
 {% block footer %}
 	<div id="footer" class="container">
 	  <div class="row">

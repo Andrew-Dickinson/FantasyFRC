@@ -4,9 +4,17 @@
   font-family: Raleway;
 }
 
+.main{
+  padding: 0;
+}
+
 .main-content {
   padding: 40px 15px;
   text-align: center;
+}
+
+.maincontent .container{
+  width: 100%;
 }
 
 .logo{
@@ -18,10 +26,16 @@
 	font-size: 40px;
 }
 
-.container_main{
+.maincontent{
+  background-color:#fff;
+  padding: 20px;
+}
+
+/*.container_main{
 	background-color: #fff;
 	padding: 20px;
-}
+}*/
+
 
 .hr{
   border-top: 1px solid #333;
