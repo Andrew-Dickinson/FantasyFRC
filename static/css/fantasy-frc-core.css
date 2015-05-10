@@ -4,6 +4,14 @@
   font-family: Raleway;
 }
 
+.style{
+  border-top: 1px white solid;
+}
+
+.login{
+  float: right;
+}
+
 .main{
   padding: 0;
 }
@@ -29,6 +37,7 @@
 .maincontent{
   background-color:#fff;
   padding: 20px;
+  margin-top: 50px;
 }
 
 /*.container_main{
