@@ -17,6 +17,7 @@ from progress_through_elimination_classification import convert_TBA_level_to_pro
 from datastore_classes import RootEvent, root_event_key, TeamEvent, team_event_key, team_key, root_team_key, RootTeam, League, Account, Choice, Lineup, DraftPick
 import time
 from points import get_points_to_date
+from league_management import run_week_begin, finish_week
 
 import jinja2
 import webapp2
@@ -211,6 +212,7 @@ class UpdateDB(webapp2.RequestHandler):
         classifyin_weeks_and_takin_names()
         geocode_within_limit()
         update_total_points()
+        self.redirect(self.request.referer)
 
 class ClearLeagueData(webapp2.RequestHandler):
     def get(self):
@@ -234,11 +236,39 @@ class ClearLeagueData(webapp2.RequestHandler):
         leagues = leagueQuery.fetch()
         for league in leagues:
             league.key.delete()
+        self.redirect(self.request.referer)
+
+
+class RunWeekBegin(webapp2.RequestHandler):
+    def get(self, week):
+        run_week_begin(week)
+        self.redirect(self.request.referer)
+
+class RunProcessing(webapp2.RequestHandler):
+    def get(self, week):
+        all_leagues = League.query().fetch()
+        for league in all_leagues:
+            if league.draft_current_position == -1:
+                finish_week(league.key.id(), int(week))
+        self.redirect(self.request.referer)
+
+class ShowAdmin(webapp2.RequestHandler):
+    def get(self):
+        #Send html data to browser
+        template_values = {
+                    'week': globals.get_current_editable_week(),
+                    'week_earlier': globals.get_current_editable_week()-1,
+                    }
+        template = JINJA_ENVIRONMENT.get_template('templates/adminPage.html')
+        self.response.write(template.render(template_values))
 
 
 application = webapp2.WSGIApplication([
                                        ('/updateTeams/clear', ClearLeagueData),
-                                       ('/updateTeams/', UpdateDB),
+                                       ('/updateTeams/fullData', UpdateDB),
+                                       ('/updateTeams/lock/(.*)', RunWeekBegin),  # Week number
+                                       ('/updateTeams/process/(.*)', RunProcessing),  # Week number
+                                       ('/updateTeams/', ShowAdmin)
                                        ], debug=True)
 
 def main():
