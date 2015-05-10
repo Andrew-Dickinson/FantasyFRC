@@ -6,19 +6,22 @@
 <div class="container">
 	
 	
-	<div class="jumbotron">
-		<h1>Welcome to Fantasy FRC</h1>
-        <div class="alert alert-danger" role="alert">Fantasy FRC is still under development and will likely be ready for the 2016 FRC season</div>
-		<p>Fantasy FRC is a <a href="http://en.wikipedia.org/wiki/Fantasy_sport" target="_blank">fantasy sport</a> that uses match data from <a href="http://www.usfirst.org" target="_blank">FIRST Robotics Competion (FRC)</a> to allow users to select and manage fantasy alliances of FRC teams. If this is your first time here, you should check out the <a href="/help/">help page</a>. Otherwise, please remember that this is an early version of this product. Expect bugs and other issues. You can report any bugs you find at our <a href="https://github.com/smarthimandrew/FantasyFRC/issues" target="_blank">Github issues page</a>.  {% if logged_out %} You'll need a google account to do anything useful. You can <a href="https://support.google.com/accounts/answer/27441?source=gsearch" target="_blank">create one</a> or <a href="{{ logged_out }}">log in</a>.{% endif %}</p>
-	</div>
-    {% if not logged_out %}
-        <h1>Fantasy-FRC Alpha 0.5.0</h1>
-        <p>
-            <a href="/leagueManagement/createLeague">Create a League</a></br>
-            <a href="/leagueManagement/showLeagues">Join a League</a></br>
-            <a href="/allianceManagement/viewAlliance">Edit your lineup</a></br>
-            <a href="/draft/">Go to the draft screen</a></br>
-        </p>
-    {% endif %}
-</div>
+	<div class="container_main col-md-12">
+        <div class="main">
+    		<h1>Welcome to Fantasy FRC</h1>
+            <div class="alert alert-danger" role="alert">Fantasy FRC is still under development and will likely be ready for the 2016 FRC season</div>
+    		<p>Fantasy FRC is a <a href="http://en.wikipedia.org/wiki/Fantasy_sport" target="_blank">fantasy sport</a> that uses match data from <a href="http://www.usfirst.org" target="_blank">FIRST Robotics Competion (FRC)</a> to allow users to select and manage fantasy alliances of FRC teams. If this is your first time here, you should check out the <a href="/help/">help page</a>. Otherwise, please remember that this is an early version of this product. Expect bugs and other issues. You can report any bugs you find at our <a href="https://github.com/smarthimandrew/FantasyFRC/issues" target="_blank">Github issues page</a>.  {% if logged_out %} You'll need a google account to do anything useful. You can <a href="https://support.google.com/accounts/answer/27441?source=gsearch" target="_blank">create one</a> or <a href="{{ logged_out }}">log in</a>.{% endif %}</p>
+    	</div><!--/main-->
+        {% if not logged_out %}
+            <hr class="hr">
+            <h1>Fantasy-FRC Alpha 0.5.0</h1>
+            <p>
+                <a href="/leagueManagement/createLeague">Create a League</a></br>
+                <a href="/leagueManagement/showLeagues">Join a League</a></br>
+                <a href="/allianceManagement/viewAlliance">Edit your lineup</a></br>
+                <a href="/draft/">Go to the draft screen</a></br>
+            </p>
+        {% endif %}
+    </div><!--/container_main-->
+</div><!--/container-->
 {% endblock %}

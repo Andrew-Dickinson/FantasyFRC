@@ -1,9 +1,30 @@
-body {
+.body {
   padding-top: 70px;
+  background-image: url(/static/images/climpek_@2X.png);
+  font-family: Raleway;
 }
+
 .main-content {
   padding: 40px 15px;
   text-align: center;
+}
+
+.logo{
+	height: 40px;
+	margin-top: -9px;
+}
+
+.body h1{
+	font-size: 40px;
+}
+
+.container_main{
+	background-color: #fff;
+	padding: 20px;
+}
+
+.hr{
+  border-top: 1px solid #333;
 }
 
 #footer {

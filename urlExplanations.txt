@@ -1,0 +1,87 @@
+fantasy-frc.appspot.com:
+
+/
+    index.html
+        Landing page. Displays basic info about the site
+        Handled by: MainPage.py
+
+/about
+    about.html
+        Displays info about me
+        Handled by: aboutPage.py
+
+/help
+    help.html
+        Displays info to help users get started
+        Handled by: helpPage.py
+
+/thanks
+    thanks.html
+        Displays a bunch of thank you messages to everyone that helped the project along
+        Handled by: thanksPage.py
+
+/draft/
+    Handled by: drafting.py
+    /draft/
+        draft_main.html
+            Main draft board. Displays the draft board for the league of the current user
+    /draft/watchList
+        watchlist.html
+            Displays the watch list (favorite teams)
+    /draft/freeAgentList/(PAGE_NUMBER)
+        falist.html
+            Displays a page of the free agent list (list of teams which have no owner)
+    /draft/watchList/Update
+        Has no html file. Used internally to preform actions related to the watch list
+    /draft/startDraft
+        Has no html file. Used internally to begin the draft
+    /draft/submitPick
+        Has no html file. Used internally to submit draft picks
+    /draft/pickUp/submitPick
+        Has no html file. Used internally to submit picks after the draft
+
+/allianceManagement/
+    Handled by: alliance_management.py
+    /allianceManagement/viewAlliance
+        alliance_management_portal.html
+        Displays the alliance portal. The main page with an overview of almost all actions
+    /allianceManagement/viewAlliance/(WEEK NUMBER)
+        If WEEK NUMBER is in the present or future:
+            alliance_management.html
+            Displays the current and future bench/lineups. Allows modification
+        IF WEEK NUMBER is in the past:
+            past_alliances.html
+            Displays past bench/lineups. Doesn't allow modification
+    /allianceManagement/teamDetail/(TEAM DETAIL)
+        team_detail.html
+        Displays a teams scoring and scheduling details
+    /allianceManagement/updateLineup/(WEEK NUMBER)
+        Has no html file. Used internally to drop, put in, or bench a team
+
+/leagueManagement/
+    Handled by: league_management.py
+    /leagueManagement/createLeague
+        create_league.html
+        Displays the form for making a new league
+    /leagueManagement/showLeagues
+        league_list.html
+        Displays the list of leagues and information about each, with the option to join them by clicking
+    /leagueManagement/manageLeague
+        manage_league.html
+        Displays the current league's settings for changing
+    /leagueManagement/deleteLeague
+        Had no html file. Used internally to delete the user's league
+    /leagueManagement/leaveLeague
+        Has no html file. Used internally to remove the current user from their league
+    /leagueManagement/joinLeague/(LEAGUE ID)
+        Has no html file. Used internally to put the current user in the specified league
+    /leagueManagement/updateLeague
+        Has no html file. Used internally to change/create league settings
+
+/updateTeams/
+    Handled by: updateDB.py
+    /updateTeams/
+        Has no html file. Used internally to update the database from TBA
+    /updateTeams/clear
+        Has no html file. Used internally to clear the database
+
