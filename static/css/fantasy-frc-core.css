@@ -1,6 +1,9 @@
-body {
+.body {
   padding-top: 70px;
+  background-image: url(/static/images/climpek_@2X.png);
+  font-family: Raleway;
 }
+
 .main-content {
   padding: 40px 15px;
   text-align: center;
