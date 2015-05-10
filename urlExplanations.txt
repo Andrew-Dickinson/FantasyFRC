@@ -10,10 +10,14 @@ fantasy-frc.appspot.com:
         Displays info about me
         Handled by: aboutPage.py
 
-/help
-    help.html
+/help/
+    Handled by: helpPage.py
+    /help/
+        help.html
         Displays info to help users get started
-        Handled by: helpPage.py
+    /help/points
+        points_detail.html
+        Displays a breakdown of the point system
 
 /thanks
     thanks.html
