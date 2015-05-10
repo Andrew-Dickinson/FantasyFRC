@@ -81,7 +81,14 @@ fantasy-frc.appspot.com:
 /updateTeams/
     Handled by: updateDB.py
     /updateTeams/
+        adminPage.html
+        Displays all of the admin actions
+    /updateTeams/fullData
         Has no html file. Used internally to update the database from TBA
     /updateTeams/clear
-        Has no html file. Used internally to clear the database
+        Has no html file. Used internally to clear the database of account/league info
+    /updateTeams/lock/(WEEK NUMBER)
+        Has no html file. Used internally to lock picks in place for all leagues
+    /updateTeams/process/(WEEK NUMBER)
+        Has no html file. Used internally to process winners and losers and update leader board
 

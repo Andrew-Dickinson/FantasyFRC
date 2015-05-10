@@ -44,3 +44,8 @@ td {
     font-style: italic;
     color: #727272;
 }
+
+nav#admin{
+    background-color: #EC0000;
+    border-color: #ffffff;
+}

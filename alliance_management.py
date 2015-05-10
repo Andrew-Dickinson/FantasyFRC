@@ -82,9 +82,14 @@ def get_team_lists(user_id, week_number):
     """
     account = account_key(user_id).get()
     choice = choice_key(account.key, account.league).get()
-    roster = choice.current_team_roster
 
-    active_lineup = lineup_key(choice_key(account.key, account.league), week_number).get().active_teams
+    lineup = lineup_key(choice_key(account.key, account.league), week_number).get()
+    active_lineup = lineup.active_teams
+
+    if week_number < globals.get_current_editable_week():
+        roster = lineup.weekly_roster
+    else:
+        roster = choice.current_team_roster
 
     current_lineup = []
     for number in active_lineup:
@@ -174,7 +179,7 @@ def get_top_teams(number):
 
 def is_week_editable(week_number):
     """Return if the week is editable or not"""
-    return globals.debug_current_editable_week <= int(week_number)
+    return globals.get_current_editable_week() <= int(week_number)
 
 
 class alliance_portal(webapp2.RequestHandler):
@@ -252,7 +257,7 @@ class alliance_portal(webapp2.RequestHandler):
                                 'schedule': league_schedule,
                                 'roster': current_roster,
                                 'watch_list': watch_list,
-                                'week_number': globals.debug_current_editable_week,
+                                'week_number': globals.get_current_editable_week(),
                                 'user_schedule': user_schedule
                                 }
 
@@ -368,7 +373,7 @@ class view_alliance(webapp2.RequestHandler):
             if get_opponent(user_id, week_number) != globals.schedule_bye_week:
                 opponent_team_lists = get_team_lists(get_opponent(user_id, week_number), week_number)
                 opponent_point_totals = []
-                for team_list in team_lists:
+                for team_list in opponent_team_lists:
                     opponent_point_total = 0
                     for team in team_list:
                         opponent_point_total += team['total_points']
