@@ -4,13 +4,6 @@
 
 {% block content %}
 <div class="container">
-
-    <ol class="breadcrumb">
-        <li><a href="/">Home</a></li>
-        <li><a href="/draft/">Draft Board</a></li>
-        <li class="active">List of Free Agents</li>
-    </ol>
-
     <nav>
 	  <ul class="pager">
 	  	{% if page == 1 %}
@@ -77,21 +70,15 @@
 	  </ul>
 	</nav>
 
-        <div class="container">
-            <div class="row">
-                <div class="addto col-md-12">
-                    <h4>Manually Select a Team</h4>
-                    <div id="team_selector">
-                		<form action="/draft/pickUp/submitPick" method="post">
-                			Team Number:
-                			<input type="text" value="{{ default_team }}" name="team">
-                			<button type="submit"  class="btn btn-primary">Submit</button>
-                		</form>
-                	</div><!--/team_selector-->
-                </div><!--/addto-->
-            </div><!--/row-->
-        </div><!--/container-->
-
+    <h1>Or Manually Select a Team</h1>
+    <div id="team_selector">
+		<h2>Enter a Team Number:</h2>
+		<form action="/draft/pickUp/submitPick" method="post">
+			Team Number:
+			<input type="text" value="{{ default_team }}" name="team">
+			<button type="submit"  class="btn btn-primary">Submit</button>
+		</form>
+	</div>
     <div id="Current Roster">
 		<h2>Current Roster</h2>
 		{% if roster|length > 0%}
