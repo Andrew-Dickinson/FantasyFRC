@@ -81,6 +81,6 @@ td {
 }
 
 nav#admin{
-    background-color: #d9534f;
-    border-color: #d43f3a;
+    background-color: #428bca;
+    border-bottom: #d43f3a 3px solid;
 }
