@@ -75,7 +75,7 @@
 
 	<div id="draft_display">
 		<h2>Draft Board:</h2>
-		<h2>
+		<h3>
 			{% if draft_status == "Mid" %}
 				Time remaining for {% if users_turn %}you{% else %}{{ picking_user }}{% endif %}: <span id="countdown"></span>
 			{% elif draft_status == "Post"  %}
@@ -84,7 +84,7 @@
 				<i>Draft has not yet begun - Tell your commissioner to <a href="/draft/startDraft">start the draft</a>.</i><br/><br/>
 			    <i>The commissioner may also want to <a href="/leagueManagement/manageLeague">edit</a> the league settings</i>
             {% endif %}
-		</h2>
+		</h3>
 		<table class="table">
 		<th>
 		{% for player in player_list %}

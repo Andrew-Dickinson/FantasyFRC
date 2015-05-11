@@ -24,7 +24,7 @@
   <body class="body">
 {% block navbar %}
 	<nav id="logout" class="navbar navbar-inverse navbar-fixed-top" role="navigation">
-		  	<div class="container">
+		  	<div class="container-fluid">
           <div class="row">
   		  		<div class="navbar-header col-md-12">
   	          <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
@@ -36,33 +36,45 @@
   	          <a class="navbar-brand" href="/"><img class="logo" src="/static/images/fantasylogo.png" alt="Fantasy FRC"></a>
               <div class="login">
                 {%if not logged_out %}
+                <ul class="nav navbar-nav navbar-right">
                 <li><p class="navbar-text">
                           Logged in as {{ user }} - <a href="{{ logout_url }}">Log out</a>
                       </p></li>
                     </ul>
-                {% else %}
+                {% endif %}
+                {% if logged_out %}
                   <ul class="nav navbar-nav navbar-right">
+                    <p class="navbar-text">
                       <li><a href="{{ logged_out }}">Log in to Play</a></li>
+                    </p>
                   </ul>
                 {% endif %}
               </div><!--/login-->
+
+              <div class="leaguename">
+                {% if not logged_out %}
+                  {% if league_name == "f35f0a1295224ac2a1d21c8ce9768a70" %}{% else %}
+                  <li><p class="navbar-text">
+                    {% if league_name != ""%}League: {{ league_name }} - <a id="leave_league" href="#"  data-toggle="modal"
+                        data-target="#leave_league_modal">Click to leave</a>{% endif %}
+                    </p></li>
+                  {% endif %}
+                {% endif %}
+              </div><!--/leaguename-->
+
   	        </div><!--/navbar-header-->
           </div><!--/row-->
             {% if not logged_out %}
                 <div class="row style">
                   <div id="navbar" class="collapse navbar-collapse col-md-12">
                     <ul class="nav navbar-nav">
-                      <li><a href="/allianceManagement/viewAlliance"><span class="glyphicon glyphicon-list-alt"></span> Alliance Portal</a></li>
-                      <li><a href="/draft/"><span class="glyphicon glyphicon-user"></span> Draft Board</a></li>
-                    </ul>
-                    <ul class="nav navbar-nav navbar-right">
-                      <li><p class="navbar-text">
+                      <li><a href="/allianceManagement/viewAlliance"><span class="glyphicon glyphicon-home"></span> Alliance Portal</a></li>
+                      <li><a href="/draft/"><span class="glyphicon glyphicon-list-alt"></span> Draft Board</a></li>
+                      <li>
                           {% if league_name == "f35f0a1295224ac2a1d21c8ce9768a70" %}{% else %}
-                              {% if league_name == ""%}Not a member of a league - <a href="/leagueManagement/createLeague">Click to Create one!</a>{% endif %}
-                              {% if league_name != ""%}League: {{ league_name }} - <a id="leave_league" href="#"  data-toggle="modal"
-                                                                                  data-target="#leave_league_modal">Click to leave</a>{% endif %}
+                              {% if league_name == ""%}<a href="/leagueManagement/showLeagues"><span class="glyphicon glyphicon-plus-sign"></span> Join a League</a>{% endif %}
                           {% endif %}
-  						</p></li></ul>
+  						</li></ul>
             {% endif %}
           </div><!--/row-->
 		  </div><!--/container-->
