@@ -13,7 +13,7 @@ import globals
 from award_classification import AwardType
 
 from google.appengine.ext.webapp.util import run_wsgi_app
-from progress_through_elimination_classification import convert_TBA_level_to_progress, FINALIST, WINNER
+from progress_through_elimination_classification import convert_TBA_level_to_progress, FINALIST, WINNER, DIDNTQUALIFY
 from datastore_classes import RootEvent, root_event_key, TeamEvent, team_event_key, team_key, root_team_key, RootTeam, League, Account, Choice, Lineup, DraftPick
 import time
 from points import get_points_to_date
@@ -98,21 +98,40 @@ def get_data_from_web(url, selector, second_selector=None):
     page_data = br.open(final_url, timeout=globals.mechanize_timeout).read()
     return json.loads(page_data)
 
-def proccess_elimination_progress(raw_data):
-    if len(raw_data) != 0:
-        event_id = raw_data[0]['event_key'] #0 is arbitrary, all elements should be the same
+def proccess_elimination_progress(match_data, alliance_data):
+    team_list = []
+    alliance_list = []
+    for i, alliance in enumerate(alliance_data):
+        teams = alliance['picks']
+        for team in teams:
+            team_list.append(team[3:])
+            alliance_list.append(i+1)  # +1 for conversion to 1-based index
+    alliance_dictionary = dict(zip(team_list,alliance_list))
+    alliance_progress_levels = []
+
+    if len(match_data) != 0:
+        event_id = match_data[0]['event_key'] #0 is arbitrary, all elements should be the same
         team_list = globals.get_team_list_per_event(event_id)
+        for alliance in alliance_data:
+            alliance_progress_level = 0
+            for match in match_data:
+                for team_number_with_frc in alliance['picks']:
+                    on_blue_alliance = team_number_with_frc in match['alliances']['blue']['teams']
+                    on_red_alliance = team_number_with_frc in match['alliances']['red']['teams']
+                    if on_blue_alliance or on_red_alliance:
+                        level =  match['comp_level']
+                        new_progress_level = convert_TBA_level_to_progress[level]
+                        if new_progress_level > alliance_progress_level:
+                            alliance_progress_level = new_progress_level
+            #Now alliance progress level is correct
+            alliance_progress_levels.append(alliance_progress_level)  # We add it to the list
+
         for team in team_list:
-            team_progress_level = 0
-            for match in raw_data:
-                team_number_with_frc = 'frc' + str(team)
-                on_blue_alliance = team_number_with_frc in match['alliances']['blue']['teams']
-                on_red_alliance = team_number_with_frc in match['alliances']['red']['teams']
-                if on_blue_alliance or on_red_alliance:
-                    level =  match['comp_level']
-                    new_progress_level = convert_TBA_level_to_progress[level]
-                    if new_progress_level > team_progress_level:
-                        team_progress_level = new_progress_level
+            if str(team) in alliance_dictionary:
+                team_progress_level = alliance_progress_levels[int(alliance_dictionary[str(team)])-1]  # -1 for conversion to 0-based index
+            else:
+                team_progress_level = DIDNTQUALIFY
+
             team_event = TeamEvent.get_or_insert(team_event_key(team_key(team), event_id).id(), parent=team_key(team))
             if team_progress_level == FINALIST:
                 if AwardType.WINNER in team_event.awards:
@@ -121,7 +140,7 @@ def proccess_elimination_progress(raw_data):
             team_event.put()
 
 
-def proccess_event_data(raw_data, event_id):
+def proccess_event_data(raw_data, match_data, event_id):
     root_event = RootEvent.get_or_insert(root_event_key(event_id).id())
     team_list = []
     for i, data in enumerate(raw_data):
@@ -145,8 +164,13 @@ def proccess_event_data(raw_data, event_id):
             team_list.append(int(data[1]))
     #Store the root event team list data
     root_event.teams = team_list
-    root_event.name = get_data_from_web(globals.event_url, event_id)['name']
+    root_event_raw_data = get_data_from_web(globals.event_url, event_id)
+    root_event.name = root_event_raw_data['name']
     root_event.put()
+
+    alliance_data = root_event_raw_data['alliances']
+    proccess_elimination_progress(match_data, alliance_data)
+
 
 def proccess_event_awards(raw_data, team_number, event_id):
     event_award_types = []
@@ -200,15 +224,15 @@ class UpdateDB(webapp2.RequestHandler):
     def get(self):
         setup_default_league()
         raw_data = get_data_from_web(globals.rankings_url, '2014txsa')
-        proccess_event_data(raw_data, '2014txsa')
+        match_data = get_data_from_web(globals.event_matches_url, '2014txsa')
+        proccess_event_data(raw_data, match_data, '2014txsa')
         alamo_teams = root_event_key('2014txsa').get().teams
         for team in alamo_teams:
             raw_data = get_data_from_web(globals.team_events_url, str(team))
             proccess_team_data(raw_data, str(team))
             raw_data = get_data_from_web(globals.team_event_awards_url, str(team), '2014txsa')
             proccess_event_awards(raw_data, str(team), '2014txsa')
-        raw_data = get_data_from_web(globals.event_matches_url, '2014txsa')
-        proccess_elimination_progress(raw_data)
+
         classifyin_weeks_and_takin_names()
         geocode_within_limit()
         update_total_points()
