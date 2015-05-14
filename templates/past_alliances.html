@@ -32,7 +32,7 @@
     {% for team_lists in team_listss %}
         {% set opponent_loop = loop %}
         {% if loop.first %}
-            <h1>Your Lineup</h1>
+            <h2>Your Lineup</h2>
             {% if opponent_name == "" %}
                 <div class="alert alert-warning">
                     <b>Note:</b> Since this was a bye week for you, you did not earn any league points.
@@ -40,17 +40,17 @@
             {% endif %}
         {% else %}
             <hr/>
-            <h1>{{ opponent_name }}'s Lineup</h1>
+            <h2>{{ opponent_name }}'s Lineup</h2>
         {% endif %}
         <div id="team_list">
                 {% for list in team_lists %}
                 {% set listloop = loop %}
-                    <h2>{% if listloop.first %}
+                    <h3>{% if listloop.first %}
                         Active:
                         {% else %}
                         Bench:
                         {% endif %}
-                    </h2>
+                    </h3>
                 {% if list %}
                     <table class="table">
                     <tr><td>Team</td><td>Points</td></tr>
