@@ -284,12 +284,13 @@ class Show_Leagues(webapp2.RequestHandler):
             commissioner = "None"
             if account_key(league.key.id()).get():
                 commissioner = account_key(league.key.id()).get().nickname
-            league_output.append({'name': league.name,
-                                  'id': league.key.id(),
-                                  'size': number_of_players,
-                                  'commissioner': commissioner,
-                                  'join_url': '/leagueManagement/joinLeague/' + league.key.id()
-                                  })
+            if league.key.id() != '0':
+                league_output.append({'name': league.name,
+                                      'id': league.key.id(),
+                                      'size': number_of_players,
+                                      'commissioner': commissioner,
+                                      'join_url': '/leagueManagement/joinLeague/' + league.key.id()
+                                      })
 
         if league_id != '0':
             if league_key(league_id).get().draft_current_position == 0:
