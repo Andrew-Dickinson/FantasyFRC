@@ -24,9 +24,9 @@
   <body class="body">
 {% block navbar %}
 	<nav id="logout" class="navbar navbar-inverse navbar-fixed-top" role="navigation">
-        <div class="nopad container-fluid">
-            <div class="nopad container">
-  		  		<div class="nopad col-md-12">
+        <div class="container-fluid">
+            <div class="row">
+  		  		<div class="navbar-header col-md-12">
                     <div id="navbar" class="collapse navbar-collapse col-md-12">
                         <button type="button" class="navbar-toggle collapsed" data-toggle="collapse" data-target="#navbar" aria-expanded="false" aria-controls="navbar">
                             <span class="sr-only">Toggle navigation</span>
@@ -69,21 +69,19 @@
             </div><!--/row-->
 
             {% if not logged_out %}
-                <div class="grey-wrapper">
-                    <div class="container">
-                        <div id="navbar" class="collapse navbar-collapse col-md-12">
-                            <ul class="nav navbar-nav">
-                                <li><a href="/allianceManagement/viewAlliance"><span class="glyphicon glyphicon-home"></span> Alliance Portal</a></li>
-                                <li><a href="/draft/"><span class="glyphicon glyphicon-list-alt"></span> Draft Board</a></li>
-                                <li>
-                                    {% if league_name == "f35f0a1295224ac2a1d21c8ce9768a70" %}{% else %}
-                                        {% if league_name == ""%}<a href="/leagueManagement/showLeagues"><span class="glyphicon glyphicon-plus-sign"></span> Join a League</a>{% endif %}
-                                    {% endif %}
-                                </li>
-                            </ul>
-                        </div>
-                    </div><!--/row-->
-                </div>
+                <div class="row style">
+                    <div id="navbar" class="collapse navbar-collapse col-md-12">
+                        <ul class="nav navbar-nav">
+                            <li><a href="/allianceManagement/viewAlliance"><span class="glyphicon glyphicon-home"></span> Alliance Portal</a></li>
+                            <li><a href="/draft/"><span class="glyphicon glyphicon-list-alt"></span> Draft Board</a></li>
+                            <li>
+                                {% if league_name == "f35f0a1295224ac2a1d21c8ce9768a70" %}{% else %}
+                                    {% if league_name == ""%}<a href="/leagueManagement/showLeagues"><span class="glyphicon glyphicon-plus-sign"></span> Join a League</a>{% endif %}
+                                {% endif %}
+                            </li>
+                        </ul>
+                    </div>
+                </div><!--/row-->
             {% endif %}
         </div><!--/container-->
     </nav>
