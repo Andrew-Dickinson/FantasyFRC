@@ -11,6 +11,10 @@
   padding: 0;
 }
 
+.helpPage li{
+  float: right;
+}
+
 #logout .container-fluid{
   padding-left: 0;
   padding-right: 0;
