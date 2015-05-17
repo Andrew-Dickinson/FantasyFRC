@@ -82,6 +82,9 @@
                                   {% endif %}
                               </li>
                           </ul>
+                          <ul class="nav navbar-nav">
+                            <li><a href="/help/"><span class="glyphicon glyphicon-question-sign"></span> Help </a></li>
+                          </ul>
                       </div><!--/navbar-->
                   </div><!--/row-->
                 </div><!--/container-->
@@ -125,7 +128,7 @@
 	    </div>
 	    <div class="col-sm-6 col-sm-offset-3 col-md-offset-3 col-lg-offset-3">
    	      <div>
-	        <a href="/thanks">Thanks</a> - <a href="/about">About/Contact</a> - <a href="/help/">Help</a>
+	        <a href="/thanks">Thanks</a> - <a href="/about">About/Contact</a> {% if logged_out %} - <a href="/help/">Help</a> {% endif %}
 	      </div>
           <div>Fantasy FRC is open source. <a href="https://github.com/smarthimandrew/FantasyFRC" target="_blank">Contribute here!</a></div>
           <div>Copyright &copy 2015 Andrew Dickinson - <a href="https://github.com/smarthimandrew/FantasyFRC/blob/master/LICENSE.txt" target="_blank">Licensed under GNU</a>.</div>
