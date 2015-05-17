@@ -14,12 +14,6 @@
                 <p>Fantasy FRC is a <a href="http://en.wikipedia.org/wiki/Fantasy_sport" target="_blank">fantasy sport</a> that uses match data from <a href="http://www.usfirst.org" target="_blank">FIRST Robotics Competion (FRC)</a> to allow users to select and manage fantasy alliances of FRC teams. If this is your first time here, you should check out the <a href="/help/">help page</a>. Otherwise, please remember that this is an early version of this product. Expect bugs and other issues. You can report any bugs you find at our <a href="https://github.com/smarthimandrew/FantasyFRC/issues" target="_blank">Github issues page</a>.  {% if logged_out %} You'll need a google account to do anything useful. You can <a href="https://support.google.com/accounts/answer/27441?source=gsearch" target="_blank">create one</a> or <a href="{{ logged_out }}">log in</a>.{% endif %}</p>
             </div><!--/main-->
         {% endif %}
-        {% if not logged_out and league_name=="" %}
-            <div>
-                <h2>Fantasy FRC is more fun with friends!</h2>
-                <p>Join a league on the <a href="/leagueManagement/showLeagues">leagues page</a></p>
-            </div>
-        {% endif %}
         {% if (draft_state == 0 or draft_state == -10) and league_name != "" %}
             <div>
                 <h2>Current League: {{ league_name }}</h2>
@@ -30,9 +24,11 @@
                         <tr><td>{{ member }}</td></tr>
                     {% endfor %}
                 </table>
-                <h2>Getting started</h2>
-                <p>GRACE'S DIRECTIONS HERE</p>
             </div>
+        {% endif %}
+        {% if not logged_out and ((league_name != "" and (draft_state == 0 or draft_state == -10))) or (league_name == ""))%}
+            <h2>Getting started</h2>
+            <p>GRACE'S DIRECTIONS HERE</p>
         {% endif %}
         {% if draft_state != 0 and draft_state != -10 and league_name != "" and not show_league_standings and not logged_out %}
             <div>
