@@ -361,7 +361,6 @@ class view_alliance(webapp2.RequestHandler):
 
             opponent_name = ""
             opponent_point_totals = []
-            opponent_team_lists = []
             team_listss = [team_lists]
             if get_opponent(user_id, week_number) != globals.schedule_bye_week:
                 opponent_team_lists = get_team_lists(get_opponent(user_id, week_number), week_number)

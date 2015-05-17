@@ -556,11 +556,7 @@ class Draft_Page(webapp2.RequestHandler):
 
             number_of_picks = len(league_players) * globals.draft_rounds
             for position in range(1, number_of_picks + 1):
-                pick_query = DraftPick.query().filter(DraftPick.display_number == position)
-                query_results = pick_query.fetch(1)
-                pick = DraftPick()
-                if len(query_results) != 0:
-                    pick = query_results[0]
+                pick = draft_pick_key(league_key(league_id), position).get()
 
                 username = (((position % len(league_players)) - 1) % len(league_players))
                 draft_round = int((position - 1) / len(league_players))

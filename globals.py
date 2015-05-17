@@ -126,7 +126,10 @@ def get_draft_state(account_entity):
     if is_league_owner(account_entity) and league.draft_current_position == 0:
         return -10
     else:
-        return league.draft_current_position
+        if league:
+            return league.draft_current_position
+        else:
+            return 0
 
 
 def is_league_owner(account_entity):
