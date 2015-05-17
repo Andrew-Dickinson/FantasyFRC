@@ -555,12 +555,21 @@ class Draft_Page(webapp2.RequestHandler):
                 player_list.append(player.nickname)
 
             number_of_picks = len(league_players) * globals.draft_rounds
+            last_username = 0
             for position in range(1, number_of_picks + 1):
                 pick = draft_pick_key(league_key(league_id), position).get()
+                player_ids_in_order = []
+                for player in league_players:
+                    player_ids_in_order.append(player.key.id())
+                if pick:
+                    current_id = ndb.Key(urlsafe=pick.player).id()
+                    username = player_ids_in_order.index(current_id)
+                else:
+                    username = (((position % len(league_players)) - 1) % len(league_players))
 
-                username = (((position % len(league_players)) - 1) % len(league_players))
                 draft_round = int((position - 1) / len(league_players))
-                if username == 0:
+
+                if username == last_username:
                     draft_board.append([])
                     for i in range(0, len(league_players)):
                         draft_board[draft_round].append('-')
@@ -570,6 +579,7 @@ class Draft_Page(webapp2.RequestHandler):
                         draft_board[draft_round][username] = "<i>Forfeited</i>"
                 else:
                     draft_board[draft_round][username] = "<i>TBD</i>"
+                last_username = username
 
             if league_id != '0':
                 league_name = league_key(league_id).get().name
