@@ -238,6 +238,14 @@ class UpdateDB(webapp2.RequestHandler):
         update_total_points()
         self.redirect(self.request.referer)
 
+    def handle_exception(self, exception, debug_mode):
+        if debug_mode:
+            super(type(self), self).handle_exception(exception, debug_mode)
+        else:
+            template = JINJA_ENVIRONMENT.get_template('templates/500.html')
+            self.response.write(template.render())
+
+
 class ClearLeagueData(webapp2.RequestHandler):
     def get(self):
         accountQuery = Account.query()
@@ -262,11 +270,25 @@ class ClearLeagueData(webapp2.RequestHandler):
             league.key.delete()
         self.redirect(self.request.referer)
 
+    def handle_exception(self, exception, debug_mode):
+        if debug_mode:
+            super(type(self), self).handle_exception(exception, debug_mode)
+        else:
+            template = JINJA_ENVIRONMENT.get_template('templates/500.html')
+            self.response.write(template.render())
+
 
 class RunWeekBegin(webapp2.RequestHandler):
     def get(self, week):
         run_week_begin(week)
         self.redirect(self.request.referer)
+
+    def handle_exception(self, exception, debug_mode):
+        if debug_mode:
+            super(type(self), self).handle_exception(exception, debug_mode)
+        else:
+            template = JINJA_ENVIRONMENT.get_template('templates/500.html')
+            self.response.write(template.render())
 
 class RunProcessing(webapp2.RequestHandler):
     def get(self, week):
@@ -275,6 +297,14 @@ class RunProcessing(webapp2.RequestHandler):
             if league.draft_current_position == -1:
                 finish_week(league.key.id(), int(week))
         self.redirect(self.request.referer)
+
+    def handle_exception(self, exception, debug_mode):
+        if debug_mode:
+            super(type(self), self).handle_exception(exception, debug_mode)
+        else:
+            template = JINJA_ENVIRONMENT.get_template('templates/500.html')
+            self.response.write(template.render())
+
 
 class ShowAdmin(webapp2.RequestHandler):
     def get(self):
@@ -285,6 +315,13 @@ class ShowAdmin(webapp2.RequestHandler):
                     }
         template = JINJA_ENVIRONMENT.get_template('templates/adminPage.html')
         self.response.write(template.render(template_values))
+
+    def handle_exception(self, exception, debug_mode):
+        if debug_mode:
+            super(type(self), self).handle_exception(exception, debug_mode)
+        else:
+            template = JINJA_ENVIRONMENT.get_template('templates/500.html')
+            self.response.write(template.render())
 
 
 application = webapp2.WSGIApplication([

@@ -60,6 +60,13 @@ class About(webapp2.RequestHandler):
             template = JINJA_ENVIRONMENT.get_template('templates/about.html')
             self.response.write(template.render(template_values))
 
+    def handle_exception(self, exception, debug_mode):
+        if debug_mode:
+            super(type(self), self).handle_exception(exception, debug_mode)
+        else:
+            template = JINJA_ENVIRONMENT.get_template('templates/500.html')
+            self.response.write(template.render())
+
 
 application = webapp2.WSGIApplication([
                                        ('/about', About),

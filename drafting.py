@@ -434,6 +434,14 @@ class FreeAgentListPage(webapp2.RequestHandler):
         else:
             globals.display_error_page(self, self.request.referer, error_messages.need_to_be_a_member_of_a_league)
 
+    def handle_exception(self, exception, debug_mode):
+        if debug_mode:
+            super(type(self), self).handle_exception(exception, debug_mode)
+        else:
+            template = JINJA_ENVIRONMENT.get_template('templates/500.html')
+            self.response.write(template.render())
+
+
 class WatchListPage(webapp2.RequestHandler):
     def get(self):
         """
@@ -479,6 +487,14 @@ class WatchListPage(webapp2.RequestHandler):
         else:
             globals.display_error_page(self, self.request.referer, error_messages.need_to_be_a_member_of_a_league)
 
+    def handle_exception(self, exception, debug_mode):
+        if debug_mode:
+            super(type(self), self).handle_exception(exception, debug_mode)
+        else:
+            template = JINJA_ENVIRONMENT.get_template('templates/500.html')
+            self.response.write(template.render())
+
+
 class UpdateWatchlist(webapp2.RequestHandler):
     def get(self):
         """
@@ -507,6 +523,13 @@ class UpdateWatchlist(webapp2.RequestHandler):
                 account.put()
 
         self.redirect(self.request.referer)
+
+    def handle_exception(self, exception, debug_mode):
+        if debug_mode:
+            super(type(self), self).handle_exception(exception, debug_mode)
+        else:
+            template = JINJA_ENVIRONMENT.get_template('templates/500.html')
+            self.response.write(template.render())
 
 
 class Draft_Page(webapp2.RequestHandler):
@@ -628,6 +651,13 @@ class Draft_Page(webapp2.RequestHandler):
         else:
             globals.display_error_page(self, self.request.referer,error_messages.need_to_be_a_member_of_a_league)
 
+    def handle_exception(self, exception, debug_mode):
+        if debug_mode:
+            super(type(self), self).handle_exception(exception, debug_mode)
+        else:
+            template = JINJA_ENVIRONMENT.get_template('templates/500.html')
+            self.response.write(template.render())
+
 
 class Start_Draft(webapp2.RequestHandler):
     def get(self):
@@ -660,6 +690,13 @@ class Start_Draft(webapp2.RequestHandler):
                 globals.display_error_page(self, self.request.referer, error_messages.league_too_small)
         else:
             globals.display_error_page(self, self.request.referer,error_messages.access_denied)
+
+    def handle_exception(self, exception, debug_mode):
+        if debug_mode:
+            super(type(self), self).handle_exception(exception, debug_mode)
+        else:
+            template = JINJA_ENVIRONMENT.get_template('templates/500.html')
+            self.response.write(template.render())
 
 
 class Submit_Draft_Pick(webapp2.RequestHandler):
@@ -709,7 +746,12 @@ class Submit_Draft_Pick(webapp2.RequestHandler):
         #Display the draft main page with status
         self.redirect('/draft/?updated=' + selection_error)
 
-
+    def handle_exception(self, exception, debug_mode):
+        if debug_mode:
+            super(type(self), self).handle_exception(exception, debug_mode)
+        else:
+            template = JINJA_ENVIRONMENT.get_template('templates/500.html')
+            self.response.write(template.render())
 
 
 class Submit_Pick(webapp2.RequestHandler):
@@ -774,6 +816,13 @@ class Submit_Pick(webapp2.RequestHandler):
 
         #Send them back to the previous page
         self.redirect(str(self.request.referer.split('?', 1)[0] + '?updated=' + selection_error))
+
+    def handle_exception(self, exception, debug_mode):
+        if debug_mode:
+            super(type(self), self).handle_exception(exception, debug_mode)
+        else:
+            template = JINJA_ENVIRONMENT.get_template('templates/500.html')
+            self.response.write(template.render())
 
 
 application = webapp2.WSGIApplication([('/draft/freeAgentList/(.*)', FreeAgentListPage),  # Page number

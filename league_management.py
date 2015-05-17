@@ -307,6 +307,14 @@ class Show_Leagues(webapp2.RequestHandler):
         template = JINJA_ENVIRONMENT.get_template('templates/league_list.html')
         self.response.write(template.render(template_values))
 
+    def handle_exception(self, exception, debug_mode):
+        if debug_mode:
+            super(type(self), self).handle_exception(exception, debug_mode)
+        else:
+            template = JINJA_ENVIRONMENT.get_template('templates/500.html')
+            self.response.write(template.render())
+
+
 class create_League(webapp2.RequestHandler):
     """
         Setup information page for creating a league
@@ -334,6 +342,14 @@ class create_League(webapp2.RequestHandler):
                         }
         template = JINJA_ENVIRONMENT.get_template('templates/create_league.html')
         self.response.write(template.render(template_values))
+
+    def handle_exception(self, exception, debug_mode):
+        if debug_mode:
+            super(type(self), self).handle_exception(exception, debug_mode)
+        else:
+            template = JINJA_ENVIRONMENT.get_template('templates/500.html')
+            self.response.write(template.render())
+
 
 class update_League(webapp2.RequestHandler):
     """
@@ -365,6 +381,14 @@ class update_League(webapp2.RequestHandler):
         else:
             globals.display_error_page(self, self.request.referer, error_messages.league_already_started_leaving)
 
+    def handle_exception(self, exception, debug_mode):
+        if debug_mode:
+            super(type(self), self).handle_exception(exception, debug_mode)
+        else:
+            template = JINJA_ENVIRONMENT.get_template('templates/500.html')
+            self.response.write(template.render())
+
+
 class leave_League(webapp2.RequestHandler):
     """
         A page which, when visited, will remove a user from their current league
@@ -378,6 +402,12 @@ class leave_League(webapp2.RequestHandler):
         else:
             globals.display_error_page(self, self.request.referer, error_messages.league_already_started_leaving)
 
+    def handle_exception(self, exception, debug_mode):
+        if debug_mode:
+            super(type(self), self).handle_exception(exception, debug_mode)
+        else:
+            template = JINJA_ENVIRONMENT.get_template('templates/500.html')
+            self.response.write(template.render())
 
 
 class Join_League(webapp2.RequestHandler):
@@ -397,6 +427,14 @@ class Join_League(webapp2.RequestHandler):
                 globals.display_error_page(self, self.request.referer, error_messages.league_already_started)
         else:
             globals.display_error_page(self, self.request.referer, error_messages.league_already_started_leaving)
+
+    def handle_exception(self, exception, debug_mode):
+        if debug_mode:
+            super(type(self), self).handle_exception(exception, debug_mode)
+        else:
+            template = JINJA_ENVIRONMENT.get_template('templates/500.html')
+            self.response.write(template.render())
+
 
 class manage_league(webapp2.RequestHandler):
     def get(self):
@@ -430,6 +468,14 @@ class manage_league(webapp2.RequestHandler):
         else:
             globals.display_error_page(self, self.request.referer,error_messages.access_denied)
 
+    def handle_exception(self, exception, debug_mode):
+        if debug_mode:
+            super(type(self), self).handle_exception(exception, debug_mode)
+        else:
+            template = JINJA_ENVIRONMENT.get_template('templates/500.html')
+            self.response.write(template.render())
+
+
 class delete_League(webapp2.RequestHandler):
     """
         The post handler for the deletion of leagues
@@ -454,6 +500,14 @@ class delete_League(webapp2.RequestHandler):
             self.redirect('/')
         else:
             globals.display_error_page(self, self.request.referer, error_messages.access_denied)
+
+    def handle_exception(self, exception, debug_mode):
+        if debug_mode:
+            super(type(self), self).handle_exception(exception, debug_mode)
+        else:
+            template = JINJA_ENVIRONMENT.get_template('templates/500.html')
+            self.response.write(template.render())
+
 
 application = webapp2.WSGIApplication([
                                        ('/leagueManagement/updateLeague', update_League),
