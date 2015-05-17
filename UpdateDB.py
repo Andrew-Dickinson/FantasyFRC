@@ -324,12 +324,20 @@ class ShowAdmin(webapp2.RequestHandler):
             self.response.write(template.render())
 
 
+class PageNotFoundHandler(webapp2.RequestHandler):
+    def get(self):
+        self.error(404)
+        template = JINJA_ENVIRONMENT.get_template('templates/404.html')
+        self.response.write(template.render())
+
+
 application = webapp2.WSGIApplication([
                                        ('/updateTeams/clear', ClearLeagueData),
                                        ('/updateTeams/fullData', UpdateDB),
                                        ('/updateTeams/lock/(.*)', RunWeekBegin),  # Week number
                                        ('/updateTeams/process/(.*)', RunProcessing),  # Week number
-                                       ('/updateTeams/', ShowAdmin)
+                                       ('/updateTeams/', ShowAdmin),
+                                       ('/updateTeams/.*', PageNotFoundHandler)
                                        ], debug=True)
 
 def main():

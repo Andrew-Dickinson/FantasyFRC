@@ -509,6 +509,13 @@ class delete_League(webapp2.RequestHandler):
             self.response.write(template.render())
 
 
+class PageNotFoundHandler(webapp2.RequestHandler):
+    def get(self):
+        self.error(404)
+        template = JINJA_ENVIRONMENT.get_template('templates/404.html')
+        self.response.write(template.render())
+
+
 application = webapp2.WSGIApplication([
                                        ('/leagueManagement/updateLeague', update_League),
                                        ('/leagueManagement/createLeague', create_League),
@@ -517,6 +524,7 @@ application = webapp2.WSGIApplication([
                                        ('/leagueManagement/leaveLeague', leave_League),
                                        ('/leagueManagement/manageLeague', manage_league),
                                        ('/leagueManagement/deleteLeague', delete_League),
+                                       ('/leagueManagement/.*', PageNotFoundHandler)
                                        ], debug=True)
 
 def main():

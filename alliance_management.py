@@ -505,10 +505,18 @@ class team_detail_page(webapp2.RequestHandler):
             self.response.write(template.render())
 
 
+class PageNotFoundHandler(webapp2.RequestHandler):
+    def get(self):
+        self.error(404)
+        template = JINJA_ENVIRONMENT.get_template('templates/404.html')
+        self.response.write(template.render())
+
+
 application = webapp2.WSGIApplication([('/allianceManagement/viewAlliance', alliance_portal),
                                        ('/allianceManagement/viewAlliance/(.*)', view_alliance),  # Week number
                                        ('/allianceManagement/updateLineup/(.*)', update_lineup),  # Week number
                                        ('/allianceManagement/teamDetail/(.*)', team_detail_page),  # Team number
+                                       ('/allianceManagement/.*', PageNotFoundHandler)
                                        ], debug=True)
 
 

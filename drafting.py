@@ -825,14 +825,21 @@ class Submit_Pick(webapp2.RequestHandler):
             self.response.write(template.render())
 
 
+class PageNotFoundHandler(webapp2.RequestHandler):
+    def get(self):
+        self.error(404)
+        template = JINJA_ENVIRONMENT.get_template('templates/404.html')
+        self.response.write(template.render())
+
+
 application = webapp2.WSGIApplication([('/draft/freeAgentList/(.*)', FreeAgentListPage),  # Page number
                                        ('/draft/pickUp/submitPick', Submit_Pick),
                                        ('/draft/submitPick', Submit_Draft_Pick),
                                        ('/draft/startDraft', Start_Draft),
                                        ('/draft/watchList/update/', UpdateWatchlist),
                                        ('/draft/watchList', WatchListPage),
-                                       ('/draft/', Draft_Page)
-
+                                       ('/draft/', Draft_Page),
+                                       ('/draft/.*', PageNotFoundHandler)
                                       ], debug=True)
 
 
