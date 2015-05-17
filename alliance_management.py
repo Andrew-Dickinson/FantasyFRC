@@ -6,8 +6,6 @@ import os
 import logging
 import error_messages
 
-import globals
-from globals import maximum_active_teams
 
 from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.api import users
@@ -251,6 +249,7 @@ class alliance_portal(webapp2.RequestHandler):
                                 'user': user.nickname(),
                                 'logout_url': logout_url,
                                 'league_name': league_name,
+                                'draft_state': globals.get_draft_state(league_id),
                                 'week_table': week_table,
                                 'total_points': total_points,
                                 'leader_board': leader_board,
@@ -388,6 +387,7 @@ class view_alliance(webapp2.RequestHandler):
                             'user': user.nickname(),
                             'logout_url': logout_url,
                             'league_name': league_name,
+                            'draft_state': globals.get_draft_state(league_id),
                             'week_number': int(week_number),
                             'point_totals': [point_totals, opponent_point_totals],
                             'team_listss': team_listss,
@@ -477,6 +477,7 @@ class team_detail_page(webapp2.RequestHandler):
                         'user': user.nickname(),
                         'logout_url': logout_url,
                         'league_name': league_name,
+                        'draft_state': globals.get_draft_state(league_id),
                         'team_data': team_data,
                         'team_name': team_name,
                         'tba_team_url': tba_team_url,
@@ -505,3 +506,5 @@ from points import get_team_points_at_event, get_points_to_date, get_point_break
     humman_readable_point_categories, explanation_of_point_categories
 from league_management import get_leader_board, get_readable_schedule, get_opponent, get_opponent_name, get_readable_user_schedule
 from drafting import get_watchlist
+from globals import maximum_active_teams
+import globals

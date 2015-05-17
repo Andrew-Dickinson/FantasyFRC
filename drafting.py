@@ -10,9 +10,6 @@ from random import shuffle
 import datetime
 import calendar
 
-import globals
-from globals import get_team_list, maximum_roster_size, maximum_active_teams
-
 from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.ext import ndb
 from google.appengine.api import users
@@ -427,6 +424,7 @@ class FreeAgentListPage(webapp2.RequestHandler):
                 'user': user.nickname(),
                 'logout_url': logout_url,
                 'league_name': league_name,
+                'draft_state': globals.get_draft_state(league_id),
                 'update_text': update_text,
                 'free_agent_list': free_agent_list,
                 'roster': current_roster,
@@ -477,6 +475,7 @@ class WatchListPage(webapp2.RequestHandler):
                 'user': user.nickname(),
                 'logout_url': logout_url,
                 'league_name': league_name,
+                'draft_state': globals.get_draft_state(league_id),
                 'update_text': update_text,
                 'watch_list': watch_list,
                 'roster': current_roster,
@@ -621,6 +620,7 @@ class Draft_Page(webapp2.RequestHandler):
                 'player_list': player_list,
                 'update_text': update_text,
                 'league_name': league_name,
+                'draft_state': globals.get_draft_state(league_id),
                 'users_turn': users_turn,
                 'picking_user': picking_user,
                 'current_unix_timeout': current_unix_timeout,
@@ -800,3 +800,5 @@ if __name__ == "__main__":
     main()
 
 from alliance_management import get_current_roster
+from globals import get_team_list, maximum_roster_size, maximum_active_teams
+import globals

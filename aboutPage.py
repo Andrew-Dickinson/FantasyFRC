@@ -57,7 +57,8 @@ class About(webapp2.RequestHandler):
             template_values = {
                         'user': user.nickname(),
                         'logout_url': logout_url,
-                        'league_name': league_name
+                        'league_name': league_name,
+                        'draft_state': globals.get_draft_state(league_id),
                         }
             template = JINJA_ENVIRONMENT.get_template('templates/about.html')
             self.response.write(template.render(template_values))

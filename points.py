@@ -1,6 +1,3 @@
-import logging
-import globals
-
 from award_classification import AwardType
 
 from datastore_classes import TeamEvent, team_event_key, team_key, lineup_key, Lineup, choice_key, account_key
@@ -288,3 +285,4 @@ award_points_by_TBA_id = {
 
 # Down here to fix import craziness
 from alliance_management import get_team_schedule
+import globals
