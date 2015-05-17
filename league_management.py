@@ -302,7 +302,7 @@ class Show_Leagues(webapp2.RequestHandler):
                         'logout_url': logout_url,
                         'league_list': league_output,
                         'league_name': league_name,
-                        'draft_state': globals.get_draft_state(league_id),
+                        'draft_state': globals.get_draft_state(account),
                         }
         template = JINJA_ENVIRONMENT.get_template('templates/league_list.html')
         self.response.write(template.render(template_values))
@@ -330,7 +330,7 @@ class create_League(webapp2.RequestHandler):
                         'user': user.nickname(),
                         'logout_url': logout_url,
                         'league_name': league_name,
-                        'draft_state': globals.get_draft_state(league_id),
+                        'draft_state': globals.get_draft_state(account),
                         }
         template = JINJA_ENVIRONMENT.get_template('templates/create_league.html')
         self.response.write(template.render(template_values))
@@ -422,7 +422,7 @@ class manage_league(webapp2.RequestHandler):
                             'user': user.nickname(),
                             'logout_url': logout_url,
                             'league_name': league_name,
-                            'draft_state': globals.get_draft_state(league_id),
+                            'draft_state': globals.get_draft_state(account),
                             'snake_draft': league_key(league_id).get().snake_draft
                             }
             template = JINJA_ENVIRONMENT.get_template('templates/manage_league.html')

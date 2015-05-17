@@ -55,7 +55,7 @@ class Thanks(webapp2.RequestHandler):
                         'user': user.nickname(),
                         'logout_url': logout_url,
                         'league_name': league_name,
-                        'draft_state': globals.get_draft_state(league_id),
+                        'draft_state': globals.get_draft_state(account),
                         }
             template = JINJA_ENVIRONMENT.get_template('templates/thanks.html')
             self.response.write(template.render(template_values))

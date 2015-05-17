@@ -108,8 +108,9 @@ def set_current_editable_week(week_num):
     global_settings.put()
 
 
-def display_league_standings(league_id):
-    if get_draft_state(league_id) == -1:
+def display_league_standings(account_entity):
+    league_id = account_entity.league
+    if get_draft_state(account_entity) == -1:
         league_points_total = 0
         players = Account.query(Account.league == league_id).fetch()
         for player in players:
@@ -119,9 +120,17 @@ def display_league_standings(league_id):
         return False
 
 
-def get_draft_state(league_id):
+def get_draft_state(account_entity):
+    league_id = account_entity.league
     league = league_key(league_id).get()
-    return league.draft_current_position
+    if is_league_owner(account_entity) and league.draft_current_position == 0:
+        return -10
+    else:
+        return league.draft_current_position
+
+
+def is_league_owner(account_entity):
+    return account_entity.league == account_entity.key.id()
 
 
 from datastore_classes import RootTeam, Account, GlobalSettings, League, league_key
