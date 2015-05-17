@@ -26,7 +26,7 @@
                 </table>
             </div>
         {% endif %}
-        {% if not logged_out and ((league_name != "" and (draft_state == 0 or draft_state == -10))) or (league_name == ""))%}
+        {% if not logged_out and ((league_name != "" and (draft_state == 0 or draft_state == -10)) or (league_name == ""))%}
             <h2>Getting started</h2>
             <p>GRACE'S DIRECTIONS HERE</p>
         {% endif %}
