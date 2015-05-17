@@ -45,10 +45,7 @@ class Help(webapp2.RequestHandler):
 
             #Proccess league info
             if league_id != '0':
-                if league_key(league_id).get().draft_current_position == 0:
-                    league_name = league_key(league_id).get().name
-                else:
-                    league_name = globals.draft_started_sentinel
+                league_name = league_key(league_id).get().name
             else:
                 league_name = ""
 
@@ -56,7 +53,8 @@ class Help(webapp2.RequestHandler):
             template_values = {
                         'user': user.nickname(),
                         'logout_url': logout_url,
-                        'league_name': league_name
+                        'league_name': league_name,
+                        'draft_state': globals.get_draft_state(account),
                         }
             template = JINJA_ENVIRONMENT.get_template('templates/help.html')
             self.response.write(template.render(template_values))
@@ -82,10 +80,7 @@ class PointsPage(webapp2.RequestHandler):
             league_id = account.league
 
             if league_id != '0':
-                if league_key(league_id).get().draft_current_position == 0:
-                    league_name = league_key(league_id).get().name
-                else:
-                    league_name = globals.draft_started_sentinel
+                league_name = league_key(league_id).get().name
             else:
                 league_name = ""
 
@@ -93,7 +88,8 @@ class PointsPage(webapp2.RequestHandler):
             template_values = {
                         'user': user.nickname(),
                         'logout_url': logout_url,
-                        'league_name': league_name
+                        'league_name': league_name,
+                        'draft_state': globals.get_draft_state(account),
                         }
             template = JINJA_ENVIRONMENT.get_template('templates/points_detail.html')
             self.response.write(template.render(template_values))

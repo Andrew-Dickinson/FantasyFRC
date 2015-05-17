@@ -6,8 +6,6 @@ import os
 import logging
 import error_messages
 
-import globals
-from globals import maximum_active_teams
 
 from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.api import users
@@ -210,10 +208,7 @@ class alliance_portal(webapp2.RequestHandler):
             if draft_over:
                 #Proccess league info
                 if league_id != '0':
-                    if league_key(league_id).get().draft_current_position == 0:
-                        league_name = league_key(league_id).get().name
-                    else:
-                        league_name = globals.draft_started_sentinel
+                    league_name = league_key(league_id).get().name
                 else:
                     league_name = ""
 
@@ -251,6 +246,7 @@ class alliance_portal(webapp2.RequestHandler):
                                 'user': user.nickname(),
                                 'logout_url': logout_url,
                                 'league_name': league_name,
+                                'draft_state': globals.get_draft_state(account),
                                 'week_table': week_table,
                                 'total_points': total_points,
                                 'leader_board': leader_board,
@@ -350,10 +346,7 @@ class view_alliance(webapp2.RequestHandler):
         draft_over = league_key(league_id).get().draft_current_position == -1
 
         if league_id != '0':
-            if league_key(league_id).get().draft_current_position == 0:
-                league_name = league_key(league_id).get().name
-            else:
-                league_name = globals.draft_started_sentinel
+            league_name = league_key(league_id).get().name
         else:
             league_name = ""
 
@@ -368,7 +361,6 @@ class view_alliance(webapp2.RequestHandler):
 
             opponent_name = ""
             opponent_point_totals = []
-            opponent_team_lists = []
             team_listss = [team_lists]
             if get_opponent(user_id, week_number) != globals.schedule_bye_week:
                 opponent_team_lists = get_team_lists(get_opponent(user_id, week_number), week_number)
@@ -388,6 +380,7 @@ class view_alliance(webapp2.RequestHandler):
                             'user': user.nickname(),
                             'logout_url': logout_url,
                             'league_name': league_name,
+                            'draft_state': globals.get_draft_state(account),
                             'week_number': int(week_number),
                             'point_totals': [point_totals, opponent_point_totals],
                             'team_listss': team_listss,
@@ -424,10 +417,7 @@ class team_detail_page(webapp2.RequestHandler):
         league_id = account.league
 
         if league_id != '0':
-            if league_key(league_id).get().draft_current_position == 0:
-                league_name = league_key(league_id).get().name
-            else:
-                league_name = globals.draft_started_sentinel
+            league_name = league_key(league_id).get().name
         else:
             league_name = ""
 
@@ -477,6 +467,7 @@ class team_detail_page(webapp2.RequestHandler):
                         'user': user.nickname(),
                         'logout_url': logout_url,
                         'league_name': league_name,
+                        'draft_state': globals.get_draft_state(account),
                         'team_data': team_data,
                         'team_name': team_name,
                         'tba_team_url': tba_team_url,
@@ -505,3 +496,5 @@ from points import get_team_points_at_event, get_points_to_date, get_point_break
     humman_readable_point_categories, explanation_of_point_categories
 from league_management import get_leader_board, get_readable_schedule, get_opponent, get_opponent_name, get_readable_user_schedule
 from drafting import get_watchlist
+from globals import maximum_active_teams
+import globals

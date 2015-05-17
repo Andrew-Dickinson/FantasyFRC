@@ -1,11 +1,9 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-from datastore_classes import RootTeam, Account, GlobalSettings
-from datetime import date
-import logging
-import jinja2
 import os
+import jinja2
+from datetime import date
 
 JINJA_ENVIRONMENT = jinja2.Environment(
     loader=jinja2.FileSystemLoader(os.path.dirname(__file__)),
@@ -38,9 +36,6 @@ league_points_per_win = 2
 league_points_per_tie = 1
 league_points_per_loss = 0
 league_points_per_bye = 0
-
-#Used as the name of a league to indicate that the league name and leave league button should not be displayed
-draft_started_sentinel = "f35f0a1295224ac2a1d21c8ce9768a70" #UUID generated from uuidgenerator.net
 
 #The character used to denote a bye week in schedules
 schedule_bye_week = '0'
@@ -111,3 +106,35 @@ def set_current_editable_week(week_num):
     global_settings = GlobalSettings.get_or_insert('0')
     global_settings.editable_week = week_num
     global_settings.put()
+
+
+def display_league_standings(account_entity):
+    league_id = account_entity.league
+    if get_draft_state(account_entity) == -1:
+        league_points_total = 0
+        players = Account.query(Account.league == league_id).fetch()
+        for player in players:
+            league_points_total += get_league_points(player.key.id())
+        return league_points_total != 0
+    else:
+        return False
+
+
+def get_draft_state(account_entity):
+    league_id = account_entity.league
+    league = league_key(league_id).get()
+    if is_league_owner(account_entity) and league.draft_current_position == 0:
+        return -10
+    else:
+        if league:
+            return league.draft_current_position
+        else:
+            return 0
+
+
+def is_league_owner(account_entity):
+    return account_entity.league == account_entity.key.id()
+
+
+from datastore_classes import RootTeam, Account, GlobalSettings, League, league_key
+from league_management import get_league_points

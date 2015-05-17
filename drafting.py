@@ -10,9 +10,6 @@ from random import shuffle
 import datetime
 import calendar
 
-import globals
-from globals import get_team_list, maximum_roster_size, maximum_active_teams
-
 from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.ext import ndb
 from google.appengine.api import users
@@ -413,10 +410,7 @@ class FreeAgentListPage(webapp2.RequestHandler):
             else:
                 page = int(page)
 
-            if league_key(league_id).get().draft_current_position == 0:
-                league_name = league_key(league_id).get().name
-            else:
-                league_name = globals.draft_started_sentinel
+            league_name = league_key(league_id).get().name
 
             free_agent_list = get_free_agent_list(league_id, page, account.key.id())
 
@@ -427,6 +421,7 @@ class FreeAgentListPage(webapp2.RequestHandler):
                 'user': user.nickname(),
                 'logout_url': logout_url,
                 'league_name': league_name,
+                'draft_state': globals.get_draft_state(account),
                 'update_text': update_text,
                 'free_agent_list': free_agent_list,
                 'roster': current_roster,
@@ -460,11 +455,7 @@ class WatchListPage(webapp2.RequestHandler):
         league_id = account.league
 
         if league_id != '0':
-
-            if league_key(league_id).get().draft_current_position == 0:
-                league_name = league_key(league_id).get().name
-            else:
-                league_name = globals.draft_started_sentinel
+            league_name = league_key(league_id).get().name
 
             watchlist_raw = account.watchlist
 
@@ -477,6 +468,7 @@ class WatchListPage(webapp2.RequestHandler):
                 'user': user.nickname(),
                 'logout_url': logout_url,
                 'league_name': league_name,
+                'draft_state': globals.get_draft_state(account),
                 'update_text': update_text,
                 'watch_list': watch_list,
                 'roster': current_roster,
@@ -564,11 +556,7 @@ class Draft_Page(webapp2.RequestHandler):
 
             number_of_picks = len(league_players) * globals.draft_rounds
             for position in range(1, number_of_picks + 1):
-                pick_query = DraftPick.query().filter(DraftPick.display_number == position)
-                query_results = pick_query.fetch(1)
-                pick = DraftPick()
-                if len(query_results) != 0:
-                    pick = query_results[0]
+                pick = draft_pick_key(league_key(league_id), position).get()
 
                 username = (((position % len(league_players)) - 1) % len(league_players))
                 draft_round = int((position - 1) / len(league_players))
@@ -584,10 +572,7 @@ class Draft_Page(webapp2.RequestHandler):
                     draft_board[draft_round][username] = "<i>TBD</i>"
 
             if league_id != '0':
-                if league_key(league_id).get().draft_current_position == 0:
-                    league_name = league_key(league_id).get().name
-                else:
-                    league_name = globals.draft_started_sentinel
+                league_name = league_key(league_id).get().name
             else:
                 league_name = ""
 
@@ -621,6 +606,7 @@ class Draft_Page(webapp2.RequestHandler):
                 'player_list': player_list,
                 'update_text': update_text,
                 'league_name': league_name,
+                'draft_state': globals.get_draft_state(account),
                 'users_turn': users_turn,
                 'picking_user': picking_user,
                 'current_unix_timeout': current_unix_timeout,
@@ -800,3 +786,5 @@ if __name__ == "__main__":
     main()
 
 from alliance_management import get_current_roster
+from globals import get_team_list, maximum_roster_size, maximum_active_teams
+import globals

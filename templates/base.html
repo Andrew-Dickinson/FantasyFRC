@@ -54,11 +54,15 @@
 
                         <div class="leaguename">
                         {% if not logged_out %}
-                            {% if league_name == "f35f0a1295224ac2a1d21c8ce9768a70" %}{% else %}
+                            {% if draft_state == 0 or draft_state == -10 %}
                                 <li><p class="navbar-text">
                                     {% if league_name != ""%}
-                                        League: {{ league_name }} - <a id="leave_league" href="#"
-                                            data-toggle="modal" data-target="#leave_league_modal">Click to leave</a>
+                                        League: {{ league_name }} -
+                                        {% if draft_state == 0 %}
+                                            <a id="leave_league" href="#" data-toggle="modal" data-target="#leave_league_modal">Click to leave</a>
+                                        {% else %}
+                                            <a href="/leagueManagement/manageLeague">Click to Edit Settings</a>
+                                        {% endif %}
                                     {% endif %}
                                 </p></li>
                             {% endif %}
@@ -77,7 +81,7 @@
                               <li><a href="/allianceManagement/viewAlliance"><span class="glyphicon glyphicon-home"></span> Alliance Portal</a></li>
                               <li><a href="/draft/"><span class="glyphicon glyphicon-list-alt"></span> Draft Board</a></li>
                               <li>
-                                  {% if league_name == "f35f0a1295224ac2a1d21c8ce9768a70" %}{% else %}
+                                  {% if draft_state == 0 %}
                                       {% if league_name == ""%}<a href="/leagueManagement/showLeagues"><span class="glyphicon glyphicon-plus-sign"></span> Join a League</a>{% endif %}
                                   {% endif %}
                               </li>
