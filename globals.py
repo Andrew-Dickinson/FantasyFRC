@@ -1,11 +1,9 @@
 #!/usr/bin/python
 # -*- coding: utf-8 -*-
 
-from datastore_classes import RootTeam, Account, GlobalSettings
-from datetime import date
-import logging
-import jinja2
 import os
+import jinja2
+from datetime import date
 
 JINJA_ENVIRONMENT = jinja2.Environment(
     loader=jinja2.FileSystemLoader(os.path.dirname(__file__)),
@@ -111,3 +109,20 @@ def set_current_editable_week(week_num):
     global_settings = GlobalSettings.get_or_insert('0')
     global_settings.editable_week = week_num
     global_settings.put()
+
+
+def display_league_standings(league_id):
+    league_points_total = 0
+    players = Account.query(Account.league == league_id).fetch()
+    for player in players:
+        league_points_total += get_league_points(player.key.id())
+    return league_points_total != 0
+
+
+def get_draft_state(league_id):
+    league = league_key(league_id).get()
+    return league.draft_current_position
+
+
+from datastore_classes import RootTeam, Account, GlobalSettings, League, league_key
+from league_management import get_league_points
