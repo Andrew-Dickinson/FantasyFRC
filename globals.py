@@ -37,9 +37,6 @@ league_points_per_tie = 1
 league_points_per_loss = 0
 league_points_per_bye = 0
 
-#Used as the name of a league to indicate that the league name and leave league button should not be displayed
-draft_started_sentinel = "f35f0a1295224ac2a1d21c8ce9768a70" #UUID generated from uuidgenerator.net
-
 #The character used to denote a bye week in schedules
 schedule_bye_week = '0'
 
@@ -112,11 +109,14 @@ def set_current_editable_week(week_num):
 
 
 def display_league_standings(league_id):
-    league_points_total = 0
-    players = Account.query(Account.league == league_id).fetch()
-    for player in players:
-        league_points_total += get_league_points(player.key.id())
-    return league_points_total != 0
+    if get_draft_state(league_id) == -1:
+        league_points_total = 0
+        players = Account.query(Account.league == league_id).fetch()
+        for player in players:
+            league_points_total += get_league_points(player.key.id())
+        return league_points_total != 0
+    else:
+        return False
 
 
 def get_draft_state(league_id):

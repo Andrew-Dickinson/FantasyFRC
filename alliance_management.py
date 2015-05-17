@@ -208,10 +208,7 @@ class alliance_portal(webapp2.RequestHandler):
             if draft_over:
                 #Proccess league info
                 if league_id != '0':
-                    if league_key(league_id).get().draft_current_position == 0:
-                        league_name = league_key(league_id).get().name
-                    else:
-                        league_name = globals.draft_started_sentinel
+                    league_name = league_key(league_id).get().name
                 else:
                     league_name = ""
 
@@ -349,10 +346,7 @@ class view_alliance(webapp2.RequestHandler):
         draft_over = league_key(league_id).get().draft_current_position == -1
 
         if league_id != '0':
-            if league_key(league_id).get().draft_current_position == 0:
-                league_name = league_key(league_id).get().name
-            else:
-                league_name = globals.draft_started_sentinel
+            league_name = league_key(league_id).get().name
         else:
             league_name = ""
 
@@ -424,10 +418,7 @@ class team_detail_page(webapp2.RequestHandler):
         league_id = account.league
 
         if league_id != '0':
-            if league_key(league_id).get().draft_current_position == 0:
-                league_name = league_key(league_id).get().name
-            else:
-                league_name = globals.draft_started_sentinel
+            league_name = league_key(league_id).get().name
         else:
             league_name = ""
 

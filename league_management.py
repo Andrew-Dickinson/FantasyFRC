@@ -9,7 +9,6 @@ from google.appengine.ext.webapp.util import run_wsgi_app
 from google.appengine.api import users
 from google.appengine.ext import ndb
 
-import globals
 from datastore_classes import account_key, Account, League, Choice, choice_key, league_key, Lineup, lineup_key, DraftPick
 
 import jinja2
@@ -293,10 +292,7 @@ class Show_Leagues(webapp2.RequestHandler):
                                       })
 
         if league_id != '0':
-            if league_key(league_id).get().draft_current_position == 0:
-                league_name = league_key(league_id).get().name
-            else:
-                league_name = globals.draft_started_sentinel
+            league_name = league_key(league_id).get().name
         else:
             league_name = ""
 
@@ -325,10 +321,7 @@ class create_League(webapp2.RequestHandler):
         league_id = account.league
 
         if league_id != '0':
-            if league_key(league_id).get().draft_current_position == 0:
-                league_name = league_key(league_id).get().name
-            else:
-                league_name = globals.draft_started_sentinel
+            league_name = league_key(league_id).get().name
         else:
             league_name = ""
 
@@ -359,15 +352,14 @@ class update_League(webapp2.RequestHandler):
         snake = self.request.get('snake_draft') == 'on'
 
         if not current_league or current_league.draft_current_position == 0:
-            if name != globals.draft_started_sentinel:
-                #Create/Update the league
-                new_league = League.get_or_insert(commissioner_account_key.id())
-                new_league.name = name
-                new_league.snake_draft = snake
-                new_league.draft_current_position = 0
-                new_league.put()
+            #Create/Update the league
+            new_league = League.get_or_insert(commissioner_account_key.id())
+            new_league.name = name
+            new_league.snake_draft = snake
+            new_league.draft_current_position = 0
+            new_league.put()
 
-                add_to_league(user.user_id(), new_league.key.id())
+            add_to_league(user.user_id(), new_league.key.id())
 
             self.redirect('/')
         else:
@@ -421,10 +413,7 @@ class manage_league(webapp2.RequestHandler):
 
         if league_id == account.key.id():
             if league_id != '0':
-                if league_key(league_id).get().draft_current_position == 0:
-                    league_name = league_key(league_id).get().name
-                else:
-                    league_name = globals.draft_started_sentinel
+                league_name = league_key(league_id).get().name
             else:
                 league_name = ""
 
@@ -485,3 +474,4 @@ if __name__ == "__main__":
 
 #Down here to fix import bug
 from points import get_total_week_points, get_person_total_points, get_bench_points
+import globals
