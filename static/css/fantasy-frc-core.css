@@ -11,9 +11,10 @@
   padding: 0;
 }
 
-.helpPage li{
-  float: right;
+#sliderFrameFrames{
+  height: 900px;
 }
+
 
 #logout .container-fluid{
   padding-left: 0;

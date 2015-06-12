@@ -2,6 +2,11 @@
 
 {% block title %}Fantasy FRC - Main{% endblock %}
 
+{% block head_javascript %}<script src="/static/js/js-image-slider.js" type="text/javascript"></script>{% endblock %}
+
+{% block add_style %}<link href="/static/css/js-image-slider.css" rel="stylesheet" type="text/css" />{% endblock %}
+
+
 {% block content %}
 <div class="container">
 	
@@ -14,6 +19,20 @@
                 <p>Fantasy FRC is a <a href="http://en.wikipedia.org/wiki/Fantasy_sport" target="_blank">fantasy sport</a> that uses match data from <a href="http://www.usfirst.org" target="_blank">FIRST Robotics Competion (FRC)</a> to allow users to select and manage fantasy alliances of FRC teams. If this is your first time here, you should check out the <a href="/help/">help page</a>. Otherwise, please remember that this is an early version of this product. Expect bugs and other issues. You can report any bugs you find at our <a href="https://github.com/smarthimandrew/FantasyFRC/issues" target="_blank">Github issues page</a>.  {% if logged_out %} You'll need a google account to do anything useful. You can <a href="https://support.google.com/accounts/answer/27441?source=gsearch" target="_blank">create one</a> or <a href="{{ logged_out }}">log in</a>.{% endif %}</p>
             </div><!--/main-->
         {% endif %}
+
+        {% if logged_out %}
+            <div id="sliderFrameFrame">
+                <div id="sliderFrame">
+                    <div id="slider">
+                        <img src="static/images/DemoImages/FRC1.png" alt="Join a League" />
+                        <img src="static/images/DemoImages/FRC2.png" alt="Build Alliances" />
+                        <img src="static/images/DemoImages/FRC3.png" alt="Scout the Competition" />
+                        <img src="static/images/DemoImages/FRC5.png" alt="Earn Points... and WIN!" />
+                    </div>
+                </div>
+            </div>
+        {% endif %}
+
         {% if (draft_state == 0 or draft_state == -10) and league_name != "" %}
             <div>
                 <h2>Current League: {{ league_name }}</h2>
