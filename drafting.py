@@ -434,6 +434,14 @@ class FreeAgentListPage(webapp2.RequestHandler):
         else:
             globals.display_error_page(self, self.request.referer, error_messages.need_to_be_a_member_of_a_league)
 
+    def handle_exception(self, exception, debug_mode):
+        if debug_mode:
+            super(type(self), self).handle_exception(exception, debug_mode)
+        else:
+            template = JINJA_ENVIRONMENT.get_template('templates/500.html')
+            self.response.write(template.render())
+
+
 class WatchListPage(webapp2.RequestHandler):
     def get(self):
         """
@@ -479,6 +487,14 @@ class WatchListPage(webapp2.RequestHandler):
         else:
             globals.display_error_page(self, self.request.referer, error_messages.need_to_be_a_member_of_a_league)
 
+    def handle_exception(self, exception, debug_mode):
+        if debug_mode:
+            super(type(self), self).handle_exception(exception, debug_mode)
+        else:
+            template = JINJA_ENVIRONMENT.get_template('templates/500.html')
+            self.response.write(template.render())
+
+
 class UpdateWatchlist(webapp2.RequestHandler):
     def get(self):
         """
@@ -507,6 +523,13 @@ class UpdateWatchlist(webapp2.RequestHandler):
                 account.put()
 
         self.redirect(self.request.referer)
+
+    def handle_exception(self, exception, debug_mode):
+        if debug_mode:
+            super(type(self), self).handle_exception(exception, debug_mode)
+        else:
+            template = JINJA_ENVIRONMENT.get_template('templates/500.html')
+            self.response.write(template.render())
 
 
 class Draft_Page(webapp2.RequestHandler):
@@ -555,21 +578,31 @@ class Draft_Page(webapp2.RequestHandler):
                 player_list.append(player.nickname)
 
             number_of_picks = len(league_players) * globals.draft_rounds
+            last_draft_round = 9999
             for position in range(1, number_of_picks + 1):
                 pick = draft_pick_key(league_key(league_id), position).get()
+                player_ids_in_order = []
+                for player in league_players:
+                    player_ids_in_order.append(player.key.id())
+                if pick:
+                    current_id = ndb.Key(urlsafe=pick.player).id()
+                    username = player_ids_in_order.index(current_id)
+                else:
+                    username = (((position % len(league_players)) - 1) % len(league_players))
 
-                username = (((position % len(league_players)) - 1) % len(league_players))
                 draft_round = int((position - 1) / len(league_players))
-                if username == 0:
+
+                if draft_round != last_draft_round:
                     draft_board.append([])
                     for i in range(0, len(league_players)):
                         draft_board[draft_round].append('-')
-                if pick and pick.team != None:
+                if pick and pick.team:
                     draft_board[draft_round][username] = str(pick.team)
                     if pick.team == 0:
                         draft_board[draft_round][username] = "<i>Forfeited</i>"
                 else:
                     draft_board[draft_round][username] = "<i>TBD</i>"
+                last_draft_round = draft_round
 
             if league_id != '0':
                 league_name = league_key(league_id).get().name
@@ -618,6 +651,13 @@ class Draft_Page(webapp2.RequestHandler):
         else:
             globals.display_error_page(self, self.request.referer,error_messages.need_to_be_a_member_of_a_league)
 
+    def handle_exception(self, exception, debug_mode):
+        if debug_mode:
+            super(type(self), self).handle_exception(exception, debug_mode)
+        else:
+            template = JINJA_ENVIRONMENT.get_template('templates/500.html')
+            self.response.write(template.render())
+
 
 class Start_Draft(webapp2.RequestHandler):
     def get(self):
@@ -650,6 +690,13 @@ class Start_Draft(webapp2.RequestHandler):
                 globals.display_error_page(self, self.request.referer, error_messages.league_too_small)
         else:
             globals.display_error_page(self, self.request.referer,error_messages.access_denied)
+
+    def handle_exception(self, exception, debug_mode):
+        if debug_mode:
+            super(type(self), self).handle_exception(exception, debug_mode)
+        else:
+            template = JINJA_ENVIRONMENT.get_template('templates/500.html')
+            self.response.write(template.render())
 
 
 class Submit_Draft_Pick(webapp2.RequestHandler):
@@ -699,7 +746,12 @@ class Submit_Draft_Pick(webapp2.RequestHandler):
         #Display the draft main page with status
         self.redirect('/draft/?updated=' + selection_error)
 
-
+    def handle_exception(self, exception, debug_mode):
+        if debug_mode:
+            super(type(self), self).handle_exception(exception, debug_mode)
+        else:
+            template = JINJA_ENVIRONMENT.get_template('templates/500.html')
+            self.response.write(template.render())
 
 
 class Submit_Pick(webapp2.RequestHandler):
@@ -765,6 +817,20 @@ class Submit_Pick(webapp2.RequestHandler):
         #Send them back to the previous page
         self.redirect(str(self.request.referer.split('?', 1)[0] + '?updated=' + selection_error))
 
+    def handle_exception(self, exception, debug_mode):
+        if debug_mode:
+            super(type(self), self).handle_exception(exception, debug_mode)
+        else:
+            template = JINJA_ENVIRONMENT.get_template('templates/500.html')
+            self.response.write(template.render())
+
+
+class PageNotFoundHandler(webapp2.RequestHandler):
+    def get(self):
+        self.error(404)
+        template = JINJA_ENVIRONMENT.get_template('templates/404.html')
+        self.response.write(template.render())
+
 
 application = webapp2.WSGIApplication([('/draft/freeAgentList/(.*)', FreeAgentListPage),  # Page number
                                        ('/draft/pickUp/submitPick', Submit_Pick),
@@ -772,8 +838,8 @@ application = webapp2.WSGIApplication([('/draft/freeAgentList/(.*)', FreeAgentLi
                                        ('/draft/startDraft', Start_Draft),
                                        ('/draft/watchList/update/', UpdateWatchlist),
                                        ('/draft/watchList', WatchListPage),
-                                       ('/draft/', Draft_Page)
-
+                                       ('/draft/', Draft_Page),
+                                       ('/draft/.*', PageNotFoundHandler)
                                       ], debug=True)
 
 

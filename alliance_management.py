@@ -264,6 +264,13 @@ class alliance_portal(webapp2.RequestHandler):
         else:
             globals.display_error_page(self, self.request.referer, error_messages.need_to_be_a_member_of_a_league)
 
+    def handle_exception(self, exception, debug_mode):
+        if debug_mode:
+            super(type(self), self).handle_exception(exception, debug_mode)
+        else:
+            template = JINJA_ENVIRONMENT.get_template('templates/500.html')
+            self.response.write(template.render())
+
 
 class update_lineup(webapp2.RequestHandler):
     def get(self, week_number):
@@ -323,6 +330,13 @@ class update_lineup(webapp2.RequestHandler):
             active_lineup.put()
         if not error:
             self.redirect(self.request.referer)
+
+    def handle_exception(self, exception, debug_mode):
+        if debug_mode:
+            super(type(self), self).handle_exception(exception, debug_mode)
+        else:
+            template = JINJA_ENVIRONMENT.get_template('templates/500.html')
+            self.response.write(template.render())
 
 
 class view_alliance(webapp2.RequestHandler):
@@ -394,6 +408,13 @@ class view_alliance(webapp2.RequestHandler):
             self.response.write(template.render(template_values))
         else:
             globals.display_error_page(self, self.request.referer, error_messages.draft_needs_to_be_completed)
+
+    def handle_exception(self, exception, debug_mode):
+        if debug_mode:
+            super(type(self), self).handle_exception(exception, debug_mode)
+        else:
+            template = JINJA_ENVIRONMENT.get_template('templates/500.html')
+            self.response.write(template.render())
 
 
 class team_detail_page(webapp2.RequestHandler):
@@ -476,11 +497,26 @@ class team_detail_page(webapp2.RequestHandler):
         template = JINJA_ENVIRONMENT.get_template('templates/team_detail.html')
         self.response.write(template.render(template_values))
 
+    def handle_exception(self, exception, debug_mode):
+        if debug_mode:
+            super(type(self), self).handle_exception(exception, debug_mode)
+        else:
+            template = JINJA_ENVIRONMENT.get_template('templates/500.html')
+            self.response.write(template.render())
+
+
+class PageNotFoundHandler(webapp2.RequestHandler):
+    def get(self):
+        self.error(404)
+        template = JINJA_ENVIRONMENT.get_template('templates/404.html')
+        self.response.write(template.render())
+
 
 application = webapp2.WSGIApplication([('/allianceManagement/viewAlliance', alliance_portal),
                                        ('/allianceManagement/viewAlliance/(.*)', view_alliance),  # Week number
                                        ('/allianceManagement/updateLineup/(.*)', update_lineup),  # Week number
                                        ('/allianceManagement/teamDetail/(.*)', team_detail_page),  # Team number
+                                       ('/allianceManagement/.*', PageNotFoundHandler)
                                        ], debug=True)
 
 
