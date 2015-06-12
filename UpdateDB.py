@@ -332,12 +332,12 @@ class PageNotFoundHandler(webapp2.RequestHandler):
 
 
 application = webapp2.WSGIApplication([
-                                       ('/updateTeams/clear', ClearLeagueData),
-                                       ('/updateTeams/fullData', UpdateDB),
-                                       ('/updateTeams/lock/(.*)', RunWeekBegin),  # Week number
-                                       ('/updateTeams/process/(.*)', RunProcessing),  # Week number
-                                       ('/updateTeams/', ShowAdmin),
-                                       ('/updateTeams/.*', PageNotFoundHandler)
+                                       ('/clear', ClearLeagueData),
+                                       ('/fullData', UpdateDB),
+                                       ('/lock/(.*)', RunWeekBegin),  # Week number
+                                       ('/process/(.*)', RunProcessing),  # Week number
+                                       ('/', ShowAdmin),
+                                       ('/.*', PageNotFoundHandler)
                                        ], debug=True)
 
 def main():

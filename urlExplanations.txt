@@ -82,17 +82,18 @@ fantasy-frc.appspot.com:
     /leagueManagement/updateLeague
         Has no html file. Used internally to change/create league settings
 
-/updateTeams/
+Admin Module:
+/
     Handled by: updateDB.py
-    /updateTeams/
+    /
         adminPage.html
         Displays all of the admin actions
-    /updateTeams/fullData
+    /fullData
         Has no html file. Used internally to update the database from TBA
-    /updateTeams/clear
+    /clear
         Has no html file. Used internally to clear the database of account/league info
-    /updateTeams/lock/(WEEK NUMBER)
+    /lock/(WEEK NUMBER)
         Has no html file. Used internally to lock picks in place for all leagues
-    /updateTeams/process/(WEEK NUMBER)
+    /process/(WEEK NUMBER)
         Has no html file. Used internally to process winners and losers and update leader board
 
