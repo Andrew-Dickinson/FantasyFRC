@@ -1,5 +1,5 @@
 application: fantasy-frc
-version: 1-5-0
+version: 2-0-0
 runtime: python27
 api_version: 1
 module: default
@@ -11,9 +11,6 @@ handlers:
   upload: static/icons/favicon\.ico
 - url: /static
   static_dir: static
-- url: /updateTeams/.*
-  script: UpdateDB.application
-  login: admin
 - url: /leagueManagement/.*
   script: league_management.application
   login: required

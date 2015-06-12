@@ -18,9 +18,9 @@
 {% block content %}
     <div class="container">
     <h1>FantasyFRC Admin</h1>
-        <p><a class="btn btn-primary" role="button" href="/updateTeams/fullData">Update Team Data - Full</a></p>
-        <p><a class="btn btn-danger" role="button" href="/updateTeams/clear">Clear Account/League Data</a></p>
-        <p><a class="btn btn-primary" role="button" href="/updateTeams/lock/{{ week }}">Lock Up for scoring week</a></p>
-        <p><a class="btn btn-primary" role="button" href="/updateTeams/process/{{ week_earlier }}">Process Week Results</a></p>
+        <p><a class="btn btn-primary" role="button" href="/fullData">Update Team Data - Full</a></p>
+        <p><a class="btn btn-danger" role="button" href="/clear">Clear Account/League Data</a></p>
+        <p><a class="btn btn-primary" role="button" href="/lock/{{ week }}">Lock Up for scoring week</a></p>
+        <p><a class="btn btn-primary" role="button" href="/process/{{ week_earlier }}">Process Week Results</a></p>
     </div>
 {% endblock content %}
