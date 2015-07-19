@@ -1,8 +1,5 @@
 FantasyFRC
 ==========
- 
-Fantasy first robotics
-
 www.fantasy-frc.appspot.com 
 
 Fantasy FRC is a <a href="http://en.wikipedia.org/wiki/Fantasy_sport" target="_blank">fantasy sport</a> that uses match data from <a href="http://www.usfirst.org" target="_blank">FIRST Robotics Competion (FRC)</a> to allow users to select and manage fantasy alliances of FRC teams.
