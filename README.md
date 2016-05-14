@@ -8,4 +8,4 @@ This implementation uses Google App engine in python to handle web requests and 
 
 Fantasy FRC is only possible because of the lovely work by the folks at <a href="http://www.thebluealliance.com">The Blue Alliance</a>. Their API and source code have been invaluable.
 
-Fantasy FRC is in an early state of development and will likely be ready for beta 1.0 for the 2016 FRC season
+Fantasy FRC's development has ceased. If you want to continue working on it, you may fork the project.
